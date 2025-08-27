@@ -1,0 +1,299 @@
+version: '3.8'
+
+networks:
+  ft_transcendence:
+    driver: bridge
+
+volumes:
+  database_data:
+  vault_data:
+  elasticsearch_data:
+  prometheus_data:
+  grafana_data:
+  avatars_data:
+  server_certs:
+  frontend_dist:
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/server_certs:/etc/nginx/server_certs:ro
+      - frontend_dist:/usr/share/nginx/html:ro
+    depends_on:
+      - api-gateway
+      - frontend
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VAULT_ADDR=https://vault:8200
+      - VAULT_TOKEN=${VAULT_TOKEN}
+    depends_on:
+      - vault
+      - auth-service
+      - game-service
+      # - chat-service
+      - pong-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+      - avatars_data:/app/public/avatars
+      - server_certs:/app/certs:ro
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VAULT_ADDR=https://vault:8200
+      - VAULT_TOKEN=${VAULT_TOKEN}
+    volumes:
+      - database_data:/app/data
+      - ./services/auth-service:/app
+      - avatars_data:/app/public/avatars
+      - /app/node_modules
+      - server_certs:/app/certs:ro
+    depends_on:
+      - vault
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  game-service:
+    build:
+      context: ./services/game-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VAULT_ADDR=https://vault:8200
+      - VAULT_TOKEN=${VAULT_TOKEN}
+    volumes:
+      - database_data:/app/data
+      - ./services/game-service:/app
+      - /app/node_modules
+      - server_certs:/app/certs:ro
+    depends_on:
+      - vault
+      - auth-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  chat-service:
+    build:
+      context: ./services/chat-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VAULT_ADDR=https://vault:8200
+      - VAULT_TOKEN=${VAULT_TOKEN}
+    volumes:
+      - database_data:/app/data
+      - ./services/chat-service:/app
+      - /app/node_modules
+      - server_certs:/app/certs:ro
+    depends_on:
+      - vault
+      - auth-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  pong-service:
+    build:
+      context: ./services/pong-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VAULT_ADDR=https://vault:8200
+      - VAULT_TOKEN=${VAULT_TOKEN}
+    volumes:
+      - database_data:/app/data
+      - ./services/pong-service:/app
+      - /app/node_modules
+      - server_certs:/app/certs:ro
+    depends_on:
+      - vault
+      - auth-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${NODE_ENV}
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/dist
+      - server_certs:/app/certs:ro
+      - frontend_dist:/app/dist
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+    command: >
+      sh -c "if [ \"$NODE_ENV\" = 'production' ]; then vite build; else vite dev --host; fi"
+
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    volumes:
+      - database_data:/app/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/scripts:/app/scripts
+    env_file: .env
+    networks:
+      - ft_transcendence
+    healthcheck:
+      test: ["CMD", "/app/scripts/health-check.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # i think we'll just leave vault in dev mode since it doesn't make sense to automate the manual sceret insertoin process in prod mode with shamir keys and such
+  # we could technically create another vault for transit and leave that iin dev mode, and make the main one in prod mode, but its just weird
+  vault:
+    build:
+      context: ./vault
+      dockerfile: Dockerfile
+    cap_add:
+      - IPC_LOCK
+    env_file: .env
+    ports:
+      - "8200:8200"
+    volumes:
+      - vault_data:/vault/data
+      - ./vault/config:/vault/config:ro
+      - ./.env.generated:/app/.env.generated:rw
+      - ./.env:/app/.env:rw
+      - server_certs:/app/certs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:8200/v1/sys/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+  
+  #all elk stuff
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - server_certs:/app/certs:ro
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    volumes:
+      - ./monitoring/elk/logstash/config:/usr/share/logstash/config
+      - ./monitoring/elk/logstash/pipeline:/usr/share/logstash/pipeline
+      - server_certs:/app/certs:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    environment:
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  # prom and graf
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+      - server_certs:/app/certs:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}'
+      - '--web.enable-lifecycle'
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - server_certs:/app/certs:ro
+    depends_on:
+      - prometheus
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  cli-client:
+    build:
+      context: ./cli-client
+      dockerfile: Dockerfile
+    volumes:
+      - ./cli-client:/app
+      - /app/node_modules
+      - server_certs:/app/certs:ro
+    networks:
+      - ft_transcendence
+    profiles:
+      - cli
+    tty: true
+    stdin_open: true

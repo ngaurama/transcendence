@@ -1,0 +1,173 @@
+version: '3.8'
+
+networks:
+  ft_transcendence:
+    driver: bridge
+
+volumes:
+  database_data:
+  vault_data:
+  avatars_data:
+  frontend_dist:
+  env_generated:
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - frontend_dist:/usr/share/nginx/html:ro
+    depends_on:
+      - api-gateway
+      - frontend
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    depends_on:
+      - vault
+      - auth-service
+      - game-service
+      # - chat-service
+      - pong-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+      - avatars_data:/app/public/avatars
+      - ./nginx/certs:/app/certs:ro
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+      # - .env.generated
+    volumes:
+      - database_data:/app/data
+      - ./services/auth-service:/app
+      - avatars_data:/app/public/avatars
+      - /app/node_modules
+      - ./nginx/certs:/app/certs:ro
+      - ./.env.generated:/app/.env.generated:ro
+    depends_on:
+      - vault
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  game-service:
+    build:
+      context: ./services/game-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - database_data:/app/data
+      - ./services/game-service:/app
+      - /app/node_modules
+      - ./nginx/certs:/app/certs:ro
+    depends_on:
+      - vault
+      - auth-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  pong-service:
+    build:
+      context: ./services/pong-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - database_data:/app/data
+      - ./services/pong-service:/app
+      - /app/node_modules
+      - ./nginx/certs:/app/certs:ro
+    depends_on:
+      - vault
+      - auth-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${NODE_ENV}
+    env_file:
+      - .env
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - frontend_dist:/app/dist
+      - ./nginx/certs:/app/certs:ro
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    volumes:
+      - database_data:/app/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/scripts:/app/scripts
+    env_file: .env
+    networks:
+      - ft_transcendence
+    healthcheck:
+      test: ["CMD", "/app/scripts/health-check.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # i think we'll just leave vault in dev mode since it doesn't make sense to automate the manual sceret insertoin process in prod mode with shamir keys and such
+  # we could technically create another vault for transit and leave that iin dev mode, and make the main one in prod mode, but its just weird
+
+  vault:
+    build:
+      context: ./vault
+      dockerfile: Dockerfile
+    cap_add:
+      - IPC_LOCK
+    env_file: .env
+    ports:
+      - "8200:8200"
+    volumes:
+      - vault_data:/vault/data
+      - ./vault/config/policies:/vault/config/policies:ro
+      - ./vault/scripts:/vault/scripts:ro
+      - ./.env.generated:/app/.env.generated:rw
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "--insecure", "https://localhost:8200/v1/sys/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ft_transcendence
+    restart: unless-stopped

@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Avatar Dropdown */
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 50;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  color: white;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #4b5563;
+}
+
+/* Game Canvas */
+.game-canvas {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  touch-action: none; /* For better touch controls if added */
+}

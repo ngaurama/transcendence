@@ -1,0 +1,8 @@
+node_modules/
+.env*
+*old*
+/readmes
+test*
+.DS_Store
+*dist
+*.txt
