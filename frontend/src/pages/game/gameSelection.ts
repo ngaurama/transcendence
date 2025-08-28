@@ -1,3 +1,6 @@
+import { startGame } from '../../services/GameService';
+import { saveGameOptions } from '../../services/GameOptionsService';
+
 export function playSelectionPage(): string {
   return `
     <div class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg">
@@ -59,7 +62,13 @@ export function attachPlaySelectionListeners() {
   const gameMode = document.getElementById('game-mode') as HTMLSelectElement;
   const optionsPanel = document.getElementById('options-panel');
   const localOptions = document.getElementById('local-options');
-  const startGame = document.getElementById('start-game');
+  const startGameBtn = document.getElementById('start-game');
+
+  const savedOptions = getGameOptions();
+  if (savedOptions.points) {
+    const pointsSelect = document.getElementById('points-to-win') as HTMLSelectElement;
+    if (pointsSelect) pointsSelect.value = savedOptions.points.toString();
+  }
 
   if (selectPong && modeSelection) {
     selectPong.addEventListener('click', () => modeSelection.classList.remove('hidden'));
@@ -69,115 +78,69 @@ export function attachPlaySelectionListeners() {
     gameMode.addEventListener('change', (e) => {
       const value = (e.target as HTMLSelectElement).value;
       if (optionsPanel) {
-        if (value === 'tournament') {
-          optionsPanel.classList.add('hidden');
-        } else {
-          optionsPanel.classList.remove('hidden');
-        }
+        optionsPanel.classList.toggle('hidden', value === 'tournament');
       }
       if (localOptions) {
-        if (value === 'local') {
-          localOptions.classList.remove('hidden');
-        } else {
-          localOptions.classList.add('hidden');
-        }
+        localOptions.classList.toggle('hidden', value !== 'local');
       }
     });
   }
 
-  if (startGame) {
-    startGame.addEventListener('click', async () => {
-      const mode = gameMode.value;
-      const points = parseInt((document.getElementById('points-to-win') as HTMLSelectElement).value);
-      const powerups = (document.getElementById('powerups') as HTMLSelectElement).value === 'true';
-      const variant = (document.getElementById('board-variant') as HTMLSelectElement).value;
-      let opponent_alias = '';
+  if (startGameBtn) {
+    startGameBtn.addEventListener('click', handleStartGame);
+  }
+}
 
-      if (mode === 'local') {
-        opponent_alias = (document.getElementById('opponent-alias') as HTMLInputElement).value || 'Player 2';
-      }
+async function handleStartGame(): Promise<void> {
+  const mode = (document.getElementById('game-mode') as HTMLSelectElement).value;
+  const points = parseInt((document.getElementById('points-to-win') as HTMLSelectElement).value);
+  const powerups = (document.getElementById('powerups') as HTMLSelectElement).value === 'true';
+  const variant = (document.getElementById('board-variant') as HTMLSelectElement).value;
+  let opponent_alias = '';
 
-      try {
-        const token = localStorage.getItem('access_token');
-        let res;
-        
-        if (mode === 'online') {
-          // Matchmaking
-          res = await fetch(`/api/game/matchmaking/join`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ 
-              game_type: 'pong', 
-              skill_range: 'any',
-              points_to_win: points,
-              power_ups_enabled: powerups,
-              map_variant: variant
-            })
-          });
-        } else if (mode === 'tournament') {
-          // Tournament
-          res = await fetch(`/api/game/tournament/create`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ 
-              name: 'My Tournament', 
-              max_participants: 8, 
-              tournament_type: 'single_elimination', 
-              game_type: 'pong',
-              points_to_win: points,
-              power_ups_enabled: powerups,
-              map_variant: variant
-            })
-          });
-        } else {
-          // Local game
-          res = await fetch(`/api/pong/game/create`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ 
-              is_private: mode === 'local',
-              max_players: 2,
-              power_ups_enabled: powerups,
-              map_variant: variant,
-              points_to_win: points,
-              opponent_alias: opponent_alias
-            })
-          });
-        }
+  if (mode === 'local') {
+    opponent_alias = (document.getElementById('opponent-alias') as HTMLInputElement).value || 'Player 2';
+  }
 
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
-        }
+  saveGameOptions({
+    mode,
+    points,
+    powerups,
+    variant,
+    opponent_alias
+  });
 
-        const data = await res.json();
-        if (data.success) {
-          if (mode === 'local') {
-            (window as any).gameOptions = {
-              mode: 'local',
-              points: points,
-              powerups: powerups,
-              variant: variant,
-              opponent_alias: opponent_alias
-            };
-          }
-          (window as any).navigate(`/game/pong?game_id=${data.game_id || data.tournament_id}`);
-        } else {
-          alert(data.error || 'Failed to start game');
-        }
-      } catch (error) {
-        console.error('Failed to start game:', error);
-        alert(error || 'Failed to start game');
-      }
+  try {
+    const gameId = await startGame(mode, {
+      mode,
+      points,
+      powerups,
+      variant,
+      opponent_alias
     });
+
+    if (mode === 'local') {
+      (window as any).gameOptions = {
+        mode: 'local',
+        points,
+        powerups,
+        variant,
+        opponent_alias
+      };
+    }
+
+    (window as any).navigate(`/game/pong?game_id=${gameId}`);
+  } catch (error) {
+    console.error('Failed to start game:', error);
+    alert(error instanceof Error ? error.message : 'Failed to start game');
+  }
+}
+
+function getGameOptions(): any {
+  try {
+    const stored = localStorage.getItem('gameOptions');
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
   }
 }

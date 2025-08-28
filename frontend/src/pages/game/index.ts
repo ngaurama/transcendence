@@ -1,2 +1,3 @@
 
-export * from './local/localTournament';
+export * from './tournaments/localTournament';
+export * from './pong'

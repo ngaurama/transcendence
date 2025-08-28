@@ -46,7 +46,7 @@ export function initRouter() {
             <img src="${user.avatar_url}" alt="Avatar" class="w-10 h-10 rounded-full cursor-pointer" id="avatar-dropdown-trigger">
             <div id="avatar-dropdown" class="hidden dropdown-menu">
               <div class="dropdown-item" onclick="navigate('/settings')">Settings</div>
-              <div class="dropdown-item hover:bg-red-800" onclick="navigate('/logout')">Logout</div>
+              <div class="dropdown-item hover:bg-red-500" onclick="navigate('/logout')">Logout</div>
             </div>
           </div>
         `;
@@ -58,23 +58,6 @@ export function initRouter() {
         <button onclick="navigate('/register')" class="bg-green-500 px-3 py-1 rounded">Register</button>
       `;
     }
-    // if (user && !user.is_guest) {
-    //     authStatus.innerHTML = `
-    //       <div class="relative">
-    //         <img src="${user.avatar_url}" alt="Avatar" class="w-10 h-10 rounded-full cursor-pointer" id="avatar-dropdown-trigger">
-    //         <div id="avatar-dropdown" class="hidden dropdown-menu">
-    //           <div class="dropdown-item" onclick="navigate('/settings')">Settings</div>
-    //           <div class="dropdown-item hover:bg-red-800" onclick="navigate('/logout')">Logout</div>
-    //         </div>
-    //       </div>
-    //     `;
-    //   attachDropdownListener();
-    // } else {
-    //   authStatus.innerHTML = `
-    //     <button onclick="navigate('/login')" class="bg-blue-500 px-3 py-1 rounded mr-2">Login</button>
-    //     <button onclick="navigate('/register')" class="bg-green-500 px-3 py-1 rounded">Register</button>
-    //   `;
-    // }
   }
 
   function attachDropdownListener() {

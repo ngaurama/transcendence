@@ -124,7 +124,7 @@ class PongGame {
 
   async start() {
     this.gameState.status = 'countdown';
-    for (let i = 3; i > 0; i--) {
+    for (let i = 4; i > 0; i--) {
       this.broadcast({
         type: 'countdown',
         number: i
