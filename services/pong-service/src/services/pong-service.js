@@ -64,8 +64,8 @@ class PongService {
   }
 
   async createGame(gameId, options) {
-    const game = new PongGame(gameId, this.db, options);
-    // await game.init();
+    console.log("OPTIONS:: ", options);
+    const game = new PongGame(gameId, this.db, options, this);
     this.gameRooms.set(gameId, game);
     return game;
   }

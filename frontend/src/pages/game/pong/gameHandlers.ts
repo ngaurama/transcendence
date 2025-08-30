@@ -20,13 +20,13 @@ export function setupPlayAgainHandler(): void {
 export function setupTournamentHandlers(tournamentId: string): void {
   const viewBracketBtn = document.getElementById("view-bracket");
   const leaveTournamentBtn = document.getElementById("leave-tournament");
-  
+
   if (viewBracketBtn) {
     viewBracketBtn.addEventListener("click", () => {
       (window as any).navigate(`/tournament/${tournamentId}`);
     });
   }
-  
+
   if (leaveTournamentBtn) {
     leaveTournamentBtn.addEventListener("click", () => {
       (window as any).navigate("/tournaments");

@@ -1,9 +1,11 @@
+// game/pong-game.js
 const { PowerUpSystem } = require('./power-ups');
 
 class PongGame {
-  constructor(gameId, db, options = {}) {
+  constructor(gameId, db, options = {}, pongService) {
     this.gameId = gameId;
     this.db = db;
+    this.pongService = pongService;
     this.players = new Map();
     this.connections = new Map();
     this.inputStates = { player1: null, player2: null };
@@ -59,9 +61,12 @@ class PongGame {
       powerups_enabled: options.powerups_enabled || false,
       board_variant: options.board_variant || 'classic',
       gameMode: options.gameMode || 'online',
+      gameType: options.gameType || '2player',
       points_to_win: options.points_to_win || 5,
       player1_name: options.player1_name,
       player2_name: options.player2_name,
+      tournament_id: options.tournament_id,
+      tournament_match_id: options.tournament_match_id,
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height
     };
@@ -324,57 +329,45 @@ class PongGame {
     });
 
     await this.saveGameResults(winnerKey);
+    console.log("RRRREACHED HERE", this.options);
 
     if (this.options.tournament_id) {
+      console.log("RRRREACHED HERE supposed to atleast");
       await this.handleTournamentCompletion(winnerKey);
     }
-
-    // const participants = await this.db.all('SELECT * FROM game_participants WHERE game_session_id = ?', [this.gameId]);
-
-    // for (const participant of participants) {
-    //   const user = await this.db.get('SELECT is_guest FROM users WHERE id = ?', [participant.user_id]);
-    //   if (user && !user.is_guest) {
-    //     const isWin = participant.user_id === this.gameState.winner_id;
-    //     const updates = {
-    //       games_played: 1,
-    //       games_won: isWin ? 1 : 0,
-    //       games_lost: isWin ? 0 : 1,
-    //       // Add more like total_playtime etc.
-    //     };
-    //     await this.updateUserStats(participant.user_id, updates);
-    //   }
-    // }
-
-    // if (this.tournamentId) {
-    //   await this.db.run(`
-    //     UPDATE tournament_matches 
-    //     SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP 
-    //     WHERE game_session_id = ?
-    //   `, [this.gameState.winner_id, this.gameId]);
-
-    //   const t = this.pongService.tournaments.get(this.tournamentId);
-    //   if (t) {
-    //     await t.checkRoundCompletion();
-    //   }
-    // }
   }
 
   async handleTournamentCompletion(winnerKey) {
     try {
-      const winnerId = [...this.players.entries()]
-        .find(([id, player]) => `player${player.playerNumber}` === winnerKey)?.[0];
+      let winnerId = null;
+      if (this.options.gameMode === 'local') {
+        const winnerName = winnerKey === 'player1' 
+          ? this.playerNames.player1 
+          : this.playerNames.player2;
+        const winnerUser = await this.db.get(
+          'SELECT id FROM users WHERE display_name = ? AND is_guest = TRUE',
+          [winnerName]
+        );
+        
+        if (winnerUser) {
+          winnerId = winnerUser.id;
+        }
+      } else {
+        winnerId = [...this.players.entries()]
+          .find(([id, player]) => `player${player.playerNumber}` === winnerKey)?.[0];
+      }
 
-      // Update tournament match
-      if (this.options.tournament_match_id) {
+      console.log("Tournament game finished, winner ID:", winnerId, "for key:", winnerKey);
+
+      if (this.options.tournament_match_id && winnerId) {
         await this.db.run(`
           UPDATE tournament_matches 
           SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP 
           WHERE id = ?
         `, [winnerId, this.options.tournament_match_id]);
-
-        // Check if the tournament round is complete
         const t = this.pongService.tournaments.get(this.options.tournament_id);
         if (t) {
+          console.log("Game finished, checking round completion");
           await t.checkRoundCompletion();
         }
       }
@@ -382,6 +375,31 @@ class PongGame {
       console.error('Error handling tournament completion:', error);
     }
   }
+  // async handleTournamentCompletion(winnerKey) {
+  //   try {
+  //     const winnerId = [...this.players.entries()]
+  //       .find(([id, player]) => `player${player.playerNumber}` === winnerKey)?.[0];
+
+  //     console.log("A GAME FINISHED", winnerId);
+  //     // Update tournament match
+  //     if (this.options.tournament_match_id) {
+  //       await this.db.run(`
+  //         UPDATE tournament_matches 
+  //         SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP 
+  //         WHERE id = ?
+  //       `, [winnerId, this.options.tournament_match_id]);
+
+  //       // Check if the tournament round is complete
+  //       const t = this.pongService.tournaments.get(this.options.tournament_id);
+  //       if (t) {
+  //         console.log("GAME FINISHED");
+  //         await t.checkRoundCompletion();
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error handling tournament completion:', error);
+  //   }
+  // }
 
   async updateUserStats(userId, updates) {
     // Similar to tournament

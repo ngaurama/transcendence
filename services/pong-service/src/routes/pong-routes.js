@@ -1,4 +1,4 @@
-// routes/pong-routes.js (updated)
+// routes/pong-routes.js
 const { validateToken } = require('../utils/auth');
 
 function setupRoutes(fastify, pongService) {
@@ -78,7 +78,7 @@ function setupRoutes(fastify, pongService) {
       return { game_id: gameId };
     } catch (error) {
       console.error('Error creating game:', error);
-      return reply.code(500).send({ error: 'Failed to create game' });w
+      return reply.code(500).send({ error: 'Failed to create game' });
     }
   });
 
@@ -100,6 +100,8 @@ function setupRoutes(fastify, pongService) {
           gs.game_duration_ms,
           gs.game_settings,
           gs.tournament_id,
+          gp1.user_id as player1_id,
+          gp2.user_id as player2_id,
           u1.display_name as player1_name,
           u2.display_name as player2_name,
           CASE 
@@ -352,11 +354,14 @@ function setupRoutes(fastify, pongService) {
       // Get matches
       const matches = await pongService.db.all(`
         SELECT tm.*, u1.display_name as player1_name, u2.display_name as player2_name,
-              uw.display_name as winner_name
+              uw.display_name as winner_name,
+              gs.final_score_player1 as score1,
+              gs.final_score_player2 as score2
         FROM tournament_matches tm
         LEFT JOIN users u1 ON u1.id = tm.player1_id
         LEFT JOIN users u2 ON u2.id = tm.player2_id
         LEFT JOIN users uw ON uw.id = tm.winner_id
+        LEFT JOIN game_sessions gs ON gs.id = tm.game_session_id
         WHERE tm.tournament_id = ?
         ORDER BY tm.round_number, tm.match_number
       `, [tournamentId]);
@@ -384,13 +389,13 @@ function setupRoutes(fastify, pongService) {
         status: match.status === 'completed' ? 3 : match.status === 'in_progress' ? 2 : 1,
         opponent1: match.player1_id ? {
           id: match.player1_id,
-          result: match.winner_id === match.player1_id ? 'win' : 'loss',
-          score: match.winner_id === match.player1_id ? 1 : 0
+          result: match.winner_id === match.player1_id ? 'win' : match.status === 'completed' ? 'loss' : undefined,
+          score: match.score1
         } : null,
         opponent2: match.player2_id ? {
           id: match.player2_id,
-          result: match.winner_id === match.player2_id ? 'win' : 'loss',
-          score: match.winner_id === match.player2_id ? 1 : 0
+          result: match.winner_id === match.player2_id ? 'win' : match.status === 'completed' ? 'loss' : undefined,
+          score: match.score2
         } : null
       }));
 
@@ -501,11 +506,18 @@ function setupRoutes(fastify, pongService) {
       return reply.code(404).send({ error: 'Tournament not found' });
     }
 
+    console.log("TOURNAMENT IN PLAIN Id: ", tournament);
+
     const matches = await pongService.db.all(`
-      SELECT tm.*, u1.display_name as player1_name, u2.display_name as player2_name
+      SELECT tm.*, 
+        u1.display_name AS player1_name, 
+        u2.display_name AS player2_name,
+        gs.final_score_player1 AS score1,
+        gs.final_score_player2 AS score2
       FROM tournament_matches tm
       LEFT JOIN users u1 ON u1.id = tm.player1_id
       LEFT JOIN users u2 ON u2.id = tm.player2_id
+      LEFT JOIN game_sessions gs ON gs.id = tm.game_session_id
       WHERE tm.tournament_id = ?
     `, [tournamentId]);
 
@@ -563,6 +575,8 @@ function setupRoutes(fastify, pongService) {
     }
 
     const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [match.tournament_id]);
+
+    console.log("TOURNAMENT FROM WHEN START MATCH IS CALLED: ", tournament);
 
     if (tournament.creator_id !== user.id) {
       return reply.code(403).send({ error: 'Not authorized' });
@@ -809,4 +823,4 @@ function setupRoutes(fastify, pongService) {
   });
 }
 
-module.exports = { setupRoutes }; 
+module.exports = { setupRoutes };

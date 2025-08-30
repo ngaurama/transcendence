@@ -1,4 +1,4 @@
-// game/tournament.js (new)
+// game/tournament.js
 class Tournament {
   constructor(tournamentId, db, options, pongService) {
     this.tournamentId = tournamentId;
@@ -53,10 +53,13 @@ class Tournament {
 
         const matchId = matchResult.lastID;
 
+        console.log("CURRENT ROUND: ", this.currentRound);
+        console.log("THIS IS CALLED FOR EACH ROUND: ", matchResult);
+
         if (player1 == null && player2 != null) {
           await this.db.run(`
-            UPDATE tournament_matches 
-            SET winner_id = ?, completed_at = CURRENT_TIMESTAMP 
+            UPDATE tournament_matches
+            SET winner_id = ?, completed_at = CURRENT_TIMESTAMP
             WHERE id = ?
           `, [player2, matchId]);
         } else if (player2 == null && player1 != null) {
@@ -66,8 +69,9 @@ class Tournament {
             WHERE id = ?
           `, [player1, matchId]);
         } else if (player1 != null && player2 != null) {
-          // For local tournaments, don't create games automatically
-          // Games will be created when the "Start Match" button is clicked
+          // if (this.options.tournament_settings.gameMode === 'local') {
+          //   await this.startMatch(matchId);
+          // }
           if (this.options.tournament_settings.gameMode === 'online') {
             const gameSettings = this.options.tournament_settings;
             const gameResult = await this.db.run(`
@@ -210,11 +214,10 @@ class Tournament {
   }
 
   async startMatch(matchId) {
-
     const match = await this.db.get(`
       SELECT tm.*,
-            u1.display_name AS player1_name,
-            u2.display_name AS player2_name
+        u1.display_name AS player1_name,
+        u2.display_name AS player2_name
       FROM tournament_matches tm
       LEFT JOIN users u1 ON tm.player1_id = u1.id
       LEFT JOIN users u2 ON tm.player2_id = u2.id
@@ -230,10 +233,14 @@ class Tournament {
     `, [matchId]);
 
     const gameSettings = this.options.tournament_settings;
+
+    console.log("GAME SETTINGS WHICH IS BASIACCLY TOURNAMENT SETTINSG:", gameSettings);
     const gameResult = await this.db.run(`
       INSERT INTO game_sessions (tournament_id, status, game_settings, created_at) 
       VALUES (?, 'waiting', ?, CURRENT_TIMESTAMP)
     `, [this.tournamentId, JSON.stringify(gameSettings)]);
+
+    console.log("GAME RESULT IN START MATCH: ", gameResult);
 
     const gameId = gameResult.lastID;
 
@@ -250,7 +257,6 @@ class Tournament {
 
     this.pongService.createGame(gameId, {
       ...gameSettings, 
-      gameMode: 'local',
       tournament_id: this.tournamentId,
       tournament_match_id: matchId,
       player1_name: match.player1_name,
