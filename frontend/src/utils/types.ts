@@ -1,3 +1,4 @@
+// types.ts
 export interface User {
   id: number;
   username: string;
@@ -7,5 +8,24 @@ export interface User {
   is_verified: boolean;
   oauth_provider?: string;
   totp_enabled?: boolean;
-  is_guest?: boolean;
+}
+
+export interface GameOptions {
+  gameMode: string;
+  gameType: string;
+  points_to_win: number;
+  powerups_enabled: boolean;
+  board_variant: string;
+  player1_name: string;
+  opponent_alias?: string;
+  canvasWidth?: number;
+  canvasHeight?: number;
+}
+
+export interface TournamentOptions extends GameOptions {
+  name: string;
+  max_participants: number;
+  tournament_type: string;
+  num_players?: number;
+  aliases?: string[];
 }

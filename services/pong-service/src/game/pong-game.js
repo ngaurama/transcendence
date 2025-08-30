@@ -6,7 +6,6 @@ class PongGame {
     this.db = db;
     this.players = new Map();
     this.connections = new Map();
-    this.spectators = new Map();
     this.inputStates = { player1: null, player2: null };
     this.canvas = {
       width: options.canvasWidth || 800,
@@ -14,7 +13,7 @@ class PongGame {
     };
     this.playerNames = {
       player1: options.player1_name || 'Player 1',
-      player2: options.is_private ? (options.opponent_alias || 'Player 2') : 'Player 2'
+      player2: options.player2_name || (options.is_local ? (options.opponent_alias || 'Player 2') : 'Player 2')
     };
     this.basePaddleStats = {
       speed: this.canvas.width * 0.375, // 300/800
@@ -51,20 +50,23 @@ class PongGame {
       activePowerUps: [],
       status: 'waiting',
       player_names: this.playerNames,
-      variant: options.map_variant || 'classic',
+      variant: options.board_variant || 'classic',
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height
     };
+    console.log("OPTIONS BEFORE: ", options);
     this.options = {
       max_players: options.max_players || 2,
-      power_ups_enabled: options.power_ups_enabled || false,
-      map_variant: options.map_variant || 'classic',
-      is_private: options.is_private || false,
+      powerups_enabled: options.powerups_enabled || false,
+      board_variant: options.board_variant || 'classic',
+      is_local: options.is_local || false,
       points_to_win: options.points_to_win || 5,
+      player1_name: options.player1_name,
       opponent_alias: options.opponent_alias,
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height
     };
+    console.log("OPTIONS AFTER: ", this.options);
     this.gameLoop = null;
     this.powerUpSystem = new PowerUpSystem(this);
   }
@@ -84,11 +86,24 @@ class PongGame {
       type: 'game_state',
       state: this.gameState
     });
+
+
+
+    this.db.run('UPDATE user_presence SET status = "playing", current_game_id = ? WHERE user_id = ?', [this.gameId, userId]);
+
+    const requiredConnections = this.options.is_local ? 1 : 2;
+    if (this.connections.size === requiredConnections) {
+      this.start();
+    }
+    // if ((this.options.is_local && this.connections.size >= 1) || (!this.options.is_local && this.connections.size === 2)) {
+    //   this.start();
+    // }
   }
 
   removeConnection(userId) {
     this.connections.delete(userId);
-    if (this.gameState.status === 'active' && !this.options.is_private) {
+    this.db.run('UPDATE user_presence SET status = "online", current_game_id = NULL WHERE user_id = ?', [userId]);
+    if (this.gameState.status === 'active' && !this.options.is_local) {
       this.handlePlayerDisconnection(userId);
     }
   }
@@ -96,17 +111,21 @@ class PongGame {
   handlePlayerInput(userId, input) {
     if (this.gameState.status !== 'active') return;
 
-    if (input.type === 'paddle_move') {
-      if (input.player1) {
-        this.inputStates.player1 = input.player1.direction;
+    if (this.options.is_local) {
+      if (input.player1_direction !== undefined) {
+        this.inputStates.player1 = input.player1_direction;
       }
-      if (input.player2) {
-        this.inputStates.player2 = input.player2.direction;
+      if (input.player2_direction !== undefined) {
+        this.inputStates.player2 = input.player2_direction;
       }
-    } else if (input.type === 'power_up_use' && this.options.power_ups_enabled) {
-      this.powerUpSystem.usePowerUp(userId, input.power_up_type);
+    } else {
+      const player = Array.from(this.players.values()).find(p => p.id === userId);
+      if (player && input.direction !== undefined) {
+        this.inputStates[`player${player.playerNumber}`] = input.direction;
+      }
     }
   }
+
 
   updatePaddlePosition(playerKey, deltaTime) {
     const paddle = this.gameState.paddles[playerKey];
@@ -124,7 +143,7 @@ class PongGame {
 
   async start() {
     this.gameState.status = 'countdown';
-    for (let i = 4; i > 0; i--) {
+    for (let i = 3; i > 0; i--) {
       this.broadcast({
         type: 'countdown',
         number: i
@@ -206,7 +225,7 @@ class PongGame {
       this.handleScore(scorerKey);
     }
 
-    if (this.options.power_ups_enabled) {
+    if (this.options.powerups_enabled) {
       this.powerUpSystem.update(deltaTime);
     }
   }
@@ -305,11 +324,92 @@ class PongGame {
     this.broadcast({
       type: 'game_ended',
       winner: winnerKey,
-      final_score: this.gameState.score
+      final_score: this.gameState.score,
+      is_tournament: !!this.options.tournament_id,
+      tournament_id: this.options.tournament_id
     });
 
     await this.saveGameResults(winnerKey);
+
+    if (this.options.tournament_id) {
+      await this.handleTournamentCompletion(winnerKey);
+    }
+
+    // const participants = await this.db.all('SELECT * FROM game_participants WHERE game_session_id = ?', [this.gameId]);
+
+    // for (const participant of participants) {
+    //   const user = await this.db.get('SELECT is_guest FROM users WHERE id = ?', [participant.user_id]);
+    //   if (user && !user.is_guest) {
+    //     const isWin = participant.user_id === this.gameState.winner_id;
+    //     const updates = {
+    //       games_played: 1,
+    //       games_won: isWin ? 1 : 0,
+    //       games_lost: isWin ? 0 : 1,
+    //       // Add more like total_playtime etc.
+    //     };
+    //     await this.updateUserStats(participant.user_id, updates);
+    //   }
+    // }
+
+    // if (this.tournamentId) {
+    //   await this.db.run(`
+    //     UPDATE tournament_matches 
+    //     SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP 
+    //     WHERE game_session_id = ?
+    //   `, [this.gameState.winner_id, this.gameId]);
+
+    //   const t = this.pongService.tournaments.get(this.tournamentId);
+    //   if (t) {
+    //     await t.checkRoundCompletion();
+    //   }
+    // }
   }
+
+  async handleTournamentCompletion(winnerKey) {
+    try {
+      const winnerId = [...this.players.entries()]
+        .find(([id, player]) => `player${player.playerNumber}` === winnerKey)?.[0];
+
+      // Update tournament match
+      if (this.options.tournament_match_id) {
+        await this.db.run(`
+          UPDATE tournament_matches 
+          SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP 
+          WHERE id = ?
+        `, [winnerId, this.options.tournament_match_id]);
+
+        // Check if the tournament round is complete
+        const t = this.pongService.tournaments.get(this.options.tournament_id);
+        if (t) {
+          await t.checkRoundCompletion();
+        }
+      }
+    } catch (error) {
+      console.error('Error handling tournament completion:', error);
+    }
+  }
+
+  async updateUserStats(userId, updates) {
+    // Similar to tournament
+    const existing = await this.db.get('SELECT * FROM user_game_stats WHERE user_id = ?', [userId]);
+    if (existing) {
+      let sql = 'UPDATE user_game_stats SET ';
+      const params = [];
+      Object.keys(updates).forEach(key => {
+        sql += `${key} = ${key} + ?, `;
+        params.push(updates[key]);
+      });
+      sql = sql.slice(0, -2) + ' , updated_at = CURRENT_TIMESTAMP WHERE user_id = ?';
+      params.push(userId);
+      await this.db.run(sql, params);
+    } else {
+      // Insert
+      await this.db.run('INSERT INTO user_game_stats (user_id) VALUES (?)', [userId]);
+      // Then update
+      await this.updateUserStats(userId, updates);
+    }
+  }
+
 
   async saveGameResults(winnerKey) {
     try {
@@ -334,6 +434,26 @@ class PongGame {
         JSON.stringify(this.options),
         this.gameId
       ]);
+
+      // Update user stats for all participants
+      const participants = await this.db.all(`
+        SELECT gp.user_id, gp.player_number 
+        FROM game_participants gp
+        WHERE gp.game_session_id = ?
+      `, [this.gameId]);
+
+      for (const participant of participants) {
+        if (participant.user_id) {
+          const isWin = participant.user_id === winnerId;
+          const updates = {
+            games_played: 1,
+            games_won: isWin ? 1 : 0,
+            games_lost: isWin ? 0 : 1,
+          };
+          
+          await this.updateUserStats(participant.user_id, updates);
+        }
+      }
 
       console.log(`Game ${this.gameId} results saved`);
     } catch (error) {

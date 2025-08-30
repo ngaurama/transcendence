@@ -1,4 +1,5 @@
-import { checkAuthStatus, uploadAvatar } from '../services';
+// pages/settings.ts
+import { checkAuthStatus, uploadAvatar, getUserStats } from '../services';
 
 export async function settingsPage(): Promise<string> {
   const user = await checkAuthStatus();
@@ -7,13 +8,15 @@ export async function settingsPage(): Promise<string> {
     return '';
   }
 
+  const stats = await getUserStats();
+
   const isOAuthUser = user.oauth_provider && user.oauth_provider !== 'local';
   return `
     <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4">Settings</h2>
-      ${user.oauth_provider ? 
-        `<p class="mb-2 text-sm text-gray-400">Connected via ${user.oauth_provider}</p>` : 
-        ''
+      ${user.oauth_provider
+        ? `<p class="mb-2 text-sm text-gray-400">Connected via ${user.oauth_provider}</p>`
+        : ''
       }
       <img src="${user.avatar_url}" alt="Avatar" class="w-32 h-32 rounded-full mx-auto mb-4">
       <p class="mb-2">Username: ${user.username}</p>
@@ -24,14 +27,29 @@ export async function settingsPage(): Promise<string> {
         <button id="upload-avatar-btn" class="w-full bg-purple-500 p-2 rounded mt-2">Upload Avatar</button>
       </div>
       
-      ${!isOAuthUser ? `
+      <div class="mb-4">
+        <h3 class="text-xl mb-2">Game Statistics</h3>
+        <p>Games Played: ${stats.games_played || 0}</p>
+        <p>Games Won: ${stats.games_won || 0}</p>
+        <p>Games Lost: ${stats.games_lost || 0}</p>
+        <p>Wins with Powerups: ${stats.wins_with_powerups || 0}</p>
+        <p>Wins without Powerups: ${stats.wins_without_powerups || 0}</p>
+        <p>Most Wins Variant: ${stats.most_wins_variant?.variant || 'None'}</p>
+        <p>Tournaments Created: ${stats.tournaments_created || 0}</p>
+        <p>Tournaments Played: ${stats.tournaments_played || 0}</p>
+        <p>Tournaments Won: ${stats.tournaments_won || 0}</p>
+      </div>
+
+      ${!isOAuthUser
+        ? `
         <button onclick="navigate('/change-password')" class="w-full bg-blue-500 p-2 rounded mb-2">
           Change Password
         </button>
         <button onclick="navigate('/2fa-setup')" class="w-full bg-purple-500 p-2 rounded mb-2">
           ${user.totp_enabled ? 'Manage 2FA' : 'Setup 2FA'}
         </button>
-      ` : `
+      `
+        : `
         <p class="text-sm text-gray-400 mb-4">
           Account management is handled through ${user.oauth_provider}.
         </p>

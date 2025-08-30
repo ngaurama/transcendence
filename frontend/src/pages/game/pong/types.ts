@@ -12,6 +12,7 @@ export interface GameState {
     player1: string;
     player2: string;
   };
+  namesSet: boolean,
   status: string;
   variant: string;
   powerups: PowerUp[];

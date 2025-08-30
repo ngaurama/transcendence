@@ -34,7 +34,7 @@ class PowerUpSystem {
   }
 
   spawnPowerUp() {
-    if (!this.game.options.power_ups_enabled) {
+    if (!this.game.options.powerups_enabled) {
       return;
     }
     if (this.game.gameState.score.player1 === 0 && this.game.gameState.score.player2 === 0) {

@@ -124,49 +124,41 @@ CREATE TABLE user_presence (
 );
 
 -- ============================================================================
--- 3. GAME SYSTEM FOUNDATION
+-- 3. PONG GAME SYSTEM
 -- ============================================================================
-
-CREATE TABLE game_types (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(50) UNIQUE NOT NULL, -- 'pong', 'any other games if we're implementing that'
-    display_name VARCHAR(100) NOT NULL,
-    max_players INTEGER NOT NULL DEFAULT 2,
-    min_players INTEGER NOT NULL DEFAULT 2,
-    supports_ai BOOLEAN DEFAULT FALSE,
-    has_powerups BOOLEAN DEFAULT FALSE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    CHECK (max_players >= min_players),
-    CHECK (min_players >= 2)
-);
 
 CREATE TABLE game_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_type_id INTEGER NOT NULL,
     tournament_id INTEGER, -- nullable for casual games
+    player1_id INTEGER,
+    player2_id INTEGER,
     
     -- Game state
     status VARCHAR(20) DEFAULT 'waiting', -- 'waiting', 'in_progress', 'completed', 'abandoned'
     winner_id INTEGER, -- nullable for draws/abandoned games
+    final_score_player1 INTEGER,
+    final_score_player2 INTEGER,
     result VARCHAR(20), -- 'win', 'draw', 'abandoned'
+    
+    -- Pong-specific settings (JSON)
+    game_settings TEXT DEFAULT '{}', -- JSON: powerups_enabled, ball_speed, paddle_size, etc.
     
     -- Timing
     started_at DATETIME,
     ended_at DATETIME,
-    duration_seconds INTEGER, -- calculated duration
-    
-    -- Game-specific settings (JSON)
-    game_settings TEXT DEFAULT '{}', -- JSON: time controls, powerups, difficulty, etc.
-    max_players INTEGER DEFAULT 2,
+    -- duration_seconds INTEGER, -- calculated duration
+    game_duration_ms INTEGER,
     
     -- Timestamps
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (game_type_id) REFERENCES game_types(id),
     FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE SET NULL,
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (player1_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (player2_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL,
+    -- FOREIGN KEY (game_session_id) REFERENCES game_sessions(id),
     
     CHECK (status IN ('waiting', 'in_progress', 'completed', 'abandoned')),
     CHECK (result IN ('win', 'draw', 'abandoned') OR result IS NULL)
@@ -176,10 +168,9 @@ CREATE TABLE game_participants (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     game_session_id INTEGER NOT NULL,
     user_id INTEGER, -- nullable for AI players
-    player_number INTEGER NOT NULL, -- 1, 2 (no more multiplayer)
+    player_number INTEGER NOT NULL, -- 1, 2
     is_ai BOOLEAN DEFAULT FALSE,
     ai_difficulty INTEGER, -- 1-10 for Pong
-    ai_engine VARCHAR(50), -- 'custom_pong_ai', etc.
     
     -- Player-specific stats for this game
     score INTEGER DEFAULT 0,
@@ -192,14 +183,9 @@ CREATE TABLE game_participants (
     FOREIGN KEY (game_session_id) REFERENCES game_sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     
-    -- CHECK (
-    --     (user_id IS NOT NULL AND is_ai = FALSE) OR 
-    --     (user_id IS NULL AND is_ai = TRUE) OR
-    --     (user_id IS NOT NULL AND is_ai = TRUE)
-    -- )
     UNIQUE(game_session_id, player_number),
     CHECK (player_number IN (1, 2)),
-    CHECK (ai_difficulty IS NULL OR (ai_difficulty >= 1 AND ai_difficulty <= 20)),
+    CHECK (ai_difficulty IS NULL OR (ai_difficulty >= 1 AND ai_difficulty <= 10)),
     CHECK (NOT (user_id IS NULL AND is_ai = FALSE)), -- AI players must have is_ai = TRUE
     CHECK (NOT (user_id IS NOT NULL AND is_ai = TRUE)) -- Human players must have is_ai = FALSE
 );
@@ -211,11 +197,10 @@ CREATE TABLE game_participants (
 CREATE TABLE tournaments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(200) NOT NULL,
-    game_type_id INTEGER NOT NULL,
     creator_id INTEGER NOT NULL,
     
     -- Tournament structure (even numbers only, max 64)
-    type VARCHAR(50) DEFAULT 'single_elimination', -- only single_elimination for now
+    type VARCHAR(50) DEFAULT 'single_elimination',
     max_participants INTEGER DEFAULT 8,
     current_participants INTEGER DEFAULT 0,
     
@@ -226,7 +211,7 @@ CREATE TABLE tournaments (
     total_rounds INTEGER, -- calculated based on participants
     
     -- Tournament settings (JSON)
-    tournament_settings TEXT DEFAULT '{}', -- JSON for game-specific tournament rules
+    tournament_settings TEXT DEFAULT '{}', -- JSON for pong-specific tournament rules
     
     -- Scheduling
     registration_starts_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -238,7 +223,6 @@ CREATE TABLE tournaments (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (game_type_id) REFERENCES game_types(id),
     FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL,
     
@@ -314,11 +298,9 @@ CREATE TABLE tournament_matches (
 CREATE TABLE matchmaking_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    game_type_id INTEGER NOT NULL,
     
     -- Matchmaking preferences
     preferred_game_settings TEXT DEFAULT '{}', -- JSON
-    skill_rating INTEGER DEFAULT 1000, -- ELO-like system
     max_wait_time_seconds INTEGER DEFAULT 300, -- 5 minutes default
     
     -- Queue state
@@ -327,11 +309,9 @@ CREATE TABLE matchmaking_queue (
     matched_with_user_id INTEGER,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (game_type_id) REFERENCES game_types(id),
     FOREIGN KEY (matched_with_user_id) REFERENCES users(id) ON DELETE SET NULL,
     
     CHECK (status IN ('searching', 'matched', 'cancelled')),
-    CHECK (skill_rating >= 0),
     CHECK (max_wait_time_seconds > 0)
 );
 
@@ -430,7 +410,6 @@ CREATE TABLE user_blocks (
 CREATE TABLE user_game_stats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    game_type_id INTEGER NOT NULL,
     
     -- Basic stats
     games_played INTEGER DEFAULT 0,
@@ -444,11 +423,6 @@ CREATE TABLE user_game_stats (
     longest_game_duration INTEGER, -- seconds
     shortest_game_duration INTEGER, -- seconds
     
-    -- Skill metrics (all-time only)
-    current_rating INTEGER DEFAULT 1000, -- ELO-like
-    peak_rating INTEGER DEFAULT 1000,
-    lowest_rating INTEGER DEFAULT 1000,
-    
     -- Streak tracking
     current_win_streak INTEGER DEFAULT 0,
     longest_win_streak INTEGER DEFAULT 0,
@@ -460,21 +434,19 @@ CREATE TABLE user_game_stats (
     tournaments_won INTEGER DEFAULT 0,
     tournaments_top3 INTEGER DEFAULT 0,
     
-    -- Game-specific stats (JSON)
-    game_specific_stats TEXT DEFAULT '{}',
+    -- Pong-specific stats (JSON)
+    pong_stats TEXT DEFAULT '{}',
     
     -- Last updated
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (game_type_id) REFERENCES game_types(id),
     
-    UNIQUE(user_id, game_type_id),
+    UNIQUE(user_id),
     CHECK (games_played >= 0),
     CHECK (games_won >= 0),
     CHECK (games_lost >= 0),
     CHECK (games_drawn >= 0),
-    CHECK (current_rating >= 0),
     CHECK (tournaments_played >= 0)
 );
 
@@ -483,14 +455,9 @@ CREATE TABLE detailed_game_stats (
     game_session_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     
-    -- Performance metrics (JSON based on game type)
-    game_specific_stats TEXT NOT NULL DEFAULT '{}',
-    -- Pong: {"paddle_hits": 45, "perfect_returns": 12, "powerups_collected": 8, "max_ball_speed": 180}
-    
-    -- Rating change for this game
-    rating_before INTEGER,
-    rating_after INTEGER,
-    rating_change INTEGER, -- can be negative
+    -- Pong performance metrics
+    pong_stats TEXT NOT NULL DEFAULT '{}',
+    -- {"paddle_hits": 45, "perfect_returns": 12, "powerups_collected": 8, "max_ball_speed": 180}
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
@@ -500,38 +467,19 @@ CREATE TABLE detailed_game_stats (
     UNIQUE(game_session_id, user_id)
 );
 
--- Global leaderboard (all-time only)
-CREATE TABLE leaderboards (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_type_id INTEGER NOT NULL,
-    
-    -- Leaderboard data (JSON) - top 100 players
-    rankings TEXT NOT NULL, -- JSON array of {user_id, username, rating, games_played, win_rate}
-    
-    -- Metadata
-    last_updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    player_count INTEGER DEFAULT 0, -- Total players with stats for this game type
-    
-    FOREIGN KEY (game_type_id) REFERENCES game_types(id),
-    
-    UNIQUE(game_type_id),
-    CHECK (player_count >= 0)
-);
-
 -- ============================================================================
--- 9. GAME CUSTOMIZATION & POWER-UPS
+-- 9. PONG CUSTOMIZATION & POWER-UPS
 -- ============================================================================
 
-CREATE TABLE game_customizations (
+CREATE TABLE pong_customizations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_type_id INTEGER NOT NULL,
     name VARCHAR(100) NOT NULL,
     display_name VARCHAR(200) NOT NULL,
     description TEXT,
     
-    -- Customization data (JSON)
+    -- Pong customization data (JSON)
     settings TEXT NOT NULL DEFAULT '{}',
-    -- Pong: {"powerups_enabled": true, "powerup_spawn_score": 3, "available_powerups": ["multiball", "speed", "big_paddle"], "ball_speed_multiplier": 1.0}
+    -- {"powerups_enabled": true, "powerup_spawn_score": 3, "available_powerups": ["multiball", "speed", "big_paddle"], "ball_speed_multiplier": 1.0}
     
     -- Availability
     is_default BOOLEAN DEFAULT FALSE,
@@ -540,10 +488,9 @@ CREATE TABLE game_customizations (
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (game_type_id) REFERENCES game_types(id),
     FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
     
-    UNIQUE(game_type_id, name)
+    UNIQUE(name)
 );
 
 -- Pong power-up definitions
@@ -587,7 +534,6 @@ CREATE INDEX idx_user_sessions_expires ON user_sessions(expires_at);
 
 -- Game indexes
 CREATE INDEX idx_game_sessions_status ON game_sessions(status);
-CREATE INDEX idx_game_sessions_type ON game_sessions(game_type_id);
 CREATE INDEX idx_game_sessions_tournament ON game_sessions(tournament_id) WHERE tournament_id IS NOT NULL;
 CREATE INDEX idx_game_sessions_created ON game_sessions(created_at);
 
@@ -596,7 +542,6 @@ CREATE INDEX idx_game_participants_session ON game_participants(game_session_id)
 
 -- Tournament indexes
 CREATE INDEX idx_tournaments_status ON tournaments(status);
-CREATE INDEX idx_tournaments_type ON tournaments(game_type_id);
 CREATE INDEX idx_tournaments_creator ON tournaments(creator_id);
 
 CREATE INDEX idx_tournament_participants_tournament ON tournament_participants(tournament_id);
@@ -623,16 +568,11 @@ CREATE INDEX idx_friendships_status ON friendships(status);
 
 -- Stats indexes
 CREATE INDEX idx_user_game_stats_user ON user_game_stats(user_id);
-CREATE INDEX idx_user_game_stats_type ON user_game_stats(game_type_id);
-CREATE INDEX idx_user_game_stats_rating ON user_game_stats(current_rating);
-
 CREATE INDEX idx_detailed_game_stats_session ON detailed_game_stats(game_session_id);
 CREATE INDEX idx_detailed_game_stats_user ON detailed_game_stats(user_id);
 
 -- Matchmaking indexes
 CREATE INDEX idx_matchmaking_queue_status ON matchmaking_queue(status);
-CREATE INDEX idx_matchmaking_queue_type ON matchmaking_queue(game_type_id);
-CREATE INDEX idx_matchmaking_queue_rating ON matchmaking_queue(skill_rating);
 
 -- ============================================================================
 -- UPDATE TRIGGERS

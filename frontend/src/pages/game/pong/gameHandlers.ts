@@ -1,3 +1,4 @@
+// gameHandlers.ts - Updated version
 import { requestRematch } from '../../../services/PongService';
 
 export function setupRematchHandler(): void {
@@ -11,8 +12,24 @@ export function setupPlayAgainHandler(): void {
   const playAgainBtn = document.getElementById("play-again");
   if (playAgainBtn) {
     playAgainBtn.addEventListener("click", () => {
-      console.log("Navigating to play page");
       (window as any).navigate("/play");
+    });
+  }
+}
+
+export function setupTournamentHandlers(tournamentId: string): void {
+  const viewBracketBtn = document.getElementById("view-bracket");
+  const leaveTournamentBtn = document.getElementById("leave-tournament");
+  
+  if (viewBracketBtn) {
+    viewBracketBtn.addEventListener("click", () => {
+      (window as any).navigate(`/tournament/${tournamentId}`);
+    });
+  }
+  
+  if (leaveTournamentBtn) {
+    leaveTournamentBtn.addEventListener("click", () => {
+      (window as any).navigate("/tournaments");
     });
   }
 }

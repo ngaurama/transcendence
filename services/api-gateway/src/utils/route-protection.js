@@ -1,17 +1,3 @@
-function isProtectedGameRoute(url) {
-  const protectedRoutes = [
-    '/tournament/create',
-    '/tournament/join',
-    '/matchmaking/join',
-    '/join',
-    '/stats',
-    '/history',
-    '/wss/'
-  ];
-
-  return protectedRoutes.some(route => url.includes(route));
-}
-
 function isProtectedPongRoute(url) {
   const protectedRoutes = [
     '/game/create',
@@ -26,6 +12,5 @@ function isProtectedPongRoute(url) {
 
 
 module.exports = {
-  isProtectedGameRoute,
   isProtectedPongRoute,
 };

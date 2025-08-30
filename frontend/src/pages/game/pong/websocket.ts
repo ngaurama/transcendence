@@ -1,21 +1,21 @@
+// pages/websocket.ts
 import { GameState } from './types';
 import { updateScene } from './renderer';
 import { rollNeonColor } from './utils';
 
 let isLocalMultiplayer = false;
-let holdBallAtCenterUntil = 0;
-let countdownNumber: number | null = null;
 
 export function createWebSocketHandler(
-  gameId: string, 
+  gameId: string,
   token: string | null,
   onGameEnd: (winner: string) => void
 ): WebSocket {
+
   const ws = new WebSocket(`wss://${window.location.host}/api/pong/wss?game_id=${gameId}`);
 
   ws.onopen = () => {
-    console.log("Connected to Pong WS");
-    ws.send(JSON.stringify({ type: "auth", token }));
+    console.log('WebSocket connected successfully');
+    ws.send(JSON.stringify({ type: 'auth', token }));
   };
 
   ws.onmessage = (event) => {
@@ -23,17 +23,17 @@ export function createWebSocketHandler(
       const data = JSON.parse(event.data);
       handleWebSocketMessage(data, onGameEnd);
     } catch (error) {
-      console.error("Error parsing WebSocket message:", error);
+      console.error('Error parsing WebSocket message:', error);
     }
   };
 
   ws.onerror = (error) => {
-    console.error("WebSocket error:", error);
+    console.error('WebSocket error:', error);
   };
 
   ws.onclose = (event) => {
-    console.log("WebSocket closed:", event.code, event.reason);
-    (window as any).navigate("/play");
+    console.log('WebSocket closed:', event.code, event.reason);
+    (window as any).navigate('/');
   };
 
   return ws;
@@ -41,80 +41,63 @@ export function createWebSocketHandler(
 
 function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void): void {
   switch (data.type) {
-    case "auth_success":
-      isLocalMultiplayer = data.player_id === "both";
-      console.log(`Authenticated as ${data.player_id}`);
+    case 'auth_success':
+      isLocalMultiplayer = data.is_local || false;
+      console.log(`Authenticated, is_local: ${isLocalMultiplayer}`);
       break;
 
-    case "game_state":
-    case "game_update":
+    case 'game_state':
+    case 'game_update':
       updateScene(data.state);
       break;
 
-    case "countdown":
-      console.log("Received countdown:", data.number)
-      updateScene({ 
-        ...data.state,
-        countdown: data.number 
-      });
+    case 'countdown':
+      updateScene({ ...data.state, countdown: data.number, namesSet: false });
       break;
 
-    case "round_pause":
+    case 'round_pause':
       updateScene({ holdUntil: performance.now() + 1500 });
       rollNeonColor();
       break;
 
-    case "game_started":
+    case 'game_started':
       rollNeonColor();
-      updateScene({ countdown: null });
-      console.log("Game started");
+      updateScene({ countdown: null, namesSet: false });
+      console.log('Game started');
       break;
 
-    case "game_ended":
+    case 'game_ended':
       onGameEnd(data.winner);
       break;
 
-    case "powerup_spawned":
+    case 'tournament_match_start':
+      (window as any).navigate(`/game/pong?game_id=${data.game_id}&tournament_id=${data.tournament_id}`);
       break;
 
-    case "powerup_collected":
+    case 'tournament_update':
+      (window as any).navigate(`/tournament/${data.tournament_id}`);
       break;
 
-    case "extra_ball_spawned":
-      break;
-
-    case "extra_ball_removed":
-      break;
-
-    case "all_extra_balls_cleared":
-      break;
-
-    case "powerup_ended":
-      break;
-
-    case "paddle_speed_changed":
-    case "paddle_size_changed":
+    case 'powerup_spawned':
+    case 'powerup_collected':
+    case 'extra_ball_spawned':
+    case 'extra_ball_removed':
+    case 'all_extra_balls_cleared':
+    case 'powerup_ended':
+    case 'paddle_speed_changed':
+    case 'paddle_size_changed':
+    case 'powerup_expired':
+    case 'all_powerups_cleared':
       updateScene(data.state || {});
       break;
 
-    case "powerup_expired":
-      break;
-
-    case "all_powerups_cleared":
-      break;
-
     default:
-      console.warn("Unknown message type:", data.type);
+      console.warn('Unknown message type:', data.type);
   }
 }
 
-export function sendPaddleMove(ws: WebSocket, player1Input: string | null, player2Input: string | null): void {
-  if (!isLocalMultiplayer) return;
-
-  const message = {
-    type: "paddle_move",
-    player1: player1Input ? { direction: player1Input } : null,
-    player2: player2Input ? { direction: player2Input } : null,
-  };
-  ws.send(JSON.stringify(message));
+export function sendPaddleMove(ws: WebSocket, input: any): void {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'paddle_move', ...input }));
+  }
 }

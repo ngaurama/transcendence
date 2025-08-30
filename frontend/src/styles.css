@@ -32,3 +32,84 @@
   border-radius: 0.5rem;
   touch-action: none; /* For better touch controls if added */
 }
+
+
+.tournament-bracket {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 200px;
+}
+
+.match {
+  background: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 200px;
+}
+
+.match.completed {
+  border-color: #10B981;
+}
+
+.match.in-progress {
+  border-color: #F59E0B;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { border-color: #F59E0B; }
+  50% { border-color: #FBBF24; }
+  100% { border-color: #F59E0B; }
+}
+
+.players {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.player1, .player2 {
+  padding: 4px;
+}
+
+.vs {
+  margin: 4px 0;
+  color: #9CA3AF;
+  font-size: 0.8rem;
+}
+
+.match-status {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.start-match-btn {
+  width: 100%;
+  padding: 6px 12px;
+  background: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.start-match-btn:hover {
+  background: #2563EB;
+}
+
+.winner {
+  text-align: center;
+  color: #10B981;
+  font-weight: bold;
+  margin-top: 8px;
+}

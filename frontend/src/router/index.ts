@@ -1,3 +1,4 @@
+// router.ts
 import { checkAuthStatus } from '../services';
 import * as Pages from '../pages';
 
@@ -10,6 +11,8 @@ export function initRouter() {
     '/settings': Pages.settingsPage,
     '/play': Pages.playSelectionPage,
     '/game/pong': Pages.pongGamePage,
+    '/tournaments': Pages.tournamentSelectionPage, // New
+    '/tournament/:tournamentId': Pages.tournamentPage, // New
     '/login': Pages.loginPage,
     '/register': Pages.registerPage,
     '/verify-email': Pages.verifyEmailPage,
@@ -23,7 +26,14 @@ export function initRouter() {
   };
 
   async function render() {
-    const path = window.location.pathname;
+    let path = window.location.pathname;
+    // Handle dynamic routes
+    const tournamentMatch = path.match(/^\/tournament\/(\d+)$/);
+    if (tournamentMatch) {
+      path = '/tournament/:tournamentId';
+      (window as any).tournamentId = tournamentMatch[1];
+    }
+
     const content = await routes[path]?.() || '<h2>404 - Page Not Found</h2>';
     app.innerHTML = content;
     updateAuthStatus();
@@ -46,6 +56,7 @@ export function initRouter() {
             <img src="${user.avatar_url}" alt="Avatar" class="w-10 h-10 rounded-full cursor-pointer" id="avatar-dropdown-trigger">
             <div id="avatar-dropdown" class="hidden dropdown-menu">
               <div class="dropdown-item" onclick="navigate('/settings')">Settings</div>
+              <div class="dropdown-item" onclick="navigate('/tournaments')">Tournaments</div>
               <div class="dropdown-item hover:bg-red-500" onclick="navigate('/logout')">Logout</div>
             </div>
           </div>
@@ -73,32 +84,27 @@ export function initRouter() {
 
   function attachEventListeners() {
     const currentPath = window.location.pathname;
-    switch (currentPath) {
-      case '/': Pages.attachHomeListeners(); break;
-      case '/settings': Pages.attachSettingsListeners(); break;
-      case '/play': Pages.attachPlaySelectionListeners(); break;
-      case '/game/pong': Pages.attachPongGameListeners(); break;
-      case '/login': Pages.attachLoginListeners(); break;
-      case '/register': Pages.attachRegisterListeners(); break;
-      case '/verify-2fa': Pages.attachVerify2FAListeners(); break;
-      case '/2fa-setup': Pages.attach2FASetupListeners(); break;
-      case '/forgot-password': Pages.attachForgotPasswordListeners(); break;
-      case '/reset-password': Pages.attachResetPasswordListeners(); break;
-      case '/change-password': Pages.attachChangePasswordListeners(); break;
+    const tournamentMatch = currentPath.match(/^\/tournament\/(\d+)$/);
+    if (tournamentMatch) {
+      Pages.attachTournamentListeners(tournamentMatch[1]);
+    } else {
+      switch (currentPath) {
+        case '/': Pages.attachHomeListeners(); break;
+        case '/settings': Pages.attachSettingsListeners(); break;
+        case '/play': Pages.attachPlaySelectionListeners(); break;
+        case '/game/pong': Pages.attachPongGameListeners(); break;
+        case '/tournaments': Pages.attachTournamentSelectionListeners(); break;
+        case '/login': Pages.attachLoginListeners(); break;
+        case '/register': Pages.attachRegisterListeners(); break;
+        case '/verify-2fa': Pages.attachVerify2FAListeners(); break;
+        case '/2fa-setup': Pages.attach2FASetupListeners(); break;
+        case '/forgot-password': Pages.attachForgotPasswordListeners(); break;
+        case '/reset-password': Pages.attachResetPasswordListeners(); break;
+        case '/change-password': Pages.attachChangePasswordListeners(); break;
+      }
     }
   }
 
   window.addEventListener('popstate', render);
-  // if (window.location.search.includes('access_token')) {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const accessToken = params.get('access_token');
-  //   const refreshToken = params.get('refresh_token');
-    
-  //   if (accessToken && refreshToken) {
-  //     localStorage.setItem('access_token', accessToken);
-  //     localStorage.setItem('refresh_token', refreshToken);
-  //   }
-  //   window.history.replaceState({}, '', '/');
-  // }
   render();
 }

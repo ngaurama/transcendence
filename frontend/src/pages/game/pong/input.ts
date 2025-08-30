@@ -1,50 +1,160 @@
+// pages/input.ts - Updated version
 import { sendPaddleMove } from './websocket';
+import { checkAuthStatus } from '../../../services';
 
 export class InputHandler {
-  private player1Input: string | null = null;
-  private player2Input: string | null = null;
+  private playerInput: string | null = null;
   private ws: WebSocket;
+  private isLocal: boolean;
+  private userId: number | null = null;
+  private keyState: { [key: string]: boolean } = {};
 
-  constructor(webSocket: WebSocket) {
+  constructor(webSocket: WebSocket, isLocal: boolean) {
     this.ws = webSocket;
+    this.isLocal = isLocal;
+    this.setupUserId();
     this.setupEventListeners();
+    this.startInputLoop();
+  }
+
+  private async setupUserId() {
+    const user = await checkAuthStatus();
+    this.userId = user?.id || null;
   }
 
   private setupEventListeners(): void {
-    document.addEventListener("keydown", this.handleKeyDown.bind(this));
-    document.addEventListener("keyup", this.handleKeyUp.bind(this));
+    document.addEventListener('keydown', this.handleKeyDown.bind(this));
+    document.addEventListener('keyup', this.handleKeyUp.bind(this));
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    if (event.key === "w" || event.key === "W") {
-      this.player1Input = "up";
-    } else if (event.key === "s" || event.key === "S") {
-      this.player1Input = "down";
-    }
-
-    if (event.key === "ArrowUp") {
-      this.player2Input = "up";
-    } else if (event.key === "ArrowDown") {
-      this.player2Input = "down";
-    }
-
-    sendPaddleMove(this.ws, this.player1Input, this.player2Input);
+    this.keyState[event.key.toLowerCase()] = true;
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
-    if (event.key === "w" || event.key === "s" || event.key === "W" || event.key === "S") {
-      this.player1Input = "stop";
-    }
+    this.keyState[event.key.toLowerCase()] = false;
+  }
 
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      this.player2Input = "stop";
-    }
+  private startInputLoop(): void {
+    const processInput = () => {
+      if (this.isLocal) {
+        // Local mode: handle both players
+        if (this.keyState['w']) {
+          sendPaddleMove(this.ws, { player1_direction: 'up' });
+        } else if (this.keyState['s']) {
+          sendPaddleMove(this.ws, { player1_direction: 'down' });
+        } else {
+          sendPaddleMove(this.ws, { player1_direction: 'stop' });
+        }
 
-    sendPaddleMove(this.ws, this.player1Input, this.player2Input);
+        if (this.keyState['arrowup']) {
+          sendPaddleMove(this.ws, { player2_direction: 'up' });
+        } else if (this.keyState['arrowdown']) {
+          sendPaddleMove(this.ws, { player2_direction: 'down' });
+        } else {
+          sendPaddleMove(this.ws, { player2_direction: 'stop' });
+        }
+      } else {
+        // Online mode: handle only the authenticated user's input
+        if (this.keyState['w']) {
+          sendPaddleMove(this.ws, { direction: 'up' });
+        } else if (this.keyState['s']) {
+          sendPaddleMove(this.ws, { direction: 'down' });
+        } else {
+          sendPaddleMove(this.ws, { direction: 'stop' });
+        }
+      }
+      
+      requestAnimationFrame(processInput);
+    };
+    
+    requestAnimationFrame(processInput);
   }
 
   public cleanup(): void {
-    document.removeEventListener("keydown", this.handleKeyDown.bind(this));
-    document.removeEventListener("keyup", this.handleKeyUp.bind(this));
+    document.removeEventListener('keydown', this.handleKeyDown.bind(this));
+    document.removeEventListener('keyup', this.handleKeyUp.bind(this));
   }
 }
+
+
+// // pages/input.ts - Updated version
+// import { sendPaddleMove } from './websocket';
+// import { checkAuthStatus } from '../../../services';
+
+// export class InputHandler {
+//   private playerInput: string | null = null;
+//   private ws: WebSocket;
+//   private isLocal: boolean;
+//   private userId: number | null = null;
+//   private keyState: { [key: string]: boolean } = {};
+
+//   constructor(webSocket: WebSocket, isLocal: boolean) {
+//     this.ws = webSocket;
+//     this.isLocal = isLocal;
+//     this.setupUserId();
+//     this.setupEventListeners();
+//     this.startInputLoop();
+//   }
+
+//   private async setupUserId() {
+//     const user = await checkAuthStatus();
+//     this.userId = user?.id || null;
+//   }
+
+//   private setupEventListeners(): void {
+//     document.addEventListener('keydown', this.handleKeyDown.bind(this));
+//     document.addEventListener('keyup', this.handleKeyUp.bind(this));
+//   }
+
+//   private handleKeyDown(event: KeyboardEvent): void {
+//     this.keyState[event.key.toLowerCase()] = true;
+//   }
+
+//   private handleKeyUp(event: KeyboardEvent): void {
+//     this.keyState[event.key.toLowerCase()] = false;
+//   }
+
+//   private startInputLoop(): void {
+//     console.log("HAHAHAHA");
+//     const processInput = () => {
+//       if (this.isLocal) {
+//         console.log("hehehhe????");
+//         if (this.keyState['w']) {
+//           sendPaddleMove(this.ws, { player1_direction: 'up' });
+//         } else if (this.keyState['s']) {
+//           sendPaddleMove(this.ws, { player1_direction: 'down' });
+//         } else {
+//           sendPaddleMove(this.ws, { player1_direction: 'stop' });
+//         }
+
+//         if (this.keyState['arrowup']) {
+//           sendPaddleMove(this.ws, { player2_direction: 'up' });
+//         } else if (this.keyState['arrowdown']) {
+//           sendPaddleMove(this.ws, { player2_direction: 'down' });
+//         } else {
+//           sendPaddleMove(this.ws, { player2_direction: 'stop' });
+//         }
+//       } else {
+//         console.log("hohohohoho????")
+//         // Online mode: handle only the authenticated user's input
+//         if (this.keyState['w']) {
+//           sendPaddleMove(this.ws, { direction: 'up' });
+//         } else if (this.keyState['s']) {
+//           sendPaddleMove(this.ws, { direction: 'down' });
+//         } else {
+//           sendPaddleMove(this.ws, { direction: 'stop' });
+//         }
+//       }
+      
+//       requestAnimationFrame(processInput);
+//     };
+    
+//     requestAnimationFrame(processInput);
+//   }
+
+//   public cleanup(): void {
+//     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
+//     document.removeEventListener('keyup', this.handleKeyUp.bind(this));
+//   }
+// }

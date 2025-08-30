@@ -21,24 +21,6 @@ async function authProxy(fastify, options) {
   });
 }
 
-async function gameProxy(fastify, options) {
-  await fastify.register(httpProxy, {
-    upstream: config.services.game,
-    prefix: '/game',
-    rewritePrefix: '/',
-    websocket: true,
-    preHandler: async (request, reply) => {
-      request.headers['x-request-id'] = generateRequestId();
-
-      if (isProtectedRoutes.isProtectedGameRoute(request.url)) {
-        await authenticateRequest(request, reply);
-      }
-
-      console.log(`Game Request: ${request.method} ${request.url}`);
-    }
-  });
-}
-
 async function pongProxy(fastify, options) {
   await fastify.register(httpProxy, {
     upstream: config.services.pong,
@@ -59,7 +41,6 @@ async function pongProxy(fastify, options) {
 
 async function proxyRoutes(fastify, options) {
   await fastify.register(authProxy);
-  await fastify.register(gameProxy);
   await fastify.register(pongProxy);
 }
 

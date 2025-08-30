@@ -32,17 +32,24 @@ export default defineConfig({
         ws: true,
         rewrite: (path) => path.replace(/^\/api\/pong\/wss/, '/wss')
       },
+      '/api/pong/ws': {
+        target: 'https://pong-service:3004',
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/api\/pong\/ws/, '/ws')
+      },
       '/api': {
         target: 'https://api-gateway:3000/',
         changeOrigin: true,
         secure: false,
         ws: true,
       },
-      // '/avatars': {
-      //   target: 'https://api-gateway:3000/',
-      //   changeOrigin: true,
-      //   secure: false,
-      // },
+      '/avatars': {
+        target: 'https://api-gateway:3000/',
+        changeOrigin: true,
+        secure: false,
+      },
     }
   },
   css: {

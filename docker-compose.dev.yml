@@ -40,8 +40,6 @@ services:
     depends_on:
       - vault
       - auth-service
-      - game-service
-      # - chat-service
       - pong-service
     networks:
       - ft_transcendence
@@ -68,24 +66,6 @@ services:
       - ./.env.generated:/app/.env.generated:ro
     depends_on:
       - vault
-    networks:
-      - ft_transcendence
-    restart: unless-stopped
-
-  game-service:
-    build:
-      context: ./services/game-service
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    volumes:
-      - database_data:/app/data
-      - ./services/game-service:/app
-      - /app/node_modules
-      - ./nginx/certs:/app/certs:ro
-    depends_on:
-      - vault
-      - auth-service
     networks:
       - ft_transcendence
     restart: unless-stopped

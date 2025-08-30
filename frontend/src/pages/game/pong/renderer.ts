@@ -10,6 +10,7 @@ export let gameState: GameState = {
   ball: { x: 400, y: 300 },
   score: { player1: 0, player2: 0 },
   player_names: { player1: "Player 1", player2: "Player 2" },
+  namesSet: false,
   status: "waiting",
   variant: "classic",
   powerups: [],
@@ -20,7 +21,7 @@ export let gameState: GameState = {
   countdown: null,
 };
 
-let namesSet = false;
+// let namesSet = false;
 let currentNeonColor = randomNeonColor();
 let holdBallAtCenterUntil = 0;
 let images: { [key: string]: HTMLImageElement } = {};
@@ -387,7 +388,7 @@ export function updateScene(state: Partial<GameState>): void {
     countdown: state.countdown !== undefined ? state.countdown : gameState.countdown,
   };
 
-  if (!namesSet && gameState.player_names) {
+  if (!gameState.namesSet && gameState.player_names) {
     const currentUserDisplayName = localStorage.getItem("display_name") || gameState.player_names.player1 || "Player 1";
     const opponentAlias = gameState.player_names.player2 || "Player 2";
     
@@ -398,7 +399,7 @@ export function updateScene(state: Partial<GameState>): void {
     if (player2NameEl) player2NameEl.textContent = opponentAlias;
     
     console.log(`Set player names: ${currentUserDisplayName} vs ${opponentAlias}`);
-    namesSet = true;
+    gameState.namesSet = true;
   }
 }
 

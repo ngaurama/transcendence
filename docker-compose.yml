@@ -48,7 +48,6 @@ services:
     depends_on:
       - vault
       - auth-service
-      - game-service
       # - chat-service
       - pong-service
     networks:
@@ -78,28 +77,6 @@ services:
       - server_certs:/app/certs:ro
     depends_on:
       - vault
-    networks:
-      - ft_transcendence
-    restart: unless-stopped
-
-  game-service:
-    build:
-      context: ./services/game-service
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - VAULT_ADDR=https://vault:8200
-      - VAULT_TOKEN=${VAULT_TOKEN}
-    volumes:
-      - database_data:/app/data
-      - ./services/game-service:/app
-      - /app/node_modules
-      - server_certs:/app/certs:ro
-    depends_on:
-      - vault
-      - auth-service
     networks:
       - ft_transcendence
     restart: unless-stopped
