@@ -7,17 +7,17 @@ export interface PlayerNames {
 }
 
 export function getPlayerNames(options: any, user: any): PlayerNames {
-  if (options.mode === 'local' && options.tournament_id) {
+  if (options.gameMode === 'local' && options.tournament_id) {
     // Local tournament - use provided aliases
     return {
       player1: options.player1_name || 'Player 1',
       player2: options.player2_name || 'Player 2'
     };
-  } else if (options.mode === 'local') {
+  } else if (options.gameMode === 'local') {
     // Local 2-player game
     return {
       player1: options.player1_name || 'Player 1',
-      player2: options.opponent_alias || 'Player 2'
+      player2: options.player2_name || 'Player 2'
     };
   } else {
     // Online game - will be set via WebSocket

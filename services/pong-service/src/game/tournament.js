@@ -31,7 +31,6 @@ class Tournament {
     }
   }
 
-
   async createNextRoundMatches() {
     try {
       let players = [...this.activePlayers];
@@ -89,7 +88,7 @@ class Tournament {
               WHERE id = ?
             `, [gameId, matchId]);
 
-            this.pongService.createGame(gameId, { ...gameSettings, is_local: false, tournament_id: this.tournamentId });
+            this.pongService.createGame(gameId, { ...gameSettings, gameMode: 'online', tournament_id: this.tournamentId });
 
             const player1Name = await this.pongService.getDisplayName(player1);
             const player2Name = await this.pongService.getDisplayName(player2);
@@ -211,15 +210,19 @@ class Tournament {
   }
 
   async startMatch(matchId) {
+
     const match = await this.db.get(`
-      SELECT * FROM tournament_matches 
-      WHERE id = ? AND tournament_id = ?
+      SELECT tm.*,
+            u1.display_name AS player1_name,
+            u2.display_name AS player2_name
+      FROM tournament_matches tm
+      LEFT JOIN users u1 ON tm.player1_id = u1.id
+      LEFT JOIN users u2 ON tm.player2_id = u2.id
+      WHERE tm.id = ? AND tm.tournament_id = ?
     `, [matchId, this.tournamentId]);
 
     if (match.status !== 'pending') return match.game_session_id;
     
-    // if (match.game_session_id) return match.game_session_id;
-
     await this.db.run(`
       UPDATE tournament_matches 
       SET status = 'in_progress', started_at = CURRENT_TIMESTAMP 
@@ -247,7 +250,7 @@ class Tournament {
 
     this.pongService.createGame(gameId, {
       ...gameSettings, 
-      is_local: true,
+      gameMode: 'local',
       tournament_id: this.tournamentId,
       tournament_match_id: matchId,
       player1_name: match.player1_name,

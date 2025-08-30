@@ -74,14 +74,10 @@ export function attachPongGameListeners(): () => void {
     }
   };
 
-  const isLocal = (window as any).gameOptions?.gameMode === 'local' || 
-                 (window as any).gameOptions?.is_local;
-
   console.log('Attempting WebSocket connection...');
   const ws = createWebSocketHandler(gameId, token, onGameEnd);
 
-  const inputHandler = new InputHandler(ws, isLocal);
-  // const inputHandler = new InputHandler(ws, (window as any).gameOptions?.mode === 'local');
+  const inputHandler = new InputHandler(ws, (window as any).gameOptions?.gameMode === 'local');
 
   setupRematchHandler();
   setupPlayAgainHandler();

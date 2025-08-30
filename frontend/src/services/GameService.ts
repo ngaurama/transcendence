@@ -16,8 +16,9 @@ export async function startGame(options: GameOptions | TournamentOptions): Promi
     case 'local':
       if (options.gameType === '2player')
         return createLocalGame(options as GameOptions);
-      else
+      else {
         return createTournament(options as TournamentOptions);
+      }
 
   
     default:

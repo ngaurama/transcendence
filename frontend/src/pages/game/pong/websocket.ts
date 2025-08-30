@@ -3,8 +3,6 @@ import { GameState } from './types';
 import { updateScene } from './renderer';
 import { rollNeonColor } from './utils';
 
-let isLocalMultiplayer = false;
-
 export function createWebSocketHandler(
   gameId: string,
   token: string | null,
@@ -42,8 +40,6 @@ export function createWebSocketHandler(
 function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void): void {
   switch (data.type) {
     case 'auth_success':
-      isLocalMultiplayer = data.is_local || false;
-      console.log(`Authenticated, is_local: ${isLocalMultiplayer}`);
       break;
 
     case 'game_state':
@@ -62,7 +58,7 @@ function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void):
 
     case 'game_started':
       rollNeonColor();
-      updateScene({ countdown: null, namesSet: false });
+      updateScene({ countdown: null });
       console.log('Game started');
       break;
 

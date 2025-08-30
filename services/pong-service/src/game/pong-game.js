@@ -13,7 +13,7 @@ class PongGame {
     };
     this.playerNames = {
       player1: options.player1_name || 'Player 1',
-      player2: options.player2_name || (options.is_local ? (options.opponent_alias || 'Player 2') : 'Player 2')
+      player2: options.player2_name || (options.gameMode === 'local' ? (options.player2_name || 'Player 2') : 'Player 2')
     };
     this.basePaddleStats = {
       speed: this.canvas.width * 0.375, // 300/800
@@ -54,19 +54,17 @@ class PongGame {
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height
     };
-    console.log("OPTIONS BEFORE: ", options);
     this.options = {
       max_players: options.max_players || 2,
       powerups_enabled: options.powerups_enabled || false,
       board_variant: options.board_variant || 'classic',
-      is_local: options.is_local || false,
+      gameMode: options.gameMode || 'online',
       points_to_win: options.points_to_win || 5,
       player1_name: options.player1_name,
-      opponent_alias: options.opponent_alias,
+      player2_name: options.player2_name,
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height
     };
-    console.log("OPTIONS AFTER: ", this.options);
     this.gameLoop = null;
     this.powerUpSystem = new PowerUpSystem(this);
   }
@@ -88,22 +86,18 @@ class PongGame {
     });
 
 
-
     this.db.run('UPDATE user_presence SET status = "playing", current_game_id = ? WHERE user_id = ?', [this.gameId, userId]);
 
-    const requiredConnections = this.options.is_local ? 1 : 2;
+    const requiredConnections = this.options.gameMode === 'local' ? 1 : 2;
     if (this.connections.size === requiredConnections) {
       this.start();
     }
-    // if ((this.options.is_local && this.connections.size >= 1) || (!this.options.is_local && this.connections.size === 2)) {
-    //   this.start();
-    // }
   }
 
   removeConnection(userId) {
     this.connections.delete(userId);
     this.db.run('UPDATE user_presence SET status = "online", current_game_id = NULL WHERE user_id = ?', [userId]);
-    if (this.gameState.status === 'active' && !this.options.is_local) {
+    if (this.gameState.status === 'active' && !this.options.gameMode === 'local') {
       this.handlePlayerDisconnection(userId);
     }
   }
@@ -111,7 +105,7 @@ class PongGame {
   handlePlayerInput(userId, input) {
     if (this.gameState.status !== 'active') return;
 
-    if (this.options.is_local) {
+    if (this.options.gameMode === 'local') {
       if (input.player1_direction !== undefined) {
         this.inputStates.player1 = input.player1_direction;
       }

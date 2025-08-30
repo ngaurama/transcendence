@@ -136,7 +136,7 @@ class PongService {
             VALUES (?, ?, 1), (?, ?, 2)
           `, [gameId, player1.user_id, gameId, player2.user_id]);
 
-          this.createGame(gameId, { ...settings, is_local: false });
+          this.createGame(gameId, { ...settings, gameMode: 'online' });
 
           await this.db.run(`
             UPDATE matchmaking_queue 

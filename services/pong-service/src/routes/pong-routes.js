@@ -22,9 +22,8 @@ function setupRoutes(fastify, pongService) {
     const {
       gameMode = 'local',
       gameType = '2player',
-      is_local = false,
       player1_name,
-      opponent_alias,
+      player2_name,
       powerups_enabled = false,
       points_to_win = 5,
       board_variant = 'classic'
@@ -52,22 +51,21 @@ function setupRoutes(fastify, pongService) {
       const options = {
         gameMode,
         gameType,
-        is_local, //im just making sure... ik i already have gameMode
         powerups_enabled,
         points_to_win,
         board_variant,
         player1_name,
-        opponent_alias
+        player2_name
       };
 
       pongService.createGame(gameId, options);
 
-      if (is_local) {
+      if (gameMode === 'local') {
         // Create guest user for opponent
         const guestResult = await pongService.db.run(`
           INSERT INTO users (display_name, is_guest, created_at) 
           VALUES (?, TRUE, CURRENT_TIMESTAMP)
-        `, [opponent_alias || 'Opponent']);
+        `, [player2_name || 'Opponent']);
 
         const guestId = guestResult.lastID;
 
@@ -152,7 +150,7 @@ function setupRoutes(fastify, pongService) {
     const gameId = parseInt(request.params.gameId);
 
     const game = pongService.gameRooms.get(gameId);
-    if (!game || game.options.is_local) {
+    if (!game || game.options.gameMode === 'local') {
       return reply.code(400).send({ error: 'Invalid game' });
     }
 
@@ -214,6 +212,7 @@ function setupRoutes(fastify, pongService) {
     });
 
     if (tournament_settings.gameMode === 'local') {
+      console.log("ENTERED HERE YEAHH");
       if (!Array.isArray(aliases)) {
         return reply.code(400).send({ error: 'Aliases must be an array' });
       }
@@ -296,7 +295,7 @@ function setupRoutes(fastify, pongService) {
     }
 
     const settings = JSON.parse(tournament.tournament_settings);
-    if (settings.mode === 'local') {
+    if (settings.gameMode === 'local') {
       return reply.code(400).send({ error: 'Cannot join local tournament' });
     }
 
@@ -450,7 +449,8 @@ function setupRoutes(fastify, pongService) {
 
     const tournamentId = parseInt(request.params.tournamentId);
     const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
-    if (!tournament || tournament.creator_id !== user.id || tournament.status !== 'registration') {
+    if (!tournament || tournament.creator_id !== user.id ) {
+      // || tournament.status !== 'registration' //add this back later
       return reply.code(403).send({ error: 'Not authorized to delete this tournament' });
     }
 
@@ -569,7 +569,7 @@ function setupRoutes(fastify, pongService) {
     }
 
     const settings = JSON.parse(tournament.tournament_settings);
-    if (settings.mode !== 'local') {
+    if (settings.gameMode !== 'local') {
       return reply.code(400).send({ error: 'Only for local tournaments' });
     }
 
@@ -703,7 +703,7 @@ function setupRoutes(fastify, pongService) {
     console.log('Found game room:', gameId);
     console.log('Game room options:', gameRoom.options);
 
-    if (gameRoom.options.is_local || gameRoom.options.gameMode === 'local') {
+    if (gameRoom.options.gameMode === 'local') {
       console.log('Local game detected, bypassing auth');
       authenticated = true;
       userId = `local_${Date.now()}_${Math.random()}`;
@@ -712,7 +712,7 @@ function setupRoutes(fastify, pongService) {
       connection.send(JSON.stringify({
         type: 'auth_success',
         user_id: userId,
-        is_local: true
+        gameMode: 'local'
       }));
     } else {
       console.log('Online game, requiring auth');
@@ -734,7 +734,7 @@ function setupRoutes(fastify, pongService) {
               connection.send(JSON.stringify({
                 type: 'auth_success',
                 user_id: userId,
-                is_local: false
+                gameMode: 'online'
               }));
             } else {
               connection.close(4002, 'Invalid token');

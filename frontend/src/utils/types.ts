@@ -17,7 +17,7 @@ export interface GameOptions {
   powerups_enabled: boolean;
   board_variant: string;
   player1_name: string;
-  opponent_alias?: string;
+  player2_name?: string;
   canvasWidth?: number;
   canvasHeight?: number;
 }

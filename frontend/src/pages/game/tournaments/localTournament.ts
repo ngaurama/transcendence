@@ -107,6 +107,6 @@ function playNextMatch(bracket: any[]) {
     return;
   }
   // Navigate to pong with local, on win callback record winner, recurse
-  (window as any).navigate('/game/pong?mode=local'); // Add params for match info
+  (window as any).navigate('/game/pong?gameMode=local'); // Add params for match info
   // In pong endGame, check if tournament, record winner, call playNextMatch
 }

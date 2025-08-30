@@ -11,8 +11,8 @@ export function initRouter() {
     '/settings': Pages.settingsPage,
     '/play': Pages.playSelectionPage,
     '/game/pong': Pages.pongGamePage,
-    '/tournaments': Pages.tournamentSelectionPage, // New
-    '/tournament/:tournamentId': Pages.tournamentPage, // New
+    '/tournaments': Pages.tournamentSelectionPage,
+    '/tournament/:tournamentId': Pages.tournamentPage,
     '/login': Pages.loginPage,
     '/register': Pages.registerPage,
     '/verify-email': Pages.verifyEmailPage,

@@ -21,7 +21,6 @@ export let gameState: GameState = {
   countdown: null,
 };
 
-// let namesSet = false;
 let currentNeonColor = randomNeonColor();
 let holdBallAtCenterUntil = 0;
 let images: { [key: string]: HTMLImageElement } = {};

@@ -13,9 +13,8 @@ export async function createLocalGame(options: GameOptions): Promise<string> {
       body: JSON.stringify({
         gameMode: 'local',
         gameType: '2player',
-        is_local: true,
         player1_name: options.player1_name || 'Player 1',
-        opponent_alias: options.opponent_alias || 'Player 2',
+        player2_name: options.player2_name || 'Player 2',
         powerups_enabled: options.powerups_enabled,
         points_to_win: options.points_to_win,
         board_variant: options.board_variant,
@@ -60,6 +59,7 @@ export async function joinMatchmaking(options: GameOptions): Promise<void> {
 }
 
 export async function createTournament(options: TournamentOptions): Promise<string> {
+  console.log(options);
   try {
     const token = localStorage.getItem('access_token');
     const res = await fetch(`/api/pong/tournament/create`, {

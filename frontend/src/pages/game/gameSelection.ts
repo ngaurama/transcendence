@@ -462,7 +462,6 @@ async function handleStartGame(gameMode: string, gameType: string): Promise<void
     num_players = parseInt((document.getElementById('tournament-num-players') as HTMLSelectElement)?.value || '4');
     max_participants = num_players;
     
-    // Only get aliases for local tournaments
     if (gameMode === 'local') {
       aliases = Array.from({ length: num_players }, (_, i) => {
         const input = document.getElementById(`alias-${i}`) as HTMLInputElement;
@@ -487,9 +486,8 @@ async function handleStartGame(gameMode: string, gameType: string): Promise<void
   const opponentAliasInput = document.getElementById('opponent-alias') as HTMLInputElement;
 
   if (gameMode === 'local') {
-    options.is_local = true;
     options.player1_name = user?.display_name || 'Player 1';
-    options.opponent_alias = opponentAliasInput?.value.trim() || 'Player 2';
+    options.player2_name = opponentAliasInput?.value.trim() || 'Player 2';
   }
 
   saveGameOptions({
@@ -499,12 +497,13 @@ async function handleStartGame(gameMode: string, gameType: string): Promise<void
     powerups_enabled,
     board_variant,
     player1_name: user?.display_name || 'Player 1',
-    opponent_alias: gameMode === 'local' ? opponentAliasInput?.value.trim() || 'Player 2' : undefined,
+    player2_name: gameMode === 'local' ? opponentAliasInput?.value.trim() || 'Player 2' : undefined,
   });
 
   try {
     const id = await startGame(options);
     if (gameType === 'tournament') {
+      (window as any).gameOptions = options;
       (window as any).navigate(`/tournament/${id}`);
     } else if (gameMode === 'local') {
       (window as any).gameOptions = options;
