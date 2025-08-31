@@ -4,6 +4,7 @@ import { saveGameOptions, getGameOptions } from '../../services/GameOptionsServi
 import { checkAuthStatus } from '../../services';
 
 let currentTournamentMode: string = '';
+let matchmakingCleanup: (() => void) | null = null;
 const user = await checkAuthStatus();
 
 export async function playSelectionPage(): Promise<string> {
@@ -342,12 +343,20 @@ export function attachPlaySelectionListeners() {
     try {
       isInMatchmaking = true;
       showMatchmakingLoading(true);
+      matchmakingCleanup = () => {
+        if (isInMatchmaking) {
+          cancelMatchmaking();
+        }
+      }
       await handleStartGame('online', '2player');
       startMatchmakingPolling();
     } catch (error) {
       console.error('Matchmaking failed:', error);
       isInMatchmaking = false;
       showMatchmakingLoading(false);
+      if (matchmakingCleanup) {
+        matchmakingCleanup = null;
+      }
       alert(error instanceof Error ? error.message : 'Failed to join matchmaking');
     }
   }
@@ -426,14 +435,58 @@ export function attachPlaySelectionListeners() {
     } catch (error) {
       console.error('Error leaving matchmaking queue:', error);
       showMatchmakingLoading(false);
+    } finally {
+      if (matchmakingCleanup) {
+        matchmakingCleanup = null;
+      }
     }
   }
 
+  function setupNavigationDetection() {
+    const onlineOptions = document.getElementById('online-options');
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isHidden = onlineOptions?.classList.contains('hidden');
+          if (isHidden && isInMatchmaking) {
+            // User navigated away from online options
+            cancelMatchmaking();
+          }
+        }
+      });
+    });
+
+    if (onlineOptions) {
+      observer.observe(onlineOptions, { attributes: true });
+    }
+
+    return observer;
+  }
+
+  const originalNavigate = (window as any).navigate;
+  (window as any).navigate = function(path: string) {
+    // Clean up matchmaking before navigating
+    if (matchmakingCleanup) {
+      matchmakingCleanup();
+      matchmakingCleanup = null;
+    }
+    originalNavigate.call(this, path);
+  };
+
   window.addEventListener('beforeunload', () => {
+    if (matchmakingCleanup) {
+      matchmakingCleanup();
+    }
     if (isInMatchmaking) {
       cancelMatchmaking();
     }
   });
+
+  // window.addEventListener('beforeunload', () => {
+  //   if (isInMatchmaking) {
+  //     cancelMatchmaking();
+  //   }
+  // });
 
   if (onlineCreateTournament) {
     onlineCreateTournament.addEventListener('click', () => {
@@ -548,6 +601,11 @@ export function attachPlaySelectionListeners() {
 
   if (playerAliasesContainer) {
     playerAliasesContainer.classList.add('hidden');
+  }
+
+  const optionsObserver = setupNavigationDetection();
+  if (optionsObserver) {
+    optionsObserver.disconnect();
   }
 
   (window as any).cancelMatchmaking = cancelMatchmaking;

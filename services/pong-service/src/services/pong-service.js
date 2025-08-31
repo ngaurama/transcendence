@@ -13,6 +13,9 @@ class PongService {
     this.gameRooms = new Map();
     this.tournaments = new Map();
     this.userConnections = new Map();
+    this.matchmakingQueue = new Set();
+    this.isProcessingMatchMaking = false;
+    this.startQueueCleanup();
   }
 
   async init() {
@@ -64,7 +67,6 @@ class PongService {
   }
 
   async createGame(gameId, options) {
-    console.log("OPTIONS:: ", options);
     const game = new PongGame(gameId, this.db, options, this);
     this.gameRooms.set(gameId, game);
     return game;
@@ -95,22 +97,48 @@ class PongService {
 
   startMatchmakingPoller() {
     setInterval(async () => {
-      await this.processMatchmaking();
+      if (this.isProcessingMatchMaking) return;
+      if (this.matchmakingQueue.size === 0) return;
+
+      this.isProcessingMatchMaking = true;
+      try {
+        await this.processMatchmaking();
+      } catch (error) {
+        console.error('Matchmaking error: ', error);
+      } finally {
+        this.isProcessingMatchMaking = false;
+      }
     }, 5000);
   }
 
   async processMatchmaking() {
     try {
+
+      const userIds = Array.from(this.matchmakingQueue);
+      if (userIds.length === 0) return ;
+
+      const placeholders = userIds.map(() => '?').join(',');
       const candidates = await this.db.all(`
         SELECT * FROM matchmaking_queue 
-        WHERE status = 'searching' 
-        AND queue_joined_at > datetime('now', '-5 minutes')
-      `);
+        WHERE user_id IN (${placeholders})
+        AND status = 'searching' 
+        ORDER BY queue_joined_at
+      `, userIds);
 
       const groups = new Map();
 
       for (const candidate of candidates) {
-        const key = JSON.stringify(candidate.preferred_game_settings);
+        const settingsObj = typeof candidate.preferred_game_settings === 'string'
+          ? JSON.parse(candidate.preferred_game_settings)
+          : candidate.preferred_game_settings;
+
+        const matchmakingSettings = {
+          powerups_enabled: settingsObj.powerups_enabled,
+          points_to_win: settingsObj.points_to_win,
+          board_variant: settingsObj.board_variant,
+        };
+
+        const key = JSON.stringify(matchmakingSettings);
         if (!groups.has(key)) {
           groups.set(key, []);
         }
@@ -136,7 +164,17 @@ class PongService {
             VALUES (?, ?, 1), (?, ?, 2)
           `, [gameId, player1.user_id, gameId, player2.user_id]);
 
-          this.createGame(gameId, { ...settings, gameMode: 'online' });
+
+          const player1Name = await this.getDisplayName(player1.user_id);
+          const player2Name = await this.getDisplayName(player2.user_id);
+
+          this.createGame(gameId, {
+             ...settings, 
+             player1_name: player1Name, 
+             player2_name: player2Name, 
+             gameType: '2player', 
+             gameMode: 'online' 
+          });
 
           await this.db.run(`
             UPDATE matchmaking_queue 
@@ -149,9 +187,6 @@ class PongService {
             SET status = 'matched', matched_with_user_id = ? 
             WHERE id = ?
           `, [player1.user_id, player2.id]);
-
-          const player1Name = await this.getDisplayName(player1.user_id);
-          const player2Name = await this.getDisplayName(player2.user_id);
 
           this.sendToUser(player1.user_id, {
             type: 'match_found',
@@ -171,6 +206,41 @@ class PongService {
     } catch (error) {
       console.error('Matchmaking processing error:', error);
     }
+  }
+
+  async removeUserFromQueue(userId) {
+    try {
+      await this.db.run(`
+        DELETE FROM matchmaking_queue WHERE user_id = ?
+      `, [userId]);
+      
+      this.matchmakingQueue.delete(userId);
+    } catch (error) {
+      console.error('Error removing user from queue:', error);
+    }
+  }
+
+  startQueueCleanup() {
+    setInterval(async () => {
+      try {
+        await this.db.run(`
+          DELETE FROM matchmaking_queue 
+          WHERE queue_joined_at < datetime('now', '-10 minutes')
+          OR status != 'searching'
+        `);
+        
+        const staleUsers = await this.db.all(`
+          SELECT user_id FROM matchmaking_queue 
+          WHERE queue_joined_at < datetime('now', '-10 minutes')
+        `);
+        
+        staleUsers.forEach(user => {
+          this.matchmakingQueue.delete(user.user_id);
+        });
+      } catch (error) {
+        console.error('Queue cleanup error:', error);
+      }
+    }, 60000);
   }
 
   async getDisplayName(userId) {

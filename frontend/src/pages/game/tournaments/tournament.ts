@@ -25,8 +25,6 @@ export async function tournamentPage(): Promise<string> {
 
     const tournament = await response.json();
 
-    console.log("TESTING: ", tournament);
-
     const participantsResponse = await fetch(`/api/pong/tournament/${tournamentId}/participants`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`

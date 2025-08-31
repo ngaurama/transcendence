@@ -3,6 +3,7 @@ import { sendPaddleMove } from './websocket';
 import { checkAuthStatus } from '../../../services';
 
 export class InputHandler {
+  private playerNumber: number | null = null;
   private playerInput: string | null = null;
   private ws: WebSocket;
   private isLocal: boolean;
@@ -20,6 +21,19 @@ export class InputHandler {
   private async setupUserId() {
     const user = await checkAuthStatus();
     this.userId = user?.id || null;
+
+    this.ws.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'auth_success' && data.player_number) {
+          console.log("DATA PLAYER NUMBER", data.player_number);
+          this.playerNumber = data.player_number;
+          console.log(`Authenticated as Player ${this.playerNumber}`);
+        }
+      } catch (error) {
+
+      }
+    });
   }
 
   private setupEventListeners(): void {
@@ -55,11 +69,20 @@ export class InputHandler {
         }
       } else {
         if (this.keyState['w']) {
-          sendPaddleMove(this.ws, { direction: 'up' });
+          sendPaddleMove(this.ws, { 
+            direction: 'up' ,
+            player_number: this.playerNumber
+          });
         } else if (this.keyState['s']) {
-          sendPaddleMove(this.ws, { direction: 'down' });
+          sendPaddleMove(this.ws, { 
+            direction: 'down',
+            player_number: this.playerNumber
+          });
         } else {
-          sendPaddleMove(this.ws, { direction: 'stop' });
+          sendPaddleMove(this.ws, { 
+            direction: 'stop',
+            player_number: this.playerNumber
+          });
         }
       }
       

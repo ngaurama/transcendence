@@ -53,9 +53,6 @@ class Tournament {
 
         const matchId = matchResult.lastID;
 
-        console.log("CURRENT ROUND: ", this.currentRound);
-        console.log("THIS IS CALLED FOR EACH ROUND: ", matchResult);
-
         if (player1 == null && player2 != null) {
           await this.db.run(`
             UPDATE tournament_matches
@@ -233,13 +230,10 @@ class Tournament {
 
     const gameSettings = this.options.tournament_settings;
 
-    console.log("GAME SETTINGS WHICH IS BASIACCLY TOURNAMENT SETTINSG:", gameSettings);
     const gameResult = await this.db.run(`
       INSERT INTO game_sessions (tournament_id, status, game_settings, created_at) 
       VALUES (?, 'waiting', ?, CURRENT_TIMESTAMP)
     `, [this.tournamentId, JSON.stringify(gameSettings)]);
-
-    console.log("GAME RESULT IN START MATCH: ", gameResult);
 
     const gameId = gameResult.lastID;
 

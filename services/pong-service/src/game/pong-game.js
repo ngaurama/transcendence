@@ -119,6 +119,15 @@ class PongGame {
       }
     } else {
       const player = Array.from(this.players.values()).find(p => p.id === userId);
+      if (!player) {
+        console.warn(`Input from unknown user: ${userId}`);
+        return;
+      }
+
+      if (input.player_number !== undefined && input.player_number !== player.playerNumber) {
+        console.warn(`Player number mismatch: User ${userId} attempted to control player ${input.player_number} but is player ${player.playerNumber}`);
+        return;
+      }
       if (player && input.direction !== undefined) {
         this.inputStates[`player${player.playerNumber}`] = input.direction;
       }
@@ -329,10 +338,8 @@ class PongGame {
     });
 
     await this.saveGameResults(winnerKey);
-    console.log("RRRREACHED HERE", this.options);
 
     if (this.options.tournament_id) {
-      console.log("RRRREACHED HERE supposed to atleast");
       await this.handleTournamentCompletion(winnerKey);
     }
   }
@@ -375,34 +382,8 @@ class PongGame {
       console.error('Error handling tournament completion:', error);
     }
   }
-  // async handleTournamentCompletion(winnerKey) {
-  //   try {
-  //     const winnerId = [...this.players.entries()]
-  //       .find(([id, player]) => `player${player.playerNumber}` === winnerKey)?.[0];
-
-  //     console.log("A GAME FINISHED", winnerId);
-  //     // Update tournament match
-  //     if (this.options.tournament_match_id) {
-  //       await this.db.run(`
-  //         UPDATE tournament_matches 
-  //         SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP 
-  //         WHERE id = ?
-  //       `, [winnerId, this.options.tournament_match_id]);
-
-  //       // Check if the tournament round is complete
-  //       const t = this.pongService.tournaments.get(this.options.tournament_id);
-  //       if (t) {
-  //         console.log("GAME FINISHED");
-  //         await t.checkRoundCompletion();
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Error handling tournament completion:', error);
-  //   }
-  // }
 
   async updateUserStats(userId, updates) {
-    // Similar to tournament
     const existing = await this.db.get('SELECT * FROM user_game_stats WHERE user_id = ?', [userId]);
     if (existing) {
       let sql = 'UPDATE user_game_stats SET ';

@@ -20,6 +20,7 @@ export interface GameOptions {
   player2_name?: string;
   canvasWidth?: number;
   canvasHeight?: number;
+  opponent_id?: string;
 }
 
 export interface TournamentOptions extends GameOptions {

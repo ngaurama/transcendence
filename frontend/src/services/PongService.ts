@@ -1,7 +1,7 @@
 // services/PongService.ts
 import { GameOptions, TournamentOptions } from '../utils/types';
 
-export async function createLocalGame(options: GameOptions): Promise<string> {
+export async function createGame(options: GameOptions): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
     const res = await fetch(`/api/pong/game/create`, {
@@ -11,7 +11,7 @@ export async function createLocalGame(options: GameOptions): Promise<string> {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        gameMode: 'local',
+        gameMode: options.gameMode,
         gameType: '2player',
         player1_name: options.player1_name || 'Player 1',
         player2_name: options.player2_name || 'Player 2',
@@ -32,6 +32,40 @@ export async function createLocalGame(options: GameOptions): Promise<string> {
     throw error;
   }
 }
+
+export async function createOnlineGame(options: GameOptions, opponentId: string): Promise<string> {
+  try {
+    const token = localStorage.getItem('access_token');
+    const res = await fetch(`/api/pong/game/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        gameMode: 'online',
+        gameType: '2player',
+        player1_name: options.player1_name || 'Player 1',
+        player2_name: options.player2_name || 'Player 2',
+        powerups_enabled: options.powerups_enabled,
+        points_to_win: options.points_to_win,
+        board_variant: options.board_variant,
+        opponent_id: opponentId,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to create online game');
+    }
+
+    const data = await res.json();
+    return data.game_id;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 export async function joinMatchmaking(options: GameOptions): Promise<void> {
   try {
@@ -248,8 +282,7 @@ export async function requestRematch(): Promise<string> {
 
   if (options) {
     try {
-      // const gameId = options.gameMode === 'local' ? await createLocalGame(options) : //need to implement onlinecreategame;
-      const gameId = await createLocalGame(options);
+      const gameId = await createGame(options);
       console.log(`Rematch created: game_id=${gameId}`);
       return gameId;
     } catch (error) {
@@ -257,6 +290,5 @@ export async function requestRematch(): Promise<string> {
       throw error;
     }
   }
-
   throw new Error('No local game options available for rematch');
 }

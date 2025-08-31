@@ -61,7 +61,6 @@ function setupRoutes(fastify, pongService) {
       pongService.createGame(gameId, options);
 
       if (gameMode === 'local') {
-        // Create guest user for opponent
         const guestResult = await pongService.db.run(`
           INSERT INTO users (display_name, is_guest, created_at) 
           VALUES (?, TRUE, CURRENT_TIMESTAMP)
@@ -180,14 +179,33 @@ function setupRoutes(fastify, pongService) {
       return reply.code(401).send({ error: 'Authentication required' });
     }
 
-    const { powerups_enabled, points_to_win } = request.body;
+    const existing = await pongService.db.get(`
+      SELECT * FROM matchmaking_queue
+      WHERE user_id = ? AND status = 'searching'
+      AND queue_joined_at > datetime('now', '-5 minutes')
+    `, [user.id]);
 
-    const settings = { powerups_enabled, points_to_win };
+    if (existing)
+      return reply.code(400).send({error: 'Already in matchmaking queue'});
+
+    const {
+      powerups_enabled = false,
+      points_to_win = 5,
+      board_variant = 'classic'
+    } = request.body;
+
+    const settings = { powerups_enabled, points_to_win, board_variant };
+
+    await pongService.db.run(`
+      DELETE FROM matchmaking_queue WHERE user_id = ?  
+    `, [user.id]);
 
     await pongService.db.run(`
       INSERT INTO matchmaking_queue (user_id, preferred_game_settings, queue_joined_at) 
       VALUES (?, ?, CURRENT_TIMESTAMP)
     `, [user.id, JSON.stringify(settings)]);
+
+    pongService.matchmakingQueue.add(user.id);
 
     return { success: true };
   });
@@ -217,10 +235,7 @@ function setupRoutes(fastify, pongService) {
       return reply.code(401).send({ error: 'Authentication required' });
     }
 
-    await pongService.db.run(`
-      DELETE FROM matchmaking_queue 
-      WHERE user_id = ?
-    `, [user.id]);
+    await pongService.removeUserFromQueue(user.id);
 
     return { success: true };
   });
@@ -247,7 +262,6 @@ function setupRoutes(fastify, pongService) {
     });
 
     if (tournament_settings.gameMode === 'local') {
-      console.log("ENTERED HERE YEAHH");
       if (!Array.isArray(aliases)) {
         return reply.code(400).send({ error: 'Aliases must be an array' });
       }
@@ -453,8 +467,6 @@ function setupRoutes(fastify, pongService) {
       return reply.code(404).send({ error: 'Tournament not found' });
     }
 
-    console.log("TOURNAMENT IN PLAIN Id: ", tournament);
-
     const matches = await pongService.db.all(`
       SELECT tm.*, 
         u1.display_name AS player1_name, 
@@ -524,8 +536,6 @@ function setupRoutes(fastify, pongService) {
     }
 
     const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [match.tournament_id]);
-
-    console.log("TOURNAMENT FROM WHEN START MATCH IS CALLED: ", tournament);
 
     if (tournament.creator_id !== user.id) {
       return reply.code(403).send({ error: 'Not authorized' });
@@ -626,6 +636,10 @@ function setupRoutes(fastify, pongService) {
     let userId = null;
     let gameId = parseInt(request.query.game_id);
 
+    const authTimeout = setTimeout(() => {
+      if (!authenticated) connection.close(4001, 'Authentication timeout');
+    }, 5000);
+
     if (!gameId || isNaN(gameId)) {
       console.error('Invalid game ID:', request.query.game_id);
       connection.close(4000, 'Game ID required');
@@ -655,10 +669,6 @@ function setupRoutes(fastify, pongService) {
       }));
     } else {
       console.log('Online game, requiring auth');
-      const authTimeout = setTimeout(() => {
-        if (!authenticated) connection.close(4001, 'Authentication timeout');
-      }, 5000);
-    
       connection.on('message', async (message) => {
         try {
           const data = JSON.parse(message.toString());
@@ -668,12 +678,23 @@ function setupRoutes(fastify, pongService) {
               authenticated = true;
               userId = user.id;
               clearTimeout(authTimeout);
+
+              const currentConnections = Array.from(gameRoom.connections.keys());
+              const playerNumber = currentConnections.length === 0 ? 1 : 2;
+
+              if (gameRoom.connections.has(userId)) {
+                console.warn(`User ${userId} already connected to game ${gameId}`);
+                connection.close(4003, 'Already connected to this game');
+                return;
+              }
               
+              gameRoom.addPlayer(userId, playerNumber);
               gameRoom.addConnection(userId, connection);
               connection.send(JSON.stringify({
                 type: 'auth_success',
                 user_id: userId,
-                gameMode: 'online'
+                gameMode: 'online',
+                player_number: playerNumber,
               }));
             } else {
               connection.close(4002, 'Invalid token');
@@ -699,6 +720,11 @@ function setupRoutes(fastify, pongService) {
     });
 
     connection.on('close', () => {
+      clearTimeout(authTimeout);
+      if (authenticated && userId) {
+        pongService.removeUserConnection(userId);
+        pongService.removeUserFromQueue(userId);
+      }
       if (authenticated && gameId) {
         const gameRoom = pongService.gameRooms.get(gameId);
         if (gameRoom) {
@@ -708,7 +734,6 @@ function setupRoutes(fastify, pongService) {
     });
   });
 
-  // Global WebSocket for notifications
   fastify.get('/ws/user', { websocket: true }, (connection, request) => {
     let authenticated = false;
     let userId = null;
@@ -741,6 +766,10 @@ function setupRoutes(fastify, pongService) {
 
     connection.on('close', () => {
       clearTimeout(authTimeout);
+      if (authenticated && userId) {
+        pongService.removeUserConnection(userId);
+        pongService.removeUserFromQueue(userId);
+      }
       if (authenticated && userId) {
         pongService.removeUserConnection(userId);
       }
