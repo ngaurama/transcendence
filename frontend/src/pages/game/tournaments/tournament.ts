@@ -25,6 +25,8 @@ export async function tournamentPage(): Promise<string> {
 
     const tournament = await response.json();
 
+    console.log("TESTING: ", tournament);
+
     const participantsResponse = await fetch(`/api/pong/tournament/${tournamentId}/participants`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
@@ -32,6 +34,10 @@ export async function tournamentPage(): Promise<string> {
     });
 
     const participants = participantsResponse.ok ? await participantsResponse.json() : [];
+
+    // Check if tournament is completed and has a winner
+    const isCompleted = tournament.status === 'completed';
+    const hasWinner = tournament.winner_id && tournament.winner_name;
 
     return `
       <div class="max-w-6xl mx-auto bg-gray-800 p-6 rounded-lg">
@@ -43,12 +49,25 @@ export async function tournamentPage(): Promise<string> {
       }
         </div>
         
+        ${isCompleted && hasWinner
+        ? `<div class="bg-green-900 border border-green-700 rounded-lg p-4 mb-6 text-center">
+              <h3 class="text-xl font-bold text-green-300 mb-2">🏆 Tournament Completed! 🏆</h3>
+              <p class="text-lg text-green-200">Winner: <span class="font-bold">${tournament.winner_name}</span></p>
+              <p class="text-sm text-green-400 mt-2">Congratulations to the champion!</p>
+              <button id="leave-tournament" class="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+                Leave Tournament
+              </button>
+            </div>`
+        : ''
+      }
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <h3 class="text-lg mb-3">Tournament Info</h3>
             <p>Status: ${tournament.status}</p>
             <p>Players: ${participants.length}/${tournament.max_participants}</p>
             <p>Type: ${tournament.tournament_settings.gameMode === 'local' ? 'Local' : 'Online'}</p>
+            ${hasWinner ? `<p>Winner: ${tournament.winner_name}</p>` : ''}
           </div>
           
           <div>
@@ -56,7 +75,10 @@ export async function tournamentPage(): Promise<string> {
             ${participants.length > 0
         ? `<ul class="space-y-1">
                   ${participants.map((p: any) => `
-                    <li class="text-sm">${p.display_name}${p.is_guest ? ' (Guest)' : ''}</li>
+                    <li class="text-sm ${p.user_id === tournament.winner_id ? 'text-green-400 font-bold' : ''}">
+                      ${p.display_name}${p.is_guest ? ' (Guest)' : ''}
+                      ${p.user_id === tournament.winner_id ? ' 🏆' : ''}
+                    </li>
                   `).join('')}
                 </ul>`
         : '<p class="text-gray-400">No participants yet</p>'
@@ -75,6 +97,15 @@ export async function tournamentPage(): Promise<string> {
               <div id="tournament-bracket" class="bg-gray-700 p-4 rounded overflow-x-auto">
                 ${renderTournamentBracket(tournament)}
               </div>
+            </div>`
+        : ''
+      }
+
+        ${!isCompleted
+        ? `<div class="mt-6">
+              <button id="leave-tournament" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+                Leave Tournament
+              </button>
             </div>`
         : ''
       }
@@ -109,6 +140,13 @@ export function attachTournamentListeners(tournamentId: string) {
           alert(error instanceof Error ? error.message : 'Failed to delete tournament');
         }
       }
+    });
+  }
+
+  const leaveTournamentBtn = document.getElementById('leave-tournament');
+  if (leaveTournamentBtn) {
+    leaveTournamentBtn.addEventListener('click', () => {
+      (window as any).navigate('/');
     });
   }
 

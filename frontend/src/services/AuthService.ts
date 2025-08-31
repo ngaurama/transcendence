@@ -128,6 +128,29 @@ export async function guestLogin(alias: string): Promise<{ user: User; access_to
   }
 }
 
+export async function updateProfile(token: string, updates: { username?: string; display_name?: string }): Promise<void> {
+  try {
+    const res = await fetch(`/api/user/update`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(updates),
+    });
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.error || 'Profile update failed');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export function initiateOAuth(provider: 'google' | 'github'): void {
   window.location.href = `/api/auth/oauth/${provider}`;
 }

@@ -107,6 +107,30 @@ function setupUserRoutes(fastify, { dbService, secrets, authenticateToken }) {
       return reply.code(500).send({ error: "Guest login failed" });
     }
   });
+
+  fastify.post('/user/update', async (request, reply) => {
+    const token = request.headers.authorization?.replace('Bearer ', '');
+    const user = await validateToken(token);
+    if (!user) {
+      return reply.code(401).send({ error: 'Authentication required' });
+    }
+
+    const { username, display_name } = request.body;
+
+    if (username) {
+      const existing = await dbService.db.get('SELECT id FROM users WHERE username = ? AND id != ?', [username, user.id]);
+      if (existing) {
+        return reply.code(400).send({ error: 'Username taken' });
+      }
+      await dbService.db.run('UPDATE users SET username = ? WHERE id = ?', [username, user.id]);
+    }
+
+    if (display_name) {
+      await dbService.db.run('UPDATE users SET display_name = ? WHERE id = ?', [display_name, user.id]);
+    }
+
+    return { success: true };
+  });
 }
 
 module.exports = { 

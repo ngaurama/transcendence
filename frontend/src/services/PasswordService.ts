@@ -21,7 +21,6 @@ export async function changePassword(token: string, currentPassword: string, new
   }
 }
 
-
 export async function forgotPassword(email: string): Promise<void> {
   try {
     const res = await fetch(`/api/auth/forgot-password`, {

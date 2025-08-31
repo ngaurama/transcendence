@@ -3,7 +3,6 @@ export function renderTournamentBracket(tournament: any): string {
     return '<p>Bracket not generated yet</p>';
   }
 
-  const points_to_win = tournament.tournament_settings.points_to_win;
   const totalRounds = tournament.total_rounds || Math.ceil(Math.log2(tournament.max_participants));
   const matchesByRound: Record<number, any[]> = {};
   
@@ -14,14 +13,6 @@ export function renderTournamentBracket(tournament: any): string {
   tournament.matches.forEach((match: any) => {
     matchesByRound[match.round_number].push(match);
   });
-
-  const getWinnerName = (match: any) => {
-    if (!match) return 'TBD';
-    if (match.score1 || match.score2) {
-      return (match.score1 >= points_to_win && match.score2 < points_to_win) ? match.player1_name : match.player2_name;
-    }
-    return 'TBD';
-  };
 
   for (let round = 1; round <= totalRounds; round++) {
     if (matchesByRound[round].length === 0) {
@@ -50,8 +41,8 @@ export function renderTournamentBracket(tournament: any): string {
             id: `future-${round}-${i}`,
             round_number: round,
             match_number: i + 1,
-            player1_name: getWinnerName(prevMatch1),
-            player2_name: getWinnerName(prevMatch2),
+            player1_name: prevMatch1.winner_name || 'TBD',
+            player2_name: prevMatch2.winner_name || 'TBD',
             status: 'pending',
             score1: null,
             score2: null,
@@ -62,27 +53,6 @@ export function renderTournamentBracket(tournament: any): string {
       }
     }
   }
-
-  // const connectorHeights = {
-  //     2: [100], // For 4 players (2 rounds)
-  //     3: [170, 350], // For 8 players (3 rounds)
-  //     4: [170, 350, 710] // For 16 players (4 rounds)
-  // }[totalRounds] || [170, 350, 710];
-
-  // const connectorStyles = Array.from({ length: totalRounds - 1 }, (_, i) => `
-  //     .connector.r${i + 1} {
-  //         height: ${connectorHeights[i]}px;
-  //     }
-  //     .connector.r${i + 1}::after {
-  //         top: calc(100% - ${10 + i * 15}px);
-  //     }
-  //     .connector.reverse.r${i + 1} {
-  //         top: -${50 + i * 15}%;
-  //         bottom: 0%;
-  //         border-top: none;
-  //         border-bottom: 2px solid #9ca3af;
-  //     }
-  // `).join('');
 
   return `
     <div class="bracket-container" id="bracket-container">
@@ -101,10 +71,10 @@ export function renderTournamentBracket(tournament: any): string {
               <div class="match-group">
                 <div class="match ${match.status} ${match.isPlaceholder ? 'placeholder' : ''}">
                   <div class="players">
-                    <div class="player ${getWinnerName(match) === match.player1_name ? 'winner' : ''} ${!match.player1_name || match.player1_name === 'TBD' ? 'tbd' : ''}">
+                    <div class="player ${match.winner_name === match.player1_name ? 'winner' : ''} ${!match.player1_name || match.player1_name === 'TBD' ? 'tbd' : ''}">
                       ${match.player1_name || 'TBD'} <span class="score">${match.score1 ?? '-'}</span>
                     </div>
-                    <div class="player ${getWinnerName(match) === match.player2_name ? 'winner' : ''} ${!match.player2_name || match.player2_name === 'TBD' ? 'tbd' : ''}">
+                    <div class="player ${match.winner_name === match.player2_name ? 'winner' : ''} ${!match.player2_name || match.player2_name === 'TBD' ? 'tbd' : ''}">
                       ${match.player2_name || 'TBD'} <span class="score">${match.score2 ?? '-'}</span>
                     </div>
                   </div>

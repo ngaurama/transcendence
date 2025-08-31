@@ -336,7 +336,7 @@ export function attachPlaySelectionListeners() {
   if (startLocalGame) {
     startLocalGame.addEventListener('click', () => {
       localOptions?.classList.add('hidden');
-      localConfirmation?.classList.remove('hidden');       // handleStartGame('local', '2player');
+      localConfirmation?.classList.remove('hidden');
     });
   }
 
@@ -358,7 +358,6 @@ export function attachPlaySelectionListeners() {
     });
   }
 
-  // Local confirmation
   if (backFromLocalConfirm) {
     backFromLocalConfirm.addEventListener('click', () => {
       localConfirmation?.classList.add('hidden');
@@ -372,7 +371,6 @@ export function attachPlaySelectionListeners() {
     });
   }
 
-  // Tournament creation
   if (tournamentNumPlayers) {
     tournamentNumPlayers.addEventListener('change', () => {
       if (currentTournamentMode === 'local') {
@@ -401,7 +399,6 @@ export function attachPlaySelectionListeners() {
     });
   }
 
-  // Join tournament
   if (backFromJoin) {
     backFromJoin.addEventListener('click', () => {
       joinTournamentSection?.classList.add('hidden');
@@ -409,7 +406,6 @@ export function attachPlaySelectionListeners() {
     });
   }
 
-  // Tournament joining
   document.querySelectorAll('.join-tournament-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const tournamentId = btn.getAttribute('data-id');
