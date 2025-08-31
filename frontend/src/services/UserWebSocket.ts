@@ -37,8 +37,15 @@ function handleUserWebSocketMessage(data: any): void {
       break;
 
     case 'match_found':
+      if (typeof (window as any).cancelMatchmaking === 'function') {
+        (window as any).cancelMatchmaking();
+      }
       (window as any).navigate(`/game/pong?game_id=${data.game_id}`);
       break;
+
+    // case 'match_found':
+    //   (window as any).navigate(`/game/pong?game_id=${data.game_id}`);
+    //   break;
 
     case 'tournament_match_start':
       (window as any).navigate(`/game/pong?game_id=${data.game_id}&tournament_id=${data.tournament_id}`);

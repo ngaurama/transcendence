@@ -1,12 +1,10 @@
-// pages/gameSelection.ts
 import { getOpenTournaments, joinTournament } from '../../services/PongService';
-import { startGame } from '../../services/GameService'
+import { startGame } from '../../services/GameService';
 import { saveGameOptions, getGameOptions } from '../../services/GameOptionsService';
 import { checkAuthStatus } from '../../services';
 
 let currentTournamentMode: string = '';
 const user = await checkAuthStatus();
-
 
 export async function playSelectionPage(): Promise<string> {
   if (!user) {
@@ -81,17 +79,38 @@ export async function playSelectionPage(): Promise<string> {
         <div id="online-options" class="mb-4 hidden">
           <h4 class="text-lg mb-3">Online Play Options</h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <button id="start-matchmaking" class="bg-green-600 p-4 rounded hover:bg-green-700">
-              <h5 class="font-semibold">Start Matchmaking</h5>
-              <p class="text-sm">Find a random opponent</p>
+            <button id="start-matchmaking" class="bg-green-600 p-4 rounded hover:bg-green-700 relative group transition-all duration-300">
+              <div id="matchmaking-content" class="text-center">
+                <h5 class="font-semibold">Start Matchmaking</h5>
+                <p class="text-sm text-gray-300">Find a random opponent</p>
+              </div>
+              <div 
+                id="matchmaking-loading" 
+                class="hidden absolute inset-0 bg-green-700 rounded flex flex-col items-center justify-center transition-opacity duration-300">
+                <div class="loader-state flex flex-col items-center group-hover:hidden">
+                  <svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span class="mt-2 text-white">Waiting for match...</span>
+                </div>
+                <div class="cancel-state hidden group-hover:flex flex-col items-center">
+                  <span id="cancel-matchmaking" class="cursor-pointer">
+                    <svg class="w-6 h-6 text-red-300 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </span>
+                  <span class="mt-1 text-red-300">Cancel Matchmaking</span>
+                </div>
+              </div>
             </button>
             <button id="online-create-tournament" class="bg-blue-600 p-4 rounded hover:bg-blue-700">
               <h5 class="font-semibold">Create Tournament</h5>
-              <p class="text-sm">Host a tournament</p>
+              <p class="text-sm text-gray-300">Host a tournament</p>
             </button>
             <button id="join-tournament" class="bg-purple-600 p-4 rounded hover:bg-purple-700">
               <h5 class="font-semibold">Join Tournament</h5>
-              <p class="text-sm">Join an open tournament</p>
+              <p class="text-sm text-gray-300">Join an open tournament</p>
             </button>
           </div>
           <button id="back-to-settings-online" class="w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
@@ -105,11 +124,11 @@ export async function playSelectionPage(): Promise<string> {
           <div class="grid grid-cols-1 gap-4 mb-4">
             <button id="start-local-game" class="bg-green-600 p-4 rounded hover:bg-green-700">
               <h5 class="font-semibold">Start 2-Player Game</h5>
-              <p class="text-sm">Play against one opponent</p>
+              <p class="text-sm text-gray-300">Play against one opponent</p>
             </button>
             <button id="local-create-tournament" class="bg-blue-600 p-4 rounded hover:bg-blue-700">
               <h5 class="font-semibold">Create Tournament</h5>
-              <p class="text-sm">4+ players bracket</p>
+              <p class="text-sm text-gray-300">4+ players bracket</p>
             </button>
           </div>
           <button id="back-to-settings-local" class="w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
@@ -226,7 +245,10 @@ export function attachPlaySelectionListeners() {
   const backFromJoin = document.getElementById('back-from-join');
   const tournamentNumPlayers = document.getElementById('tournament-num-players') as HTMLSelectElement;
   const joinTournamentBtn = document.getElementById('join-tournament');
+  const cancelMatchmakingBtn = document.getElementById('cancel-matchmaking');
 
+  let isInMatchmaking = false;
+  let matchmakingInterval: number | null = null;
   let currentMode: string = '';
 
   // Load saved options
@@ -304,16 +326,120 @@ export function attachPlaySelectionListeners() {
   // Online options
   if (startMatchmaking) {
     startMatchmaking.addEventListener('click', () => {
-      handleStartGame('online', '2player');
+      if (isInMatchmaking) return;
+      startMatchmakingProcess();
     });
   }
+
+  if (cancelMatchmakingBtn) {
+    cancelMatchmakingBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelMatchmaking();
+    });
+  }
+
+  async function startMatchmakingProcess(): Promise<void> {
+    try {
+      isInMatchmaking = true;
+      showMatchmakingLoading(true);
+      await handleStartGame('online', '2player');
+      startMatchmakingPolling();
+    } catch (error) {
+      console.error('Matchmaking failed:', error);
+      isInMatchmaking = false;
+      showMatchmakingLoading(false);
+      alert(error instanceof Error ? error.message : 'Failed to join matchmaking');
+    }
+  }
+
+  function showMatchmakingLoading(show: boolean): void {
+    const content = document.getElementById('matchmaking-content');
+    const loading = document.getElementById('matchmaking-loading');
+    const button = document.getElementById('start-matchmaking');
+    
+    if (content && loading && button) {
+      if (show) {
+        content.classList.add('hidden');
+        loading.classList.remove('hidden');
+        button.classList.add('cursor-not-allowed', 'opacity-90');
+      } else {
+        content.classList.remove('hidden');
+        loading.classList.add('hidden');
+        button.classList.remove('cursor-not-allowed', 'opacity-90');
+      }
+    }
+  }
+
+  function startMatchmakingPolling(): void {
+    if (matchmakingInterval) {
+      clearInterval(matchmakingInterval);
+    }
+    matchmakingInterval = window.setInterval(async () => {
+      if (!isInMatchmaking) {
+        clearInterval(matchmakingInterval!);
+        return;
+      }
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch('/api/pong/matchmaking/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const status = await response.json();
+          if (status.status !== 'searching') {
+            cancelMatchmaking();
+            if (status.game_id) {
+              (window as any).gameOptions = getGameOptions();
+              (window as any).navigate(`/game/pong?game_id=${status.game_id}`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking matchmaking status:', error);
+      }
+    }, 5000);
+  }
+
+  async function cancelMatchmaking(): Promise<void> {
+    try {
+      isInMatchmaking = false;
+      if (matchmakingInterval) {
+        clearInterval(matchmakingInterval);
+        matchmakingInterval = null;
+      }
+      
+      showMatchmakingLoading(false);
+      
+      const token = localStorage.getItem('access_token');
+      await fetch('/api/pong/matchmaking/leave', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({}),      
+      });
+      console.log('Left matchmaking queue');
+    } catch (error) {
+      console.error('Error leaving matchmaking queue:', error);
+      showMatchmakingLoading(false);
+    }
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (isInMatchmaking) {
+      cancelMatchmaking();
+    }
+  });
 
   if (onlineCreateTournament) {
     onlineCreateTournament.addEventListener('click', () => {
       currentTournamentMode = 'online';
       onlineOptions?.classList.add('hidden');
       tournamentCreation?.classList.remove('hidden');
-      // Hide player aliases for online tournaments
       if (playerAliasesContainer) playerAliasesContainer.classList.add('hidden');
     });
   }
@@ -423,6 +549,8 @@ export function attachPlaySelectionListeners() {
   if (playerAliasesContainer) {
     playerAliasesContainer.classList.add('hidden');
   }
+
+  (window as any).cancelMatchmaking = cancelMatchmaking;
 }
 
 function updatePlayerAliases() {

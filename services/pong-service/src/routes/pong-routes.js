@@ -192,6 +192,39 @@ function setupRoutes(fastify, pongService) {
     return { success: true };
   });
 
+  fastify.get('/matchmaking/status', async (request, reply) => {
+    const token = request.headers.authorization?.replace('Bearer ', '');
+    const user = await validateToken(token);
+    if (!user) {
+      return reply.code(401).send({ error: 'Authentication required' });
+    }
+
+    const status = await pongService.db.get(`
+      SELECT status FROM matchmaking_queue 
+      WHERE user_id = ? AND queue_joined_at > datetime('now', '-5 minutes')
+    `, [user.id]);
+
+    return { 
+      status: status ? status.status : 'not_in_queue',
+      in_queue: !!status
+    };
+  });
+
+  fastify.post('/matchmaking/leave', async (request, reply) => {
+    const token = request.headers.authorization?.replace('Bearer ', '');
+    const user = await validateToken(token);
+    if (!user) {
+      return reply.code(401).send({ error: 'Authentication required' });
+    }
+
+    await pongService.db.run(`
+      DELETE FROM matchmaking_queue 
+      WHERE user_id = ?
+    `, [user.id]);
+
+    return { success: true };
+  });
+
   fastify.post('/tournament/create', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
     const user = await validateToken(token);
@@ -326,98 +359,6 @@ function setupRoutes(fastify, pongService) {
     return { success: true };
   });
 
-  // fastify.get('/tournament/:tournamentId/bracket-data', async (request, reply) => {
-  //   const token = request.headers.authorization?.replace('Bearer ', '');
-  //   const user = await validateToken(token);
-  //   if (!user) {
-  //     return reply.code(401).send({ error: 'Authentication required' });
-  //   }
-
-  //   const tournamentId = parseInt(request.params.tournamentId);
-    
-  //   try {
-  //     // Get tournament details
-  //     const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
-  //     if (!tournament) {
-  //       return reply.code(404).send({ error: 'Tournament not found' });
-  //     }
-
-  //     // Get participants
-  //     const participants = await pongService.db.all(`
-  //       SELECT u.id, u.display_name 
-  //       FROM tournament_participants tp
-  //       JOIN users u ON u.id = tp.user_id
-  //       WHERE tp.tournament_id = ?
-  //       ORDER BY tp.registered_at
-  //     `, [tournamentId]);
-
-  //     // Get matches
-  //     const matches = await pongService.db.all(`
-  //       SELECT tm.*, u1.display_name as player1_name, u2.display_name as player2_name,
-  //             uw.display_name as winner_name,
-  //             gs.final_score_player1 as score1,
-  //             gs.final_score_player2 as score2
-  //       FROM tournament_matches tm
-  //       LEFT JOIN users u1 ON u1.id = tm.player1_id
-  //       LEFT JOIN users u2 ON u2.id = tm.player2_id
-  //       LEFT JOIN users uw ON uw.id = tm.winner_id
-  //       LEFT JOIN game_sessions gs ON gs.id = tm.game_session_id
-  //       WHERE tm.tournament_id = ?
-  //       ORDER BY tm.round_number, tm.match_number
-  //     `, [tournamentId]);
-
-  //     // Convert to brackets-viewer format
-  //     const stages = [{
-  //       id: 1,
-  //       tournament_id: tournamentId,
-  //       name: 'Main Bracket',
-  //       type: 'single_elimination',
-  //       number: 1,
-  //       settings: {
-  //         size: tournament.max_participants,
-  //         matchesChildCount: 0
-  //       }
-  //     }];
-
-  //     const formattedMatches = matches.map(match => ({
-  //       id: match.id,
-  //       number: match.match_number,
-  //       stage_id: 1,
-  //       group_id: 1,
-  //       round_id: match.round_number,
-  //       child_count: 0,
-  //       status: match.status === 'completed' ? 3 : match.status === 'in_progress' ? 2 : 1,
-  //       opponent1: match.player1_id ? {
-  //         id: match.player1_id,
-  //         result: match.winner_id === match.player1_id ? 'win' : match.status === 'completed' ? 'loss' : undefined,
-  //         score: match.score1
-  //       } : null,
-  //       opponent2: match.player2_id ? {
-  //         id: match.player2_id,
-  //         result: match.winner_id === match.player2_id ? 'win' : match.status === 'completed' ? 'loss' : undefined,
-  //         score: match.score2
-  //       } : null
-  //     }));
-
-  //     const formattedParticipants = participants.map(participant => ({
-  //       id: participant.id,
-  //       tournament_id: tournamentId,
-  //       name: participant.display_name
-  //     }));
-
-  //     return {
-  //       stages,
-  //       matches: formattedMatches,
-  //       matchGames: [],
-  //       participants: formattedParticipants
-  //     };
-
-  //   } catch (error) {
-  //     console.error('Error fetching bracket data:', error);
-  //     return reply.code(500).send({ error: 'Failed to fetch bracket data' });
-  //   }
-  // });
-
   fastify.post('/tournament/:tournamentId/leave', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
     const user = await validateToken(token);
@@ -535,41 +476,6 @@ function setupRoutes(fastify, pongService) {
       tournament_settings: JSON.parse(tournament.tournament_settings),
     };
   });
-
-  // fastify.get('/tournament/:tournamentId', async (request, reply) => {
-  //   const token = request.headers.authorization?.replace('Bearer ', '');
-  //   const user = await validateToken(token);
-  //   if (!user) {
-  //     return reply.code(401).send({ error: 'Authentication required' });
-  //   }
-
-  //   const tournamentId = parseInt(request.params.tournamentId);
-  //   const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
-  //   if (!tournament) {
-  //     return reply.code(404).send({ error: 'Tournament not found' });
-  //   }
-
-  //   console.log("TOURNAMENT IN PLAIN Id: ", tournament);
-
-  //   const matches = await pongService.db.all(`
-  //     SELECT tm.*, 
-  //       u1.display_name AS player1_name, 
-  //       u2.display_name AS player2_name,
-  //       gs.final_score_player1 AS score1,
-  //       gs.final_score_player2 AS score2
-  //     FROM tournament_matches tm
-  //     LEFT JOIN users u1 ON u1.id = tm.player1_id
-  //     LEFT JOIN users u2 ON u2.id = tm.player2_id
-  //     LEFT JOIN game_sessions gs ON gs.id = tm.game_session_id
-  //     WHERE tm.tournament_id = ?
-  //   `, [tournamentId]);
-
-  //   return {
-  //     ...tournament,
-  //     matches,
-  //     tournament_settings: JSON.parse(tournament.tournament_settings),
-  //   };
-  // });
 
   fastify.post('/tournament/start/:tournamentId', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
