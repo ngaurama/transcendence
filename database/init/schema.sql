@@ -191,7 +191,7 @@ CREATE TABLE game_participants (
 );
 
 -- ============================================================================
--- 4. TOURNAMENT SYSTEM (EVEN NUMBERS, MAX 64)
+-- 4. TOURNAMENT SYSTEM (EVEN NUMBERS, MAX 16)
 -- ============================================================================
 
 CREATE TABLE tournaments (
@@ -199,7 +199,7 @@ CREATE TABLE tournaments (
     name VARCHAR(200) NOT NULL,
     creator_id INTEGER NOT NULL,
     
-    -- Tournament structure (even numbers only, max 64)
+    -- Tournament structure (even numbers only, max 16)
     type VARCHAR(50) DEFAULT 'single_elimination',
     max_participants INTEGER DEFAULT 8,
     current_participants INTEGER DEFAULT 0,
@@ -227,7 +227,7 @@ CREATE TABLE tournaments (
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL,
     
     CHECK (status IN ('registration', 'in_progress', 'completed', 'cancelled')),
-    CHECK (max_participants >= 4 AND max_participants <= 64),
+    CHECK (max_participants >= 4 AND max_participants <= 16),
     CHECK (max_participants % 2 = 0), -- Even numbers only
     CHECK (current_participants >= 0),
     CHECK (current_participants <= max_participants),

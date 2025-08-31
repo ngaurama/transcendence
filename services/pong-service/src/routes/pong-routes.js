@@ -219,13 +219,13 @@ function setupRoutes(fastify, pongService) {
         return reply.code(400).send({ error: 'Aliases must be an array' });
       }
       
-      if (num_players < 4 || num_players > 64 || num_players % 2 !== 0 || aliases.length !== num_players) {
+      if (num_players < 4 || num_players > 16 || num_players % 2 !== 0 || aliases.length !== num_players) {
         return reply.code(400).send({ 
           error: 'Invalid local tournament parameters',
           details: {
             num_players,
             aliases_length: aliases.length,
-            requirements: 'Must have 4-64 players (even number) and matching aliases'
+            requirements: 'Must have 4-16 players (even number) and matching aliases'
           }
         });
       }

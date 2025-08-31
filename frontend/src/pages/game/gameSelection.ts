@@ -152,7 +152,6 @@ export async function playSelectionPage(): Promise<string> {
             <option value="4">4 Players</option>
             <option value="8">8 Players</option>
             <option value="16">16 Players</option>
-            <option value="32">32 Players</option>
           </select>
 
           <!-- Player aliases section - will be shown/hidden based on tournament type -->

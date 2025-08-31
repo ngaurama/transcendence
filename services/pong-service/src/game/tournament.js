@@ -173,7 +173,6 @@ class Tournament {
         }
       }
     }
-
     this.broadcastUpdate();
   }
 
