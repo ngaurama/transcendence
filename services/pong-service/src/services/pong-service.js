@@ -11,6 +11,7 @@ class PongService {
     this.fastify = fastify;
     this.db = null;
     this.gameRooms = new Map();
+    this.pendingInvitations = new Map();
     this.tournaments = new Map();
     this.userConnections = new Map();
     this.matchmakingQueue = new Set();
@@ -75,6 +76,18 @@ class PongService {
   createTournament(tournamentId, options) {
     const tournament = new Tournament(tournamentId, this.db, options, this);
     this.tournaments.set(tournamentId, tournament);
+
+    this.broadcastToAllUsers({
+      type: 'tournament_created',
+      tournament: {
+        id: tournamentId,
+        name: options.tournament_settings.name,
+        max_participants: options.tournament_settings.max_participants,
+        current_participants: 1,
+        status: 'registration'
+      }
+    });
+
     return tournament;
   }
 
@@ -93,6 +106,119 @@ class PongService {
     if (connection && connection.readyState === 1) {
       connection.send(JSON.stringify(message));
     }
+  }
+
+  broadcastToAllUsers(message) {
+    for (const [userId, connection] of this.userConnections) {
+      if (connection.readyState === 1) {
+        connection.send(JSON.stringify(message));
+      }
+    }
+  }
+
+
+  async handleGameInvitation(userId, data) {
+    const { game_id, inviter_id, inviter_name, game_settings } = data;
+    
+    const invitations = this.pendingInvitations.get(userId) || [];
+    invitations.push({
+      game_id,
+      inviter_id,
+      inviter_name,
+      game_settings,
+      timestamp: Date.now()
+    });
+    this.pendingInvitations.set(userId, invitations);
+    
+    this.sendToUser(userId, {
+      type: 'game_invitation_received',
+      game_id,
+      inviter_name,
+      game_settings
+    });
+  }
+
+  async acceptGameInvitation(userId, gameId) {
+    const invitations = this.pendingInvitations.get(userId) || [];
+    const invitation = invitations.find(inv => inv.game_id === gameId);
+
+    
+    if (!invitation) {
+      throw new Error('Invitation not found');
+    }
+    const game = await this.db.get('SELECT * FROM game_sessions WHERE id = ? AND status = "waiting"', [gameId]);
+    if (!game) {
+      throw new Error('Invalid game');
+    }
+    const participant = await this.db.get(
+      'SELECT * FROM game_participants WHERE game_session_id = ? AND user_id = ? AND player_number = 2',
+      [gameId, userId]
+    );
+    if (!participant) {
+      throw new Error('Not invited to this game');
+    }
+    await this.db.run('UPDATE game_sessions SET status = "in_progress" WHERE id = ?', [gameId]);
+    
+    this.pendingInvitations.set(userId, invitations.filter(inv => inv.game_id !== gameId));
+    
+    const inviter = await this.db.get(
+      'SELECT user_id FROM game_participants WHERE game_session_id = ? AND player_number = 1',
+      [gameId]
+    );
+
+    this.sendToUser(inviter.user_id, {
+      type: 'game_invitation_accepted',
+      game_id: gameId
+    });
+
+    this.sendToUser(userId, {
+      type: 'game_invitation_accepted',
+      game_id: gameId
+    });
+
+    const gameRoom = this.gameRooms.get(gameId);
+    if (gameRoom) {
+      // Add logic here if gameRoom needs to start the game (e.g., check connections)
+    }
+
+    return gameId;
+  }
+
+  async declineGameInvitation(userId, gameId) {
+    const invitations = this.pendingInvitations.get(userId) || [];
+    const invitation = invitations.find(inv => inv.game_id === gameId);
+    
+    if (!invitation) {
+      throw new Error('Invitation not found');
+    }
+
+    const game = await this.db.get('SELECT * FROM game_sessions WHERE id = ? AND status = "waiting"', [gameId]);
+    if (!game) {
+      throw new Error('Invalid game');
+    }
+
+    const participant = await this.db.get(
+      'SELECT * FROM game_participants WHERE game_session_id = ? AND user_id = ? AND player_number = 2',
+      [gameId, userId]
+    );
+    if (!participant) {
+      throw new Error('Not invited to this game');
+    }
+    this.pendingInvitations.set(userId, invitations.filter(inv => inv.game_id !== gameId));
+
+    // await this.db.run('UPDATE game_sessions SET status = "cancelled" WHERE id = ?', [gameId]);
+    await this.db.run('UPDATE game_sessions SET status = "abandoned" WHERE id = ?', [gameId]);
+    this.gameRooms.delete(gameId);
+
+    const inviter = await this.db.get(
+      'SELECT user_id FROM game_participants WHERE game_session_id = ? AND player_number = 1',
+      [gameId]
+    );
+
+    this.sendToUser(inviter.user_id, {
+      type: 'game_invitation_declined',
+      game_id: gameId
+    });
   }
 
   startMatchmakingPoller() {

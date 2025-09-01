@@ -1,11 +1,42 @@
-// gameHandlers.ts - Updated version
-import { requestRematch } from '../../../services/PongService';
+import { requestRematch, getGameInfo } from '../../../services/PongService';
+import { checkAuthStatus } from '../../../services';
 
-export function setupRematchHandler(): void {
-  const rematchBtn = document.getElementById("rematch");
-  if (rematchBtn) {
-    rematchBtn.addEventListener("click", handleRematch);
-  }
+export function setupRematchHandler() {
+  const rematchBtn = document.getElementById('rematch');
+  if (!rematchBtn) return;
+
+  rematchBtn.addEventListener('click', async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameId = urlParams.get('game_id');
+      const token = localStorage.getItem('access_token');
+      
+      if (!token || !gameId) {
+        throw new Error('Missing token or game ID');
+      }
+
+      const gameInfo = await getGameInfo(gameId);      
+      const options = gameInfo.settings;
+      const currentUser = await checkAuthStatus();
+      const opponent = gameInfo.players.find((p: any) => p.id !== currentUser?.id);
+      
+      if (opponent) {
+        const newGameId = await requestRematch(options, opponent.id);
+        rematchBtn.style.display = 'none';
+        rematchBtn.textContent = 'Waiting for opponent...';
+
+        (window as any).pendingRematchGameId = { 
+          newGameId,
+          originaltext: 'Rematch'
+        };
+      } else {
+        throw new Error('Could not find opponent');
+      }
+    } catch (error) {
+      console.error('Rematch failed:', error);
+      alert('Failed to request rematch');
+    }
+  });
 }
 
 export function setupPlayAgainHandler(): void {
@@ -29,17 +60,8 @@ export function setupTournamentHandlers(tournamentId: string): void {
 
   if (leaveTournamentBtn) {
     leaveTournamentBtn.addEventListener("click", () => {
-      (window as any).navigate("/tournaments");
+      (window as any).navigate("/");
     });
   }
 }
 
-async function handleRematch(): Promise<void> {
-  try {
-    const gameId = await requestRematch();
-    (window as any).navigate(`/game/pong?game_id=${gameId}`);
-  } catch (error) {
-    console.error("Rematch failed:", error);
-    alert(error instanceof Error ? error.message : "Failed to create rematch");
-  }
-}

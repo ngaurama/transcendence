@@ -71,7 +71,7 @@ function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void):
       break;
 
     case 'tournament_update':
-      (window as any).navigate(`/tournament/${data.tournament_id}`);
+      // (window as any).navigate(`/tournament/${data.tournament_id}`);
       break;
 
     case 'powerup_spawned':

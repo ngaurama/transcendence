@@ -26,7 +26,6 @@ export class InputHandler {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'auth_success' && data.player_number) {
-          console.log("DATA PLAYER NUMBER", data.player_number);
           this.playerNumber = data.player_number;
           console.log(`Authenticated as Player ${this.playerNumber}`);
         }

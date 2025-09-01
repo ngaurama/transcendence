@@ -89,13 +89,19 @@ class Tournament {
               WHERE id = ?
             `, [gameId, matchId]);
 
-            this.pongService.createGame(gameId, { ...gameSettings, gameMode: 'online', tournament_id: this.tournamentId });
-
             const player1Name = await this.pongService.getDisplayName(player1);
             const player2Name = await this.pongService.getDisplayName(player2);
 
+            this.pongService.createGame(gameId, { 
+              ...gameSettings, 
+              gameMode: 'online', 
+              tournament_id: this.tournamentId,
+              player1_name: player1Name,
+              player2_name: player2Name
+            });
+
             this.pongService.sendToUser(player1, {
-              type: 'tournament_match_start',
+              type: 'tournament_match_ready',
               tournament_id: this.tournamentId,
               match_id: matchId,
               game_id: gameId,
@@ -104,7 +110,7 @@ class Tournament {
             });
 
             this.pongService.sendToUser(player2, {
-              type: 'tournament_match_start',
+              type: 'tournament_match_ready',
               tournament_id: this.tournamentId,
               match_id: matchId,
               game_id: gameId,

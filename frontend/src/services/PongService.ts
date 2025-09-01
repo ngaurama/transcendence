@@ -1,7 +1,7 @@
 // services/PongService.ts
 import { GameOptions, TournamentOptions } from '../utils/types';
 
-export async function createGame(options: GameOptions): Promise<string> {
+export async function createGame(options: GameOptions, opponent_id?: string): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
     const res = await fetch(`/api/pong/game/create`, {
@@ -18,6 +18,7 @@ export async function createGame(options: GameOptions): Promise<string> {
         powerups_enabled: options.powerups_enabled,
         points_to_win: options.points_to_win,
         board_variant: options.board_variant,
+        opponent_id: opponent_id || undefined,
       }),
     });
 
@@ -65,7 +66,6 @@ export async function createOnlineGame(options: GameOptions, opponentId: string)
     throw error;
   }
 }
-
 
 export async function joinMatchmaking(options: GameOptions): Promise<void> {
   try {
@@ -206,7 +206,9 @@ export async function deleteTournament(tournamentId: string): Promise<void> {
       const errorData = await res.json();
       throw new Error(errorData.error || 'Failed to delete tournament');
     }
+    return;
   } catch (error) {
+    console.error('Error deleting tournament:', error);
     throw error;
   }
 }
@@ -277,12 +279,37 @@ export async function getUserStats(): Promise<any> {
   }
 }
 
-export async function requestRematch(): Promise<string> {
-  const options = (window as any).gameOptions as GameOptions;
+export async function getGameInfo(gameId: string): Promise<any> {
+  try {
+    const token = localStorage.getItem('access_token');
+    const res = await fetch(`/api/pong/game/${gameId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
+    if (!res.ok) {
+      throw new Error('Failed to get game info');
+    }
+
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function requestRematch(options: GameOptions, opponentId?: string): Promise<string> {
   if (options) {
     try {
-      const gameId = await createGame(options);
+      let gameId: string;
+      if (options.gameMode === 'local') {
+        gameId = await createGame(options);
+      } else {
+        if (!opponentId) {
+          throw new Error('Opponent ID required for online rematch');
+        }
+        gameId = await createGame(options, opponentId);
+      }
       console.log(`Rematch created: game_id=${gameId}`);
       return gameId;
     } catch (error) {
@@ -290,5 +317,21 @@ export async function requestRematch(): Promise<string> {
       throw error;
     }
   }
-  throw new Error('No local game options available for rematch');
+  throw new Error('No game options available for rematch');
 }
+
+// export async function requestRematch(): Promise<string> {
+//   const options = (window as any).gameOptions as GameOptions;
+
+//   if (options) {
+//     try {
+//       const gameId = await createGame(options);
+//       console.log(`Rematch created: game_id=${gameId}`);
+//       return gameId;
+//     } catch (error) {
+//       console.error('Rematch failed:', error);
+//       throw error;
+//     }
+//   }
+//   throw new Error('No local game options available for rematch');
+// }

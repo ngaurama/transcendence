@@ -1,4 +1,6 @@
-export function renderTournamentBracket(tournament: any): string {
+import { checkAuthStatus } from "../../../services";
+
+export async function renderTournamentBracket(tournament: any): Promise<string> {
   if (!tournament.matches || tournament.matches.length === 0) {
     return '<p>Bracket not generated yet</p>';
   }
@@ -60,38 +62,46 @@ export function renderTournamentBracket(tournament: any): string {
         <div class="round-header">${getRoundTitle(i + 1, totalRounds)}</div>
       `).join('')}
 
-      ${Array.from({ length: totalRounds }, (_, roundIndex) => {
-        const roundNumber = roundIndex + 1;
-        const roundMatches = matchesByRound[roundNumber];
-        const connectorClass = roundNumber === 2 ? 'qf' : roundNumber === 3 ? 'sf' : '';
+      ${await Promise.all(
+        Array.from({ length: totalRounds }, async (_, roundIndex) => {
+          const roundNumber = roundIndex + 1;
+          const roundMatches = matchesByRound[roundNumber];
+          const connectorClass = roundNumber === 2 ? 'qf' : roundNumber === 3 ? 'sf' : '';
 
-        return `
-          <div class="round">
-            ${roundMatches.map((match, index) => `
-              <div class="match-group">
-                <div class="match ${match.status} ${match.isPlaceholder ? 'placeholder' : ''}">
-                  <div class="players">
-                    <div class="player ${match.winner_name === match.player1_name ? 'winner' : ''} ${!match.player1_name || match.player1_name === 'TBD' ? 'tbd' : ''}">
-                      ${match.player1_name || 'TBD'} <span class="score">${match.score1 ?? '-'}</span>
+          return `
+            <div class="round">
+              ${await Promise.all(
+                roundMatches.map(async (match, index) => `
+                  <div class="match-group">
+                    <div class="match ${match.status} ${match.isPlaceholder ? 'placeholder' : ''}">
+                      <div class="players">
+                        <div class="player ${match.winner_name === match.player1_name ? 'winner' : ''} ${!match.player1_name || match.player1_name === 'TBD' ? 'tbd' : ''}">
+                          ${match.player1_name || 'TBD'} <span class="score">${match.score1 ?? '-'}</span>
+                        </div>
+                        <div class="player ${match.winner_name === match.player2_name ? 'winner' : ''} ${!match.player2_name || match.player2_name === 'TBD' ? 'tbd' : ''}">
+                          ${match.player2_name || 'TBD'} <span class="score">${match.score2 ?? '-'}</span>
+                        </div>
+                      </div>
+                      ${(await shouldShowStartButton(match, tournament))
+                        ? `<button class="start-match-btn" data-match-id="${match.id}">Start Match</button>`
+                        : match.status === 'in_progress'
+                          ? `<button class="match-status in-progress">In Progress</button>`
+                          : match.status === 'completed'
+                            ? `<button class="match-status completed">Completed</button>`
+                            : tournament.tournament_settings.gameMode === 'online' 
+                              ? `<button class="match-status not-your-match">Not Your Match</button>`
+                              : `<button class="match-status waiting">Waiting</button>`
+                      }
                     </div>
-                    <div class="player ${match.winner_name === match.player2_name ? 'winner' : ''} ${!match.player2_name || match.player2_name === 'TBD' ? 'tbd' : ''}">
-                      ${match.player2_name || 'TBD'} <span class="score">${match.score2 ?? '-'}</span>
-                    </div>
+                    ${roundNumber < totalRounds && index % 2 === 0 ? `<div class="connector ${connectorClass}"></div>` : ''}
+                    ${roundNumber < totalRounds && index % 2 === 1 ? `<div class="connector reverse ${connectorClass}"></div>` : ''}
                   </div>
-                  ${shouldShowStartButton(match, tournament)
-                    ? `<button class="start-match-btn" data-match-id="${match.id}">Start Match</button>`
-                    : match.isPlaceholder 
-                      ? `<button class="disabled-btn" data-match-id="${match.id} disabled"><i>Waiting</i></button>` 
-                      : `<button class="disabled-btn" data-match-id="${match.id} disabled">Game Finished</button>`
-                  }
-                </div>
-                  ${roundNumber < totalRounds && index % 2 === 0 ? `<div class="connector ${connectorClass}"></div>` : ''}
-                  ${roundNumber < totalRounds && index % 2 === 1 ? `<div class="connector reverse ${connectorClass}"></div>` : ''}
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }).join('')}
+                `)
+              ).then((results) => results.join(''))}
+            </div>
+          `;
+        })
+      ).then((results) => results.join(''))}
     </div>
 
     <style>
@@ -104,12 +114,16 @@ export function renderTournamentBracket(tournament: any): string {
   `;
 }
 
-function shouldShowStartButton(match: any, tournament: any): boolean {
+async function shouldShowStartButton(match: any, tournament: any): Promise<boolean> {
   if (match.isPlaceholder) return false;
   if (match.status !== 'pending') return false;
   if (!match.player1_id || !match.player2_id) return false;
   if (tournament.status !== 'in_progress') return false;
   
+  const currentUser = await checkAuthStatus();
+  if (tournament.tournament_settings.gameMode === 'online') {
+    return !!(currentUser?.id && (match.player1_id === currentUser.id || match.player2_id === currentUser.id));
+  }
   return true;
 }
 

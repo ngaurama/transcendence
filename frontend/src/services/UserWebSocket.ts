@@ -1,4 +1,6 @@
 // services/UserWebSocket.ts
+import { showRematchInvitation } from '../utils/notification';
+
 export function initUserWebSocket(): WebSocket | null {
   const token = localStorage.getItem('access_token');
   if (!token) return null;
@@ -31,6 +33,8 @@ export function initUserWebSocket(): WebSocket | null {
 }
 
 function handleUserWebSocketMessage(data: any): void {
+
+  console.log("DATA FOR WEBSOCKET: ", data);
   switch (data.type) {
     case 'auth_success':
       console.log('User WebSocket authenticated');
@@ -43,16 +47,56 @@ function handleUserWebSocketMessage(data: any): void {
       (window as any).navigate(`/game/pong?game_id=${data.game_id}`);
       break;
 
-    // case 'match_found':
-    //   (window as any).navigate(`/game/pong?game_id=${data.game_id}`);
-    //   break;
+    case 'game_invitation_received':
+      showRematchInvitation(data.inviter_name, data.game_id, data.game_settings);
+      break;
+
+    case 'game_invitation_accepted':
+      (window as any).navigate(`/game/pong?game_id=${data.game_id}`);
+      if ((window as any).pendingRematch?.gameId === data.game_id) {
+        delete (window as any).pendingRematch;
+      }
+      break;
+
+    case 'game_invitation_declined':
+      alert('Your rematch invitation was declined.');
+      if ((window as any).pendingRematch?.gameId === data.game_id) {
+        const rematchBtn = document.getElementById('rematch');
+        if (rematchBtn) {
+          rematchBtn.textContent = (window as any).pendingRematch.originalText;
+          // rematchBtn.disabled = false;
+        }
+        delete (window as any).pendingRematch;
+      }
+      break;
 
     case 'tournament_match_start':
       (window as any).navigate(`/game/pong?game_id=${data.game_id}&tournament_id=${data.tournament_id}`);
       break;
 
     case 'tournament_update':
-      (window as any).navigate(`/tournament/${data.tournament_id}`);
+      // (window as any).navigate(`/tournament/${data.tournament_id}`);
+      break;
+
+    case 'tournament_created':
+      if (typeof (window as any).addTournamentToList === 'function') {
+        (window as any).addTournamentToList(data.tournament);
+      }
+      break;
+
+    case 'tournament_joined':
+      if (typeof (window as any).updateTournamentParticipants === 'function') {
+        (window as any).updateTournamentParticipants(data.tournament_id, data.participants);
+      }
+      if (typeof (window as any).refreshTournamentParticipants === 'function') {
+        (window as any).refreshTournamentParticipants(data.participants);
+      }
+      break;
+
+    case 'tournament_started':
+      // if ((window as any).currentTournamentId === data.tournament_id) {
+        (window as any).navigate(`/tournament/${data.tournament_id}`);
+      // }
       break;
 
     default:

@@ -1,4 +1,4 @@
-import { getOpenTournaments, joinTournament } from '../../services/PongService';
+import { getOpenTournaments, joinTournament, deleteTournament } from '../../services/PongService';
 import { startGame } from '../../services/GameService';
 import { saveGameOptions, getGameOptions } from '../../services/GameOptionsService';
 import { checkAuthStatus } from '../../services';
@@ -9,7 +9,7 @@ const user = await checkAuthStatus();
 
 export async function playSelectionPage(): Promise<string> {
   if (!user) {
-    (window as any).navigate('/login');
+    (window as any).navigate('/');
     return '';
   }
   const openTournaments = await getOpenTournaments();
@@ -97,7 +97,7 @@ export async function playSelectionPage(): Promise<string> {
                 </div>
                 <div class="cancel-state hidden group-hover:flex flex-col items-center">
                   <span id="cancel-matchmaking" class="cursor-pointer">
-                    <svg class="w-6 h-6 text-red-300 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-red-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                   </span>
@@ -195,15 +195,35 @@ export async function playSelectionPage(): Promise<string> {
           <div id="open-tournaments-list" class="mb-4">
             ${openTournaments.length > 0
               ? `<ul class="space-y-2">
-                  ${openTournaments.map(t => `
-                    <li class="bg-gray-700 p-3 rounded flex justify-between items-center">
-                      <div>
-                        <span class="font-semibold">${t.name}</span>
-                        <p class="text-sm text-gray-300">${t.current_participants}/${t.max_participants} players</p>
+                  ${openTournaments.map(t => {
+                    const settings = t.tournament_settings || {};
+                    const isCreator = user && t.creator_id === user.id;
+                    
+                    return `
+                    <li class="bg-gray-700 p-3 rounded" data-id="${t.id}">
+                      <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                          <span class="font-semibold">${t.name}</span>
+                          <p class="text-xs text-gray-300 mt-1">
+                            ${settings.powerups_enabled ? 'Powerups: Yes' : 'Powerups: No'} | 
+                            ${settings.points_to_win || 5} points | 
+                            ${settings.board_variant || 'Classic'}
+                          </p>
+                          <p class="text-sm text-gray-300 mt-1">${t.current_participants}/${t.max_participants} players</p>
+                        </div>
+                        <div class="flex flex-col items-end space-y-2">
+                          ${isCreator 
+                            ? `<button class="delete-tournament-btn bg-red-500 px-3 py-1 rounded text-xs" data-id="${t.id}">Delete</button>` 
+                            : ''
+                          }
+                          <button class="join-tournament-btn bg-blue-500 px-3 py-1 rounded text-sm" data-id="${t.id}">
+                            ${isCreator ? 'Manage' : 'Join'}
+                          </button>
+                        </div>
                       </div>
-                      <button class="join-tournament-btn bg-blue-500 px-3 py-1 rounded text-sm" data-id="${t.id}">Join</button>
                     </li>
-                  `).join('')}
+                    `;
+                  }).join('')}
                 </ul>`
               : '<p class="text-gray-400 text-center py-4">No open tournaments available</p>'
             }
@@ -482,12 +502,6 @@ export function attachPlaySelectionListeners() {
     }
   });
 
-  // window.addEventListener('beforeunload', () => {
-  //   if (isInMatchmaking) {
-  //     cancelMatchmaking();
-  //   }
-  // });
-
   if (onlineCreateTournament) {
     onlineCreateTournament.addEventListener('click', () => {
       currentTournamentMode = 'online';
@@ -496,6 +510,111 @@ export function attachPlaySelectionListeners() {
       if (playerAliasesContainer) playerAliasesContainer.classList.add('hidden');
     });
   }
+
+  (window as any).addTournamentToList = function(tournament: any) {
+    console.log("Adding new tournament dynamically:", tournament);
+    const container = document.getElementById('open-tournaments-list');
+    if (!container) {
+      console.warn("No container for open tournaments found");
+      return;
+    }
+    const noTournamentsMessage = container.querySelector('p.text-gray-400');
+    if (noTournamentsMessage) {
+      noTournamentsMessage.remove();
+    }
+    let tournamentsList = container.querySelector('ul');
+    if (!tournamentsList) {
+      tournamentsList = document.createElement('ul');
+      tournamentsList.className = 'space-y-2';
+      container.appendChild(tournamentsList);
+    }
+
+    if (tournamentsList.querySelector(`li[data-id="${tournament.id}"]`)) {
+      console.warn(`Tournament ${tournament.id} already exists in the list`);
+      return;
+    }
+
+    const settings = tournament.tournament_settings || {};
+    const isCreator = user && tournament.creator_id === user.id;
+    
+    const tournamentHTML = `
+      <li class="bg-gray-700 p-3 rounded" data-id="${tournament.id}">
+        <div class="flex justify-between items-start mb-2">
+          <div class="flex-1">
+            <span class="font-semibold">${tournament.name}</span>
+            <p class="text-xs text-gray-300 mt-1">
+              ${settings.powerups_enabled ? 'Powerups: Yes' : 'Powerups: No'} | 
+              ${settings.points_to_win || 5} points | 
+              ${settings.board_variant || 'Classic'}
+            </p>
+            <p class="text-sm text-gray-300 mt-1">${tournament.current_participants}/${tournament.max_participants} players</p>
+          </div>
+          <div class="flex flex-col items-end space-y-2">
+            ${isCreator 
+              ? `<button class="delete-tournament-btn bg-red-500 px-3 py-1 rounded text-xs" data-id="${tournament.id}">Delete</button>` 
+              : ''
+            }
+            <button class="join-tournament-btn bg-blue-500 px-3 py-1 rounded text-sm" data-id="${tournament.id}">
+              ${isCreator ? 'Manage' : 'Join'}
+            </button>
+          </div>
+        </div>
+      </li>
+    `;
+    
+    tournamentsList.insertAdjacentHTML('afterbegin', tournamentHTML);
+    attachPlaySelectionListeners();
+  };
+
+
+  // (window as any).updateTournamentParticipants = function(tournamentId: string, participants: any[]) {
+  //   const tournamentItem = document.querySelector(`.tournament-item[data-id="${tournamentId}"]`) as HTMLElement | null;
+  //   if (tournamentItem) {
+  //     const infoDiv = tournamentItem.querySelector('div');
+  //     if (infoDiv) {
+  //       const settings = JSON.parse(tournamentItem.dataset.settings || '{}');
+  //       infoDiv.innerHTML = `
+  //         <span class="font-semibold">${tournamentItem.dataset.name}</span>
+  //         <p class="text-sm text-gray-300">
+  //           ${participants.length}/${tournamentItem.dataset.maxParticipants} players • 
+  //           ${settings.powerups_enabled ? 'Powerups' : 'No Powerups'} • 
+  //           ${settings.points_to_win} points to win • 
+  //           ${settings.board_variant || 'Classic'}
+  //         </p>
+  //       `;
+  //     }
+  //   }
+  // };
+
+  (window as any).updateTournamentParticipants = function(tournamentId: string, participants: any[]) {
+    const tournamentItem = document.querySelector(`li[data-id="${tournamentId}"]`) as HTMLElement | null;
+    if (tournamentItem) {
+      const infoDiv = tournamentItem.querySelector('div > div.flex-1') as HTMLElement | null;
+      if (infoDiv) {
+        const settings = JSON.parse(tournamentItem.dataset.settings || '{}');
+        
+        const participantsText = document.createElement('p');
+        participantsText.className = 'text-sm text-gray-300 mt-1';
+        participantsText.textContent = `${participants.length}/${tournamentItem.dataset.maxParticipants} players`;
+        
+        const settingsText = document.createElement('p');
+        settingsText.className = 'text-xs text-gray-300 mt-1';
+        settingsText.innerHTML = `
+          ${settings.powerups_enabled ? 'Powerups: Yes' : 'Powerups: No'} | 
+          ${settings.points_to_win || 5} points | 
+          ${settings.board_variant || 'Classic'}
+        `;
+        
+        // Clear existing content and add updated content
+        const nameElement = tournamentItem.querySelector('.font-semibold');
+        infoDiv.innerHTML = '';
+        if (nameElement) infoDiv.appendChild(nameElement.cloneNode(true));
+        infoDiv.appendChild(settingsText);
+        infoDiv.appendChild(participantsText);
+      }
+    }
+  };
+
 
   if (joinTournamentBtn) {
     joinTournamentBtn.addEventListener('click', () => {
@@ -588,12 +707,52 @@ export function attachPlaySelectionListeners() {
   document.querySelectorAll('.join-tournament-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const tournamentId = btn.getAttribute('data-id');
-      if (tournamentId) {
+        if (tournamentId) {
         try {
-          await joinTournament(tournamentId);
-          (window as any).navigate(`/tournament/${tournamentId}`);
+          const tournamentElement = document.querySelector(`li[data-id="${tournamentId}"]`);
+          const isCreator = tournamentElement && tournamentElement.querySelector('.delete-tournament-btn');
+          
+          if (isCreator) {
+            (window as any).navigate(`/tournament/${tournamentId}`);
+          } else {
+            await joinTournament(tournamentId);
+            (window as any).navigate(`/tournament/${tournamentId}`);
+          }
         } catch (error) {
           alert(error instanceof Error ? error.message : 'Failed to join tournament');
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.delete-tournament-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const tournamentId = btn.getAttribute('data-id');
+      if (tournamentId) {
+        if (!confirm('Are you sure you want to delete this tournament? All participants will be removed.')) {
+          return;
+        }
+        
+        try {
+          await deleteTournament(tournamentId);
+          
+          const tournamentElement = document.querySelector(`li[data-id="${tournamentId}"]`);
+          if (tournamentElement) {
+            tournamentElement.remove();
+          }
+          
+          const tournamentsList = document.querySelector('#open-tournaments-list ul');
+          if (tournamentsList && tournamentsList.children.length === 0) {
+            const container = document.getElementById('open-tournaments-list');
+            if (container) {
+              container.innerHTML = '<p class="text-gray-400 text-center py-4">No open tournaments available</p>';
+            }
+          }
+          
+        } catch (error) {
+          console.error('Error deleting tournament:', error);
+          alert(error instanceof Error ? error.message : 'Failed to delete tournament');
         }
       }
     });
@@ -604,9 +763,6 @@ export function attachPlaySelectionListeners() {
   }
 
   const optionsObserver = setupNavigationDetection();
-  if (optionsObserver) {
-    optionsObserver.disconnect();
-  }
 
   (window as any).cancelMatchmaking = cancelMatchmaking;
 }
@@ -690,7 +846,7 @@ async function handleStartGame(gameMode: string, gameType: string): Promise<void
       (window as any).gameOptions = options;
       (window as any).navigate(`/game/pong?game_id=${id}`);
     } else if (gameMode === 'online') {
-      alert('Joined matchmaking queue. Waiting for opponent...');
+      // alert('Joined matchmaking queue. Waiting for opponent...');
     }
   } catch (error) {
     console.error('Failed to start game:', error);

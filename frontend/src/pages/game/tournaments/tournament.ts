@@ -5,7 +5,7 @@ import { renderTournamentBracket } from './tournamentBracket';
 export async function tournamentPage(): Promise<string> {
   const user = await checkAuthStatus();
   if (!user) {
-    (window as any).navigate('/login');
+    (window as any).navigate('/');
     return '';
   }
 
@@ -33,7 +33,6 @@ export async function tournamentPage(): Promise<string> {
 
     const participants = participantsResponse.ok ? await participantsResponse.json() : [];
 
-    // Check if tournament is completed and has a winner
     const isCompleted = tournament.status === 'completed';
     const hasWinner = tournament.winner_id && tournament.winner_name;
 
@@ -63,15 +62,19 @@ export async function tournamentPage(): Promise<string> {
           <div>
             <h3 class="text-lg mb-3">Tournament Info</h3>
             <p>Status: ${tournament.status}</p>
-            <p>Players: ${participants.length}/${tournament.max_participants}</p>
+            <p>Players: ${participants.length}/${tournament.max_participants}</p><br>
+            <h4>Details: </h4>
             <p>Type: ${tournament.tournament_settings.gameMode === 'local' ? 'Local' : 'Online'}</p>
+            <p>Powerups: ${tournament.tournament_settings.powerups_enabled ? 'Enabled' : 'Disabled'}</p>
+            <p>Points to Win: ${tournament.tournament_settings.points_to_win}</p>
+            <p>Board Variant: ${tournament.tournament_settings.board_variant || 'Classic'}</p>
             ${hasWinner ? `<p>Winner: ${tournament.winner_name}</p>` : ''}
           </div>
+
           
-          <div>
-            <h3 class="text-lg mb-3">Participants</h3>
+          <div id="tournament-participants">
             ${participants.length > 0
-        ? `<ul class="space-y-1">
+              ? `<ul class="space-y-1">
                   ${participants.map((p: any) => `
                     <li class="text-sm ${p.user_id === tournament.winner_id ? 'text-green-400 font-bold' : ''}">
                       ${p.display_name}${p.is_guest ? ' (Guest)' : ''}
@@ -79,8 +82,8 @@ export async function tournamentPage(): Promise<string> {
                     </li>
                   `).join('')}
                 </ul>`
-        : '<p class="text-gray-400">No participants yet</p>'
-      }
+              : '<p class="text-gray-400">No participants yet</p>'
+            }
           </div>
         </div>
 
@@ -93,7 +96,7 @@ export async function tournamentPage(): Promise<string> {
         ? `<div>
               <h3 class="text-lg mb-3">Tournament Bracket</h3>
               <div id="tournament-bracket" class="bg-gray-700 p-4 rounded overflow-x-auto">
-                ${renderTournamentBracket(tournament)}
+                ${await renderTournamentBracket(tournament)}
               </div>
             </div>`
         : ''
@@ -127,19 +130,35 @@ export function attachTournamentListeners(tournamentId: string) {
     });
   }
 
-  const deleteTournamentBtn = document.getElementById('delete-tournament');
-  if (deleteTournamentBtn) {
-    deleteTournamentBtn.addEventListener('click', async () => {
-      if (confirm('Are you sure you want to delete this tournament?')) {
-        try {
-          await deleteTournament(tournamentId);
-          (window as any).navigate('/play');
-        } catch (error) {
-          alert(error instanceof Error ? error.message : 'Failed to delete tournament');
-        }
+
+  (window as any).refreshTournamentParticipants = function(participants: any[]) {
+    const participantsContainer = document.querySelector('#tournament-participants');
+    if (participantsContainer) {
+      participantsContainer.innerHTML = participants.length > 0
+        ? `<ul class="space-y-1">
+            ${participants.map((p: any) => `
+              <li class="text-sm">
+                ${p.display_name}${p.is_guest ? ' (Guest)' : ''}
+              </li>
+            `).join('')}
+          </ul>`
+        : '<p class="text-gray-400">No participants yet</p>';
+    }
+  };
+
+const deleteTournamentBtn = document.getElementById('delete-tournament');
+if (deleteTournamentBtn) {
+  deleteTournamentBtn.addEventListener('click', async () => {
+    if (confirm('Are you sure you want to delete this tournament? All participants will be removed.')) {
+      try {
+        await deleteTournament(tournamentId);
+        (window as any).navigate('/play');
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Failed to delete tournament');
       }
-    });
-  }
+    }
+  });
+}
 
   const leaveTournamentBtn = document.getElementById('leave-tournament');
   if (leaveTournamentBtn) {

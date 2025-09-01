@@ -3,7 +3,7 @@ import { setup2FA, enable2FA } from '../../services';
 export async function twoFASetupPage(): Promise<string> {
   const token = localStorage.getItem('access_token');
   if (!token) {
-    (window as any).navigate('/login');
+    (window as any).navigate('/');
     return '';
   }
   

@@ -388,7 +388,7 @@ export function updateScene(state: Partial<GameState>): void {
   };
 
   if (!gameState.namesSet && gameState.player_names) {
-    const currentUserDisplayName = localStorage.getItem("display_name") || gameState.player_names.player1 || "Player 1";
+    const currentUserDisplayName = gameState.player_names.player1 || "Player 1";
     const opponentAlias = gameState.player_names.player2 || "Player 2";
     
     const player1NameEl = document.getElementById("player1-name");

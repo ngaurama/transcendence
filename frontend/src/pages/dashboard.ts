@@ -1,10 +1,10 @@
-// pages/settings.ts
+// pages/dashboard.ts
 import { checkAuthStatus, uploadAvatar, getUserStats, updateProfile } from '../services';
 
-export async function settingsPage(): Promise<string> {
+export async function dashboardPage(): Promise<string> {
   const user = await checkAuthStatus();
   if (!user) {
-    (window as any).navigate('/login');
+    (window as any).navigate('/');
     return '';
   }
 
@@ -14,7 +14,7 @@ export async function settingsPage(): Promise<string> {
 
   return `
     <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
-      <h2 class="text-2xl mb-4">Settings</h2>
+      <h2 class="text-2xl mb-4">Dashboard</h2>
       ${user.oauth_provider
         ? `<p class="mb-2 text-sm text-gray-400">Connected via ${user.oauth_provider}</p>`
         : ''
@@ -130,7 +130,7 @@ export async function settingsPage(): Promise<string> {
   `;
 }
 
-export function attachSettingsListeners() {
+export function attachDashboardListeners() {
   const avatarTrigger = document.getElementById('avatar-trigger');
   const avatarDropdown = document.getElementById('avatar-dropdown');
   const avatarFileInput = document.getElementById('avatar-file-input') as HTMLInputElement;
@@ -173,7 +173,7 @@ export function attachSettingsListeners() {
       try {
         await uploadAvatar(token, file);
         alert('Avatar uploaded successfully!');
-        (window as any).navigate('/settings');
+        (window as any).navigate('/dashboard');
       } catch (error) {
         alert(error instanceof Error ? error.message : 'Avatar upload failed');
       } finally {
@@ -202,7 +202,7 @@ export function attachSettingsListeners() {
 
         await uploadAvatar(token, file);
         alert('Avatar removed successfully!');
-        (window as any).navigate('/settings');
+        (window as any).navigate('/Dashboard');
       } catch (error) {
         alert(error instanceof Error ? error.message : 'Failed to remove avatar');
       } finally {
@@ -246,7 +246,7 @@ export function attachSettingsListeners() {
       try {
         await updateProfile(token, { username, display_name });
         alert('Profile updated successfully!');
-        (window as any).navigate('/settings');
+        (window as any).navigate('/dashboard');
       } catch (error) {
         alert(error instanceof Error ? error.message : 'Profile update failed');
       }

@@ -160,7 +160,7 @@ CREATE TABLE game_sessions (
     FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL,
     -- FOREIGN KEY (game_session_id) REFERENCES game_sessions(id),
     
-    CHECK (status IN ('waiting', 'in_progress', 'completed', 'abandoned')),
+    CHECK (status IN ('waiting', 'in_progress', 'completed', 'abandoned', 'cancelled')),
     CHECK (result IN ('win', 'draw', 'abandoned') OR result IS NULL)
 );
 

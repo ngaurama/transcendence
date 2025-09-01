@@ -181,15 +181,31 @@
   border: none;
 }
 
-.disabled-btn {
+.match-status {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
   background: #982c2c;
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
   cursor: default;
   border: none;
+}
+
+.match-status.in_progress {
+  background-color: #6b7280;
+}
+
+.match-status.completed {
+  background-color: rgb(68, 144, 68);
+}
+
+.match-status.not-your-match {
+  background: rgb(198, 56, 56);
+}
+
+.match-status.waiting {
+  background-color: rgb(83, 76, 151);
 }
 
 .start-match-btn:disabled {
@@ -200,3 +216,30 @@
 .start-match-btn:hover {
   background: #2563EB;
 }
+
+/* INVITAION STUFF */
+/* Notification styles */
+.fixed {
+  position: fixed;
+}
+
+.bottom-4 {
+  bottom: 1rem;
+}
+
+.right-4 {
+  right: 1rem;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.max-w-sm {
+  max-width: 24rem;
+}
+/* 
+.hidden {
+  display: none;
+}
+ */
