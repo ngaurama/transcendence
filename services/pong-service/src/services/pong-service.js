@@ -92,39 +92,19 @@ class PongService {
   }
 
   async addUserConnection(userId, connection) {
-    console.log("ADDING CONNECTION:", userId, "Current connections:", Array.from(this.userConnections.keys()));
     this.userConnections.set(userId, connection);
     await this.db.run('INSERT OR REPLACE INTO user_presence (user_id, status, last_seen_at) VALUES (?, ?, CURRENT_TIMESTAMP)', [userId, 'online']);
   }
 
   async removeUserConnection(userId) {
-    console.log("REMOVING CONNECTION:", userId, "Before removal - exists:", this.userConnections.has(userId));
     this.userConnections.delete(userId);
-    console.log("After removal - exists:", this.userConnections.has(userId));
     await this.db.run('UPDATE user_presence SET status = ?, last_seen_at = CURRENT_TIMESTAMP WHERE user_id = ?', ['offline', userId]);
   }
 
-  sendToUser(userId, message) {
-    console.log("ALL CONNECTIONS KEYS:", Array.from(this.userConnections.keys()));
-    console.log("LOOKING FOR USER ID:", userId, "TYPE:", typeof userId);
-    
-    // Check what types are actually in the map
-    const keys = Array.from(this.userConnections.keys());
-    keys.forEach(key => {
-      console.log("KEY IN MAP:", key, "TYPE:", typeof key);
-    });
-    
-    console.log("USER ID EXISTS IN MAP:", this.userConnections.has(userId));
-    
+  sendToUser(userId, message) {    
     const connection = this.userConnections.get(userId);
-    console.log("CONNECTION FOUND:", connection !== undefined);
-    
     if (connection && connection.readyState === 1) {
-      console.log("CONNECTION READY STATE:", connection.readyState);
-      console.log("SENDING MESSAGE TO USER:", userId, "MESSAGE:", message.type);
       connection.send(JSON.stringify(message));
-    } else {
-      console.log("CANNOT SEND - CONNECTION:", connection ? "NOT READY" : "NOT FOUND");
     }
   }
 
@@ -180,8 +160,6 @@ class PongService {
       timestamp: Date.now()
     });
     this.pendingInvitations.set(userId, invitations);
-
-    console.log("CAME HERE BUDDY", userId);
     
     this.sendToUser(userId, {
       type: 'game_invitation_received',

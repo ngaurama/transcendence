@@ -33,21 +33,21 @@ export function initWinLossChart(stats: any): void {
   });
 }
 
-export function initMonthlyPerformanceChart(monthlyData: any[]): void {
-  const canvas = document.getElementById('monthly-chart') as HTMLCanvasElement;
+export function initWeeklyPerformanceChart(weeklyData: any[]): void {
+  const canvas = document.getElementById('weekly-chart') as HTMLCanvasElement;
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const months = monthlyData.map(item => item.month);
-  const wins = monthlyData.map(item => item.wins);
-  const losses = monthlyData.map(item => item.losses);
+  const weeks = weeklyData.map(item => item.week);
+  const wins = weeklyData.map(item => item.wins);
+  const losses = weeklyData.map(item => item.losses);
 
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: months,
+      labels: weeks,
       datasets: [
         {
           label: 'Wins',

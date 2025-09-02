@@ -32,10 +32,9 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
           current_loss_streak, longest_loss_streak,
           tournaments_played, tournaments_won, tournaments_top3,
           pong_stats
-        FROM user_game_stats WHERE id = ?
+        FROM user_game_stats WHERE user_id = ?
       `, [targetUserId]);
 
-      // Win/loss ratio by game type
       const winLossByType = await socialService.db.all(`
         SELECT 
           json_extract(gs.game_settings, '$.powerups_enabled') as powerups_enabled,
@@ -52,23 +51,23 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
 
       // Recent games history
       const recentGames = await socialService.db.all(`
-        SELECT 
-          gs.id, gs.created_at, gs.final_score_player1, gs.final_score_player2,
-          gs.game_duration_ms, gs.game_settings, gs.winner_id,
-          u1.id as opponent_id, u1.display_name as opponent_name, u1.avatar_url as opponent_avatar,
-          CASE 
-            WHEN gs.winner_id = ? THEN 'win'
-            WHEN gs.winner_id IS NULL THEN 'draw'
-            ELSE 'loss'
-          END as result
-        FROM game_sessions gs
-        JOIN game_participants gp ON gp.game_session_id = gs.id
-        JOIN game_participants gp_opp ON gp_opp.game_session_id = gs.id AND gp_opp.id != ?
-        LEFT JOIN users u1 ON u1.id = gp_opp.id
-        WHERE gp.id = ? AND gs.status = 'completed'
-        ORDER BY gs.created_at DESC
-        LIMIT 20
-      `, [targetUserId, targetUserId, targetUserId]);
+      SELECT 
+        gs.id, gs.created_at, gs.final_score_player1, gs.final_score_player2,
+        gs.game_duration_ms, gs.game_settings, gs.winner_id,
+        u1.id as opponent_id, u1.display_name as opponent_name, u1.avatar_url as opponent_avatar,
+        CASE 
+          WHEN gs.winner_id = ? THEN 'win'
+          WHEN gs.winner_id IS NULL THEN 'draw'
+          ELSE 'loss'
+        END as result
+      FROM game_sessions gs
+      JOIN game_participants gp ON gp.game_session_id = gs.id
+      JOIN game_participants gp_opp ON gp_opp.game_session_id = gs.id AND gp_opp.user_id != gp.user_id
+      LEFT JOIN users u1 ON u1.id = gp_opp.user_id
+      WHERE gp.user_id = ? AND gs.status = 'completed'
+      ORDER BY gs.created_at DESC
+      LIMIT 20
+    `, [targetUserId, targetUserId]);
 
       // Tournament performance
       const tournamentStats = await socialService.db.all(`
@@ -86,21 +85,21 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
         ORDER BY t.created_at DESC
       `, [targetUserId, targetUserId]);
 
-      // Monthly performance
-      const monthlyPerformance = await socialService.db.all(`
-        SELECT 
-          strftime('%Y-%m', gs.created_at) as month,
-          COUNT(*) as total_games,
-          SUM(CASE WHEN gs.winner_id = ? THEN 1 ELSE 0 END) as wins,
-          SUM(CASE WHEN gs.winner_id IS NULL THEN 1 ELSE 0 END) as draws,
-          SUM(CASE WHEN gs.winner_id != ? AND gs.winner_id IS NOT NULL THEN 1 ELSE 0 END) as losses
-        FROM game_sessions gs
-        JOIN game_participants gp ON gp.game_session_id = gs.id
-        WHERE gp.id = ? AND gs.status = 'completed'
-        GROUP BY strftime('%Y-%m', gs.created_at)
-        ORDER BY month DESC
-        LIMIT 12
-      `, [targetUserId, targetUserId, targetUserId]);
+      // Weekaly performance
+      const weeklyPerformance = await socialService.db.all(`
+      SELECT 
+        strftime('%Y-%W', gs.created_at) as week,
+        COUNT(*) as total_games,
+        SUM(CASE WHEN gs.winner_id = ? THEN 1 ELSE 0 END) as wins,
+        SUM(CASE WHEN gs.winner_id IS NULL THEN 1 ELSE 0 END) as draws,
+        SUM(CASE WHEN gs.winner_id != ? AND gs.winner_id IS NOT NULL THEN 1 ELSE 0 END) as losses
+      FROM game_sessions gs
+      JOIN game_participants gp ON gp.game_session_id = gs.id
+      WHERE gp.user_id = ? AND gs.status = 'completed'
+      GROUP BY strftime('%Y-%W', gs.created_at)
+      ORDER BY week DESC
+      LIMIT 8
+    `, [targetUserId, targetUserId, targetUserId]);
 
       return {
         targetUser,
@@ -108,7 +107,7 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
         win_loss_by_type: winLossByType,
         recent_games: recentGames,
         tournament_stats: tournamentStats,
-        monthly_performance: monthlyPerformance,
+        weekly_performance: weeklyPerformance,
         is_own_profile: isOwnProfile
       };
     } catch (error) {

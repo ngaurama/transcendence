@@ -42,7 +42,6 @@ class SocialService {
 
     async startServer() {
         try {
-            console.log("PORT: ", process.env.SOCIAL_PORT);
             const port = process.env.SOCIAL_PORT || 3002;
             await this.fastify.listen({ 
                 port, 

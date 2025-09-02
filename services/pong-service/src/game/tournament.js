@@ -191,8 +191,6 @@ class Tournament {
       sql = sql.slice(0, -2) + ' WHERE user_id = ?';
       params.push(userId);
       await this.db.run(sql, params);
-    } else {
-      // Insert new
     }
   }
 

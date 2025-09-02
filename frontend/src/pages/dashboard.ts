@@ -530,7 +530,6 @@ export function attachDashboardListeners() {
       const userId = userIdAttr ? parseInt(userIdAttr, 10) : null;
 
       if (!userId) return;
-      console.log("USERIF: ", userId);
 
       if (target.classList.contains('view-profile-btn')) {
         (window as any).navigate(`/profile/${userId}`);

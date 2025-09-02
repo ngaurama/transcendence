@@ -83,12 +83,9 @@ function renderTournamentListItem(tournament: any): string {
 }
 
 (window as any).addTournamentToList = function(tournament: any) {
-  console.log("REACHING HERE");
   const tournamentsList = document.getElementById('tournaments-ul');
   const noTournaments = document.getElementById('no-tournaments');
   const container = document.getElementById('tournaments-list');
-
-  console.log("TOURNAMENT, NOTOURNAMENTS< CONTAINER", tournamentsList, noTournaments, container);
 
   if (document.querySelector(`.tournament-item[data-id="${tournament.id}"]`)) {
     console.warn(`Tournament ${tournament.id} already exists in the list`);

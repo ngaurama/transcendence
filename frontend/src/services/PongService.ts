@@ -60,7 +60,6 @@ export async function joinMatchmaking(options: GameOptions): Promise<void> {
 }
 
 export async function createTournament(options: TournamentOptions): Promise<string> {
-  console.log(options);
   try {
     const token = localStorage.getItem('access_token');
     const res = await fetch(`/api/pong/tournament/create`, {

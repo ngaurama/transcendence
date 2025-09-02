@@ -384,6 +384,8 @@ class PongGame {
   }
 
   async updateUserStats(userId, updates) {
+
+    console.log("USER ID AND UPDATES: ", userId, updates);
     const existing = await this.db.get('SELECT * FROM user_game_stats WHERE user_id = ?', [userId]);
     if (existing) {
       let sql = 'UPDATE user_game_stats SET ';
@@ -396,9 +398,7 @@ class PongGame {
       params.push(userId);
       await this.db.run(sql, params);
     } else {
-      // Insert
       await this.db.run('INSERT INTO user_game_stats (user_id) VALUES (?)', [userId]);
-      // Then update
       await this.updateUserStats(userId, updates);
     }
   }
@@ -436,13 +436,14 @@ class PongGame {
 
       for (const participant of participants) {
         if (participant.user_id) {
+          console.log("WINNDER ID: ", winnerId);
           const isWin = participant.user_id === winnerId;
+          console.log("PARTICIPANT ID and is win: ", participant.user_id, isWin);
           const updates = {
             games_played: 1,
             games_won: isWin ? 1 : 0,
             games_lost: isWin ? 0 : 1,
           };
-          
           await this.updateUserStats(participant.user_id, updates);
         }
       }

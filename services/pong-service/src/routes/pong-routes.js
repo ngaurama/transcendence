@@ -827,8 +827,6 @@ function setupRoutes(fastify, pongService) {
                 connection.close(4003, 'Already connected to this game');
                 return;
               }
-
-              console.log("WSS USER: ", user);
               
               gameRoom.addPlayer(userId, playerNumber);
               gameRoom.addConnection(userId, connection);
@@ -898,7 +896,6 @@ function setupRoutes(fastify, pongService) {
             authenticated = true;
             userId = user.id;
             clearTimeout(authTimeout);
-            console.log("ARGH CONNECTION: ", user, userId);
             pongService.addUserConnection(userId, connection);
             connection.send(JSON.stringify({ type: 'auth_success' }));
           } else {
