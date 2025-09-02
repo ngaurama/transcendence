@@ -1,9 +1,17 @@
 function isProtectedPongRoute(url) {
   const protectedRoutes = [
-    '/game/create',
-    '/move',
+    '/game',
+    '/wss/'
+  ];
+
+  return protectedRoutes.some(route => url.includes(route));
+}
+
+function isProtectedSocialRoute(url) {
+  const protectedRoutes = [
+    '/game',
     '/stats',
-    '/history',
+    '/friends',
     '/wss/'
   ];
 
@@ -13,4 +21,5 @@ function isProtectedPongRoute(url) {
 
 module.exports = {
   isProtectedPongRoute,
+  isProtectedSocialRoute,
 };

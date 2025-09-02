@@ -108,11 +108,14 @@ function setupUserRoutes(fastify, { dbService, secrets, authenticateToken }) {
     }
   });
 
-  fastify.post('/user/update', async (request, reply) => {
-    const token = request.headers.authorization?.replace('Bearer ', '');
-    const user = await validateToken(token);
+  fastify.post('/user/update', { preHandler: authenticateToken }, async (request, reply) => {
+    const user = await dbService.db.get(
+      `SELECT * FROM users WHERE id = ?`,
+      [request.user.user_id]
+    );
+
     if (!user) {
-      return reply.code(401).send({ error: 'Authentication required' });
+      return reply.code(404).send({ error: "User not found" });
     }
 
     const { username, display_name } = request.body;

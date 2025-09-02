@@ -1,6 +1,6 @@
 module.exports = {
   auth: process.env.AUTH_SERVICE_URL,
-  chat: process.env.CHAT_SERVICE_URL,
+  social: process.env.SOCIAL_SERVICE_URL,
   pong: process.env.PONG_SERVICE_URL,
 
   serviceConfigs: {
@@ -9,12 +9,12 @@ module.exports = {
       rewritePrefix: '/',
       websocket: false
     },
-    // chat: {
-    //   prefix: '/chat',
-    //   rewritePrefix: '/',
-    //   websocket: true,
-    //   requiresAuth: true
-    // },
+    social: {
+      prefix: '/social',
+      rewritePrefix: '/',
+      websocket: true,
+      requiresAuth: true
+    },
     pong: {
       prefix: '/pong',
       rewritePrefix: '/',

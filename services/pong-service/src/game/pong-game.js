@@ -428,7 +428,6 @@ class PongGame {
         this.gameId
       ]);
 
-      // Update user stats for all participants
       const participants = await this.db.all(`
         SELECT gp.user_id, gp.player_number 
         FROM game_participants gp

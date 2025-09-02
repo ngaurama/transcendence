@@ -6,9 +6,9 @@ import * as Pages from '../pages';
 const routes: { [key: string]: () => Promise<string> | string } = {
   '/': Pages.homePage,
   '/dashboard': Pages.dashboardPage,
+  '/profile/:userId': Pages.profilePage,
   '/play': Pages.playSelectionPage,
   '/game/pong': Pages.pongGamePage,
-  // '/tournaments': Pages.tournamentSelectionPage,
   '/tournament/:tournamentId': Pages.tournamentPage,
   '/login': Pages.loginPage,
   '/register': Pages.registerPage,
@@ -20,6 +20,11 @@ const routes: { [key: string]: () => Promise<string> | string } = {
   '/change-password': Pages.changePasswordPage,
   '/logout': Pages.logoutPage,
   '/auth/callback': Pages.authCallbackPage,
+  '/gdpr': Pages.gdprPage,
+  '/view-data': Pages.viewDataPage,
+  '/export-data': Pages.exportDataPage,
+  '/anonymize-account': Pages.anonymizeAccountPage,
+  '/delete-account': Pages.deleteAccountPage,
 };
 
 // Cache DOM elements
@@ -35,12 +40,18 @@ export function initRouter() {
 
 export async function render() {
   let path = window.location.pathname;
+
+  const profileMatch = path.match(/^\/profile\/(\d+)$/);
+  if (profileMatch) {
+    path = '/profile/:userId';
+    (window as any).profileUserId = profileMatch[1];
+  }
+
   const tournamentMatch = path.match(/^\/tournament\/(\d+)$/);
   if (tournamentMatch) {
     path = '/tournament/:tournamentId';
     (window as any).tournamentId = tournamentMatch[1];
   }
-  console.log("PATH: ", path);
   try {
     const result = await routes[path]?.();
     let content = result || '<h2>404 - Page Not Found</h2>';
@@ -97,6 +108,12 @@ function attachDropdownListener() {
 
 function attachEventListeners() {
   const currentPath = window.location.pathname;
+  const profileMatch = currentPath.match(/^\/profile\/(\d+)$/);
+  if (profileMatch) {
+    Pages.attachProfileListeners(profileMatch[1]);
+    return;
+  }
+
   const tournamentMatch = currentPath.match(/^\/tournament\/(\d+)$/);
   if (tournamentMatch) {
     Pages.attachTournamentListeners(tournamentMatch[1]);
@@ -106,7 +123,6 @@ function attachEventListeners() {
       case '/dashboard': Pages.attachDashboardListeners(); break;
       case '/play': Pages.attachPlaySelectionListeners(); break;
       case '/game/pong': Pages.attachPongGameListeners(); break;
-      // case '/tournaments': Pages.attachTournamentSelectionListeners(); break;
       case '/login': Pages.attachLoginListeners(); break;
       case '/register': Pages.attachRegisterListeners(); break;
       case '/verify-2fa': Pages.attachVerify2FAListeners(); break;
@@ -114,6 +130,12 @@ function attachEventListeners() {
       case '/forgot-password': Pages.attachForgotPasswordListeners(); break;
       case '/reset-password': Pages.attachResetPasswordListeners(); break;
       case '/change-password': Pages.attachChangePasswordListeners(); break;
+      case '/gdpr': 
+      case '/view-data': 
+      case '/export-data': 
+      case '/update-data': 
+      case '/anonymize-account': 
+      case '/delete-account': Pages.attachGdprListeners(); break;
     }
   }
 }

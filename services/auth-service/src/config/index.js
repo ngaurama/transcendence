@@ -2,12 +2,14 @@ const { DatabaseConfig } = require("./databaseConfig");
 const { EmailConfig } = require("./emailConfig");
 const { loadSecrets } = require("./vaultConfig");
 const { setupRoutes } = require("../routes");
+const { GDPRService } = require("./gdprConfig");
 
 class AuthService {
   constructor(fastify) {
     this.fastify = fastify;
     this.db = null;
     this.transporter = null;
+    this.gdprService = null;
     this.secrets = {};
     this.init();
   }
@@ -16,6 +18,7 @@ class AuthService {
     try {
       await this.loadSecrets();
       await this.connectDatabase();
+      await this.setupGDPRService();
       await this.setupEmailService();
       await this.fastify.register(require('@fastify/multipart'));
       await this.setupRoutes();
@@ -33,6 +36,11 @@ class AuthService {
   async connectDatabase() {
     this.db = new DatabaseConfig(this.secrets.database.config.path);
     await this.db.connect();
+  }
+
+  async setupGDPRService() {
+    this.gdprService = new GDPRService(this.db, this.transporter);
+    await this.gdprService.init();
   }
 
   async setupEmailService() {

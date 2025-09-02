@@ -70,6 +70,24 @@ services:
       - ft_transcendence
     restart: unless-stopped
 
+  social-service:
+    build:
+      context: ./services/social-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - database_data:/app/data
+      - ./services/social-service:/app
+      - /app/node_modules
+      - ./nginx/certs:/app/certs:ro
+    depends_on:
+      - vault
+      - auth-service
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
   pong-service:
     build:
       context: ./services/pong-service

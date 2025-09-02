@@ -8,3 +8,5 @@ export * from './twoFA';
 export * from './passwords';
 // export * from './game/tournaments/tournamentSelection';
 export * from './game/tournaments/tournament';
+export * from './profile';
+export * from './auth/gdpr'

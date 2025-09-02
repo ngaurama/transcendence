@@ -39,9 +39,28 @@ async function pongProxy(fastify, options) {
   });
 }
 
+async function socialProxy(fastify, options) {
+  await fastify.register(httpProxy, {
+    upstream: config.services.social,
+    prefix: '/social',
+    rewritePrefix: '/',
+    websocket: true,
+    preHandler: async (request, reply) => {
+      request.headers['x-request-id'] = generateRequestId();
+      
+      // if (isProtectedRoutes.isProtectedSocialRoute(request.url)) {
+      //   await authenticateRequest(request, reply);
+      // }
+
+      console.log(`Social Request: ${request.method} ${request.url}`);
+    }
+  });
+}
+
 async function proxyRoutes(fastify, options) {
   await fastify.register(authProxy);
   await fastify.register(pongProxy);
+  await fastify.register(socialProxy);
 }
 
 module.exports = proxyRoutes;

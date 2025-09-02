@@ -1,4 +1,4 @@
-import { requestRematch, getGameInfo } from '../../../services/PongService';
+import { requestMatch, getGameInfo } from '../../../services/PongService';
 import { checkAuthStatus } from '../../../services';
 
 export function setupRematchHandler() {
@@ -21,7 +21,7 @@ export function setupRematchHandler() {
       const opponent = gameInfo.players.find((p: any) => p.id !== currentUser?.id);
       
       if (opponent) {
-        const newGameId = await requestRematch(options, opponent.id);
+        const newGameId = await requestMatch(options, opponent.id);
         rematchBtn.style.display = 'none';
         rematchBtn.textContent = 'Waiting for opponent...';
 

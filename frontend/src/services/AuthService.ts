@@ -130,7 +130,7 @@ export async function guestLogin(alias: string): Promise<{ user: User; access_to
 
 export async function updateProfile(token: string, updates: { username?: string; display_name?: string }): Promise<void> {
   try {
-    const res = await fetch(`/api/user/update`, {
+    const res = await fetch(`/api/auth/user/update`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

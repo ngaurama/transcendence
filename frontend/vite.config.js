@@ -26,14 +26,14 @@ export default defineConfig({
     },
     proxy: {
       '/api/pong/wss': {
-        target: 'https://pong-service:3004',
+        target: 'https://pong-service:3003',
         changeOrigin: true,
         secure: false,
         ws: true,
         rewrite: (path) => path.replace(/^\/api\/pong\/wss/, '/wss')
       },
       '/api/pong/ws': {
-        target: 'https://pong-service:3004',
+        target: 'https://pong-service:3003',
         changeOrigin: true,
         secure: false,
         ws: true,

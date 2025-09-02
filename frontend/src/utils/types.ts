@@ -1,5 +1,7 @@
 // types.ts
 export interface User {
+  is_guest: any;
+  created_at: string | number | Date;
   id: number;
   username: string;
   email: string;

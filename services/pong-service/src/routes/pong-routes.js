@@ -227,64 +227,64 @@ function setupRoutes(fastify, pongService) {
   });
 
 
-  fastify.get('/game-history', async (request, reply) => {
-    const token = request.headers.authorization?.replace('Bearer ', '');
-    const user = await validateToken(token);
-    if (!user) {
-      return reply.code(401).send({ error: 'Authentication required' });
-    }
+  // fastify.get('/game-history', async (request, reply) => {
+  //   const token = request.headers.authorization?.replace('Bearer ', '');
+  //   const user = await validateToken(token);
+  //   if (!user) {
+  //     return reply.code(401).send({ error: 'Authentication required' });
+  //   }
 
-    try {
-      const games = await pongService.db.all(`
-        SELECT 
-          gs.id,
-          gs.created_at,
-          gs.final_score_player1,
-          gs.final_score_player2,
-          gs.game_duration_ms,
-          gs.game_settings,
-          gs.tournament_id,
-          gp1.user_id as player1_id,
-          gp2.user_id as player2_id,
-          u1.display_name as player1_name,
-          u2.display_name as player2_name,
-          CASE 
-            WHEN gs.winner_id = ? THEN 'win'
-            WHEN gs.winner_id IS NULL THEN 'draw'
-            ELSE 'loss'
-          END as result
-        FROM game_sessions gs
-        LEFT JOIN game_participants gp1 ON gp1.game_session_id = gs.id AND gp1.player_number = 1
-        LEFT JOIN game_participants gp2 ON gp2.game_session_id = gs.id AND gp2.player_number = 2
-        LEFT JOIN users u1 ON u1.id = gp1.user_id
-        LEFT JOIN users u2 ON u2.id = gp2.user_id
-        WHERE gs.id IN (
-          SELECT game_session_id 
-          FROM game_participants 
-          WHERE user_id = ?
-        )
-        AND gs.status = 'completed'
-        ORDER BY gs.created_at DESC
-        LIMIT 50
-      `, [user.id, user.id]);
+  //   try {
+  //     const games = await pongService.db.all(`
+  //       SELECT 
+  //         gs.id,
+  //         gs.created_at,
+  //         gs.final_score_player1,
+  //         gs.final_score_player2,
+  //         gs.game_duration_ms,
+  //         gs.game_settings,
+  //         gs.tournament_id,
+  //         gp1.user_id as player1_id,
+  //         gp2.user_id as player2_id,
+  //         u1.display_name as player1_name,
+  //         u2.display_name as player2_name,
+  //         CASE 
+  //           WHEN gs.winner_id = ? THEN 'win'
+  //           WHEN gs.winner_id IS NULL THEN 'draw'
+  //           ELSE 'loss'
+  //         END as result
+  //       FROM game_sessions gs
+  //       LEFT JOIN game_participants gp1 ON gp1.game_session_id = gs.id AND gp1.player_number = 1
+  //       LEFT JOIN game_participants gp2 ON gp2.game_session_id = gs.id AND gp2.player_number = 2
+  //       LEFT JOIN users u1 ON u1.id = gp1.user_id
+  //       LEFT JOIN users u2 ON u2.id = gp2.user_id
+  //       WHERE gs.id IN (
+  //         SELECT game_session_id 
+  //         FROM game_participants 
+  //         WHERE user_id = ?
+  //       )
+  //       AND gs.status = 'completed'
+  //       ORDER BY gs.created_at DESC
+  //       LIMIT 50
+  //     `, [user.id, user.id]);
 
-      const history = games.map(game => ({
-        id: game.id,
-        date: new Date(game.created_at),
-        opponent: game.player1_id === user.id ? game.player2_name : game.player1_name,
-        result: game.result,
-        score: `${game.final_score_player1}-${game.final_score_player2}`,
-        duration: game.game_duration_ms,
-        options: JSON.parse(game.game_settings),
-        tournament_id: game.tournament_id
-      }));
+  //     const history = games.map(game => ({
+  //       id: game.id,
+  //       date: new Date(game.created_at),
+  //       opponent: game.player1_id === user.id ? game.player2_name : game.player1_name,
+  //       result: game.result,
+  //       score: `${game.final_score_player1}-${game.final_score_player2}`,
+  //       duration: game.game_duration_ms,
+  //       options: JSON.parse(game.game_settings),
+  //       tournament_id: game.tournament_id
+  //     }));
 
-      return history;
-    } catch (error) {
-      console.error('Error fetching game history:', error);
-      return reply.code(500).send({ error: 'Failed to fetch game history' });
-    }
-  });
+  //     return history;
+  //   } catch (error) {
+  //     console.error('Error fetching game history:', error);
+  //     return reply.code(500).send({ error: 'Failed to fetch game history' });
+  //   }
+  // });
 
   fastify.post('/game/join/:gameId', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
@@ -738,67 +738,21 @@ function setupRoutes(fastify, pongService) {
     return openTournaments;
   });
 
-  fastify.get('/stats', async (request, reply) => {
-    const token = request.headers.authorization?.replace('Bearer ', '');
-    const user = await validateToken(token);
-    if (!user) {
-      return reply.code(401).send({ error: 'Authentication required' });
+  fastify.post('/notify/friend-request', async (request, reply) => {
+    const { type, requesterId, addresseeId, requestId } = request.body;
+    try {
+      if (type === 'sent') {
+        await pongService.notifyFriendRequestSent(requesterId, addresseeId, requestId);
+      } else if (type === 'accepted') {
+        await pongService.notifyFriendRequestAccepted(requesterId, addresseeId);
+      } else if (type === 'rejected') {
+        await pongService.notifyFriendRequestRejected(requesterId, addresseeId);
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending friend notification:', error);
+      return reply.code(500).send({ error: 'Failed to send notification' });
     }
-
-    const stats = await pongService.db.get('SELECT * FROM user_game_stats WHERE user_id = ?', [user.id]);
-
-    const gamesList = await pongService.db.all(`
-      SELECT gs.*, gp1.score as player1_score, gp2.score as player2_score, u1.display_name as player1_name, u2.display_name as player2_name 
-      FROM game_sessions gs 
-      LEFT JOIN game_participants gp1 ON gp1.game_session_id = gs.id AND gp1.player_number = 1 
-      LEFT JOIN game_participants gp2 ON gp2.game_session_id = gs.id AND gp2.player_number = 2 
-      LEFT JOIN users u1 ON u1.id = gp1.user_id 
-      LEFT JOIN users u2 ON u2.id = gp2.user_id 
-      WHERE gs.id IN (SELECT game_session_id FROM game_participants WHERE user_id = ?) 
-      ORDER BY gs.ended_at DESC
-    `, [user.id]);
-
-    const winsWithPowerups = await pongService.db.get(`
-      SELECT COUNT(*) as count FROM game_sessions 
-      WHERE winner_id = ? AND json_extract(game_settings, '$.powerups_enabled') = true
-    `, [user.id]);
-
-    const winsWithoutPowerups = await pongService.db.get(`
-      SELECT COUNT(*) as count FROM game_sessions 
-      WHERE winner_id = ? AND json_extract(game_settings, '$.powerups_enabled') = false
-    `, [user.id]);
-
-    const mostWinsVariant = await pongService.db.get(`
-      SELECT json_extract(game_settings, '$.board_variant') as variant, COUNT(*) as count 
-      FROM game_sessions 
-      WHERE winner_id = ? 
-      GROUP BY variant 
-      ORDER BY count DESC LIMIT 1
-    `, [user.id]);
-
-    const tournamentsCreated = await pongService.db.get(`
-      SELECT COUNT(*) as count FROM tournaments WHERE creator_id = ?
-    `, [user.id]);
-
-    const tournamentsPlayed = await pongService.db.get(`
-      SELECT COUNT(*) as count FROM tournament_participants WHERE user_id = ?
-    `, [user.id]);
-
-    const tournamentsWon = await pongService.db.get(`
-      SELECT COUNT(*) as count FROM tournaments WHERE winner_id = ?
-    `, [user.id]);
-
-    return {
-      ...stats,
-      games_list: gamesList,
-      wins_with_powerups: winsWithPowerups.count,
-      wins_without_powerups: winsWithoutPowerups.count,
-      most_wins_variant: mostWinsVariant,
-      tournaments_created: tournamentsCreated.count,
-      tournaments_played: tournamentsPlayed.count,
-      tournaments_won: tournamentsWon.count
-      // Add graphs data if needed
-    };
   });
 
   fastify.get('/wss', { websocket: true }, (connection, request) => {
@@ -873,6 +827,8 @@ function setupRoutes(fastify, pongService) {
                 connection.close(4003, 'Already connected to this game');
                 return;
               }
+
+              console.log("WSS USER: ", user);
               
               gameRoom.addPlayer(userId, playerNumber);
               gameRoom.addConnection(userId, connection);
@@ -942,6 +898,7 @@ function setupRoutes(fastify, pongService) {
             authenticated = true;
             userId = user.id;
             clearTimeout(authTimeout);
+            console.log("ARGH CONNECTION: ", user, userId);
             pongService.addUserConnection(userId, connection);
             connection.send(JSON.stringify({ type: 'auth_success' }));
           } else {
@@ -958,9 +915,6 @@ function setupRoutes(fastify, pongService) {
       if (authenticated && userId) {
         pongService.removeUserConnection(userId);
         pongService.removeUserFromQueue(userId);
-      }
-      if (authenticated && userId) {
-        pongService.removeUserConnection(userId);
       }
     });
   });

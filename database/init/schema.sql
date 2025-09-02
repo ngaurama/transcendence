@@ -95,30 +95,52 @@ CREATE TABLE email_verification_tokens (
 -- 2. FRIENDS & SOCIAL SYSTEM
 -- ============================================================================
 
+CREATE TABLE friendship_status (
+    status VARCHAR(20) PRIMARY KEY
+);
+
+INSERT OR IGNORE INTO friendship_status (status) VALUES 
+('pending'), ('accepted'), ('blocked'), ('rejected');
+
 CREATE TABLE friendships (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     requester_id INTEGER NOT NULL,
     addressee_id INTEGER NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'accepted', 'blocked'
+    status VARCHAR(20) DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (addressee_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (status) REFERENCES friendship_status(status),
     
     UNIQUE(requester_id, addressee_id),
-    CHECK (requester_id != addressee_id),
-    CHECK (status IN ('pending', 'accepted', 'blocked'))
+    CHECK (requester_id != addressee_id)
+);
+
+CREATE TABLE friend_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_user_id INTEGER NOT NULL,
+    to_user_id INTEGER NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (from_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (status) REFERENCES friendship_status(status),
+
+    UNIQUE(from_user_id, to_user_id),
+    CHECK (from_user_id != to_user_id)
 );
 
 CREATE TABLE user_presence (
     user_id INTEGER PRIMARY KEY,
-    status VARCHAR(20) DEFAULT 'offline', -- 'online', 'playing', 'away', 'offline'
+    status VARCHAR(20) DEFAULT 'offline',
     current_game_id INTEGER,
-    current_activity VARCHAR(100), -- 'Playing Pong', etc.
+    current_activity VARCHAR(100),
     last_seen_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CHECK (status IN ('online', 'playing', 'away', 'offline'))
 );
@@ -316,94 +338,6 @@ CREATE TABLE matchmaking_queue (
 );
 
 -- ============================================================================
--- 7. CHAT SYSTEM
--- ============================================================================
-
-CREATE TABLE chat_channels (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type VARCHAR(20) NOT NULL, -- 'direct', 'tournament', 'game'
-    name VARCHAR(200),
-    
-    -- Channel settings
-    is_private BOOLEAN DEFAULT TRUE,
-    max_participants INTEGER DEFAULT 2,
-    
-    -- Associated entities
-    tournament_id INTEGER,
-    game_session_id INTEGER,
-    
-    -- Channel state
-    is_active BOOLEAN DEFAULT TRUE,
-    
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
-    FOREIGN KEY (game_session_id) REFERENCES game_sessions(id) ON DELETE CASCADE,
-    
-    CHECK (type IN ('direct', 'tournament', 'game')),
-    CHECK (max_participants >= 2)
-);
-
-CREATE TABLE chat_participants (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    channel_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    
-    -- Participation settings
-    role VARCHAR(20) DEFAULT 'member', -- 'admin', 'member'
-    is_muted BOOLEAN DEFAULT FALSE,
-    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    left_at DATETIME,
-    
-    FOREIGN KEY (channel_id) REFERENCES chat_channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    
-    UNIQUE(channel_id, user_id),
-    CHECK (role IN ('admin', 'member'))
-);
-
-CREATE TABLE chat_messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    channel_id INTEGER NOT NULL,
-    sender_id INTEGER NOT NULL,
-    
-    -- Message content
-    message_type VARCHAR(20) DEFAULT 'text', -- 'text', 'game_invite', 'system', 'tournament_update'
-    content TEXT NOT NULL,
-    metadata TEXT DEFAULT '{}', -- JSON for game invites, system messages, etc.
-    
-    -- Message status
-    is_edited BOOLEAN DEFAULT FALSE,
-    edited_at DATETIME,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    deleted_at DATETIME,
-    
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (channel_id) REFERENCES chat_channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-    
-    CHECK (message_type IN ('text', 'game_invite', 'system', 'tournament_update')),
-    CHECK (content != '')
-);
-
-CREATE TABLE user_blocks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    blocker_id INTEGER NOT NULL,
-    blocked_id INTEGER NOT NULL,
-    reason VARCHAR(500),
-    
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (blocker_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (blocked_id) REFERENCES users(id) ON DELETE CASCADE,
-    
-    UNIQUE(blocker_id, blocked_id),
-    CHECK (blocker_id != blocked_id)
-);
-
--- ============================================================================
 -- 8. STATS & DASHBOARDS (ALL-TIME ONLY)
 -- ============================================================================
 
@@ -552,19 +486,13 @@ CREATE INDEX idx_tournament_matches_round ON tournament_matches(tournament_id, r
 CREATE INDEX idx_tournament_matches_status ON tournament_matches(status);
 CREATE INDEX idx_tournament_matches_game_session ON tournament_matches(game_session_id) WHERE game_session_id IS NOT NULL;
 
--- Chat indexes
-CREATE INDEX idx_chat_messages_channel ON chat_messages(channel_id);
-CREATE INDEX idx_chat_messages_sender ON chat_messages(sender_id);
-CREATE INDEX idx_chat_messages_created ON chat_messages(created_at);
-CREATE INDEX idx_chat_messages_type ON chat_messages(message_type);
-
-CREATE INDEX idx_chat_participants_channel ON chat_participants(channel_id);
-CREATE INDEX idx_chat_participants_user ON chat_participants(user_id);
-
 -- Friendship indexes
 CREATE INDEX idx_friendships_requester ON friendships(requester_id);
 CREATE INDEX idx_friendships_addressee ON friendships(addressee_id);
 CREATE INDEX idx_friendships_status ON friendships(status);
+CREATE INDEX idx_friend_requests_from ON friend_requests(from_user_id);
+CREATE INDEX idx_friend_requests_to ON friend_requests(to_user_id);
+
 
 -- Stats indexes
 CREATE INDEX idx_user_game_stats_user ON user_game_stats(user_id);

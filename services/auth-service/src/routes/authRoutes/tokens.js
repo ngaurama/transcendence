@@ -118,7 +118,7 @@ module.exports = function setupTokensRoute(fastify, { dbService, emailService, s
 
         const user = await dbService.db.get(
           `
-          SELECT id, username, email, display_name, avatar_url, oauth_provider, is_guest
+          SELECT id, username, email, display_name, avatar_url, oauth_provider, is_guest, created_at
           FROM users 
           WHERE id = ? AND is_active = 1
         `,
@@ -140,7 +140,8 @@ module.exports = function setupTokensRoute(fastify, { dbService, emailService, s
             avatar_url: user.avatar_url,
             is_verified: user.is_verified,
             oauth_provider: user.oauth_provider,
-            is_guest: user.is_guest
+            is_guest: user.is_guest,
+            created_at: user.created_at
           },
         };
       } catch (error) {

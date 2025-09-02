@@ -1,7 +1,7 @@
 // services/PongService.ts
 import { GameOptions, TournamentOptions } from '../utils/types';
 
-export async function createGame(options: GameOptions, opponent_id?: string): Promise<string> {
+export async function createGame(options: GameOptions, opponent_id?: number): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
     const res = await fetch(`/api/pong/game/create`, {
@@ -25,39 +25,6 @@ export async function createGame(options: GameOptions, opponent_id?: string): Pr
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.error || 'Failed to create local game');
-    }
-
-    const data = await res.json();
-    return data.game_id;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function createOnlineGame(options: GameOptions, opponentId: string): Promise<string> {
-  try {
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/game/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        gameMode: 'online',
-        gameType: '2player',
-        player1_name: options.player1_name || 'Player 1',
-        player2_name: options.player2_name || 'Player 2',
-        powerups_enabled: options.powerups_enabled,
-        points_to_win: options.points_to_win,
-        board_variant: options.board_variant,
-        opponent_id: opponentId,
-      }),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Failed to create online game');
     }
 
     const data = await res.json();
@@ -257,10 +224,14 @@ export async function getOpenTournaments(): Promise<any[]> {
   }
 }
 
-export async function getUserStats(): Promise<any> {
+export async function getUserStats(userId?: number): Promise<any> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/stats`, {
+    const url = userId 
+      ? `/api/social/stats/${userId}`
+      : `/api/social/stats`;
+    
+    const res = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -269,8 +240,7 @@ export async function getUserStats(): Promise<any> {
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Failed to fetch user stats');
+      throw new Error('Failed to fetch user stats');
     }
 
     return await res.json();
@@ -298,7 +268,7 @@ export async function getGameInfo(gameId: string): Promise<any> {
   }
 }
 
-export async function requestRematch(options: GameOptions, opponentId?: string): Promise<string> {
+export async function requestMatch(options: GameOptions, opponentId?: number): Promise<string> {
   if (options) {
     try {
       let gameId: string;
@@ -319,19 +289,3 @@ export async function requestRematch(options: GameOptions, opponentId?: string):
   }
   throw new Error('No game options available for rematch');
 }
-
-// export async function requestRematch(): Promise<string> {
-//   const options = (window as any).gameOptions as GameOptions;
-
-//   if (options) {
-//     try {
-//       const gameId = await createGame(options);
-//       console.log(`Rematch created: game_id=${gameId}`);
-//       return gameId;
-//     } catch (error) {
-//       console.error('Rematch failed:', error);
-//       throw error;
-//     }
-//   }
-//   throw new Error('No local game options available for rematch');
-// }
