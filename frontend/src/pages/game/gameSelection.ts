@@ -5,9 +5,9 @@ import { checkAuthStatus } from '../../services';
 
 let currentTournamentMode: string = '';
 let matchmakingCleanup: (() => void) | null = null;
-const user = await checkAuthStatus();
 
 export async function playSelectionPage(): Promise<string> {
+  const user = await checkAuthStatus();
   if (!user) {
     (window as any).navigate('/');
     return '';
@@ -237,7 +237,7 @@ export async function playSelectionPage(): Promise<string> {
   `;
 }
 
-export function attachPlaySelectionListeners() {
+export async function attachPlaySelectionListeners() {
   const selectPong = document.getElementById('select-pong');
   const modeSelection = document.getElementById('mode-selection');
   const playOnline = document.getElementById('play-online');
@@ -271,6 +271,10 @@ export function attachPlaySelectionListeners() {
   let isInMatchmaking = false;
   let matchmakingInterval: number | null = null;
   let currentMode: string = '';
+
+  const user = await checkAuthStatus();
+  if (!user)
+    return;
 
   // Load saved options
   const savedOptions = getGameOptions();
@@ -368,7 +372,7 @@ export function attachPlaySelectionListeners() {
           cancelMatchmaking();
         }
       }
-      await handleStartGame('online', '2player');
+      await handleStartGame(user, 'online', '2player');
       startMatchmakingPolling();
     } catch (error) {
       console.error('Matchmaking failed:', error);
@@ -566,26 +570,6 @@ export function attachPlaySelectionListeners() {
     attachPlaySelectionListeners();
   };
 
-
-  // (window as any).updateTournamentParticipants = function(tournamentId: string, participants: any[]) {
-  //   const tournamentItem = document.querySelector(`.tournament-item[data-id="${tournamentId}"]`) as HTMLElement | null;
-  //   if (tournamentItem) {
-  //     const infoDiv = tournamentItem.querySelector('div');
-  //     if (infoDiv) {
-  //       const settings = JSON.parse(tournamentItem.dataset.settings || '{}');
-  //       infoDiv.innerHTML = `
-  //         <span class="font-semibold">${tournamentItem.dataset.name}</span>
-  //         <p class="text-sm text-gray-300">
-  //           ${participants.length}/${tournamentItem.dataset.maxParticipants} players • 
-  //           ${settings.powerups_enabled ? 'Powerups' : 'No Powerups'} • 
-  //           ${settings.points_to_win} points to win • 
-  //           ${settings.board_variant || 'Classic'}
-  //         </p>
-  //       `;
-  //     }
-  //   }
-  // };
-
   (window as any).updateTournamentParticipants = function(tournamentId: string, participants: any[]) {
     const tournamentItem = document.querySelector(`li[data-id="${tournamentId}"]`) as HTMLElement | null;
     if (tournamentItem) {
@@ -665,7 +649,7 @@ export function attachPlaySelectionListeners() {
 
   if (confirmLocalGame) {
     confirmLocalGame.addEventListener('click', () => {
-      handleStartGame('local', '2player');
+      handleStartGame(user, 'local', '2player');
     });
   }
 
@@ -691,9 +675,9 @@ export function attachPlaySelectionListeners() {
   if (createTournamentBtn) {
     createTournamentBtn.addEventListener('click', () => {
       if (currentTournamentMode === 'local')
-        handleStartGame('local', 'tournament');
+        handleStartGame(user, 'local', 'tournament');
       else
-        handleStartGame('online', 'tournament');
+        handleStartGame(user, 'online', 'tournament');
     });
   }
 
@@ -784,11 +768,10 @@ function updatePlayerAliases() {
   `;
 }
 
-async function handleStartGame(gameMode: string, gameType: string): Promise<void> {
+async function handleStartGame(user: any, gameMode: string, gameType: string): Promise<void> {
   const points_to_win = parseInt((document.getElementById('points-to-win') as HTMLSelectElement)?.value || '5');
   const powerups_enabled = (document.getElementById('powerups') as HTMLSelectElement)?.value === 'true';
   const board_variant = (document.getElementById('board-variant') as HTMLSelectElement)?.value || 'classic';
-  
   let tournament_name = '';
   let max_participants = 8;
   let num_players = 4;

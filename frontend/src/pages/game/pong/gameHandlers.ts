@@ -19,8 +19,9 @@ export function setupRematchHandler() {
       const options = gameInfo.settings;
       const currentUser = await checkAuthStatus();
       const opponent = gameInfo.players.find((p: any) => p.id !== currentUser?.id);
-      
+
       if (opponent) {
+        console.log("OPTIONS AND OPPONENT: ", options, opponent.id);
         const newGameId = await requestMatch(options, opponent.id);
         rematchBtn.style.display = 'none';
         rematchBtn.textContent = 'Waiting for opponent...';

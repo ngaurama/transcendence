@@ -1,4 +1,5 @@
 import { User } from "../utils/types"
+import { closeUserWebSocket } from "./UserWebSocket";
 
 export async function login(username: string, password: string): Promise<{ requires2FA?: boolean; user?: User }> {
   try {
@@ -79,7 +80,7 @@ export async function logout(): Promise<void> {
       console.error('Logout error:', error);
     }
   }
-
+  closeUserWebSocket();
   localStorage.clear();
 }
 

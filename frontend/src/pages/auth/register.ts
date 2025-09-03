@@ -1,4 +1,5 @@
 import { register, initiateOAuth } from '../../services';
+import { initUserWebSocket } from '../../services/UserWebSocket';
 
 export function registerPage(): string {
   return `

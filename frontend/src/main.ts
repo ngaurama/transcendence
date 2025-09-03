@@ -20,6 +20,7 @@ async function main() {
   }
 
   const user = await checkAuthStatus();
+  console.log("USER AFTER AUTHCHECK: ", user);
   const allowedUnauthenticatedRoutes = [
     '/login',
     '/register',
@@ -32,7 +33,9 @@ async function main() {
     window.history.replaceState({}, '', '/login');
   }
 
-  if (user) initUserWebSocket();
+  if (user) {
+    initUserWebSocket();
+  }
   initRouter();
 }
 
@@ -44,5 +47,5 @@ if (document.readyState === 'loading') {
 
 (window as any).navigate = (path: string) => {
   history.pushState({}, '', path);
-  render(); // Call render instead of initRouter
+  render();
 };

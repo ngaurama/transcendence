@@ -1,8 +1,8 @@
 // router.ts
 import { checkAuthStatus } from '../services';
 import * as Pages from '../pages';
+import { initUserWebSocket } from '../services/UserWebSocket';
 
-// Define routes once
 const routes: { [key: string]: () => Promise<string> | string } = {
   '/': Pages.homePage,
   '/dashboard': Pages.dashboardPage,
@@ -27,14 +27,11 @@ const routes: { [key: string]: () => Promise<string> | string } = {
   '/delete-account': Pages.deleteAccountPage,
 };
 
-// Cache DOM elements
 const app = document.getElementById('app') as HTMLElement;
 const authStatus = document.getElementById('auth-status') as HTMLElement;
 
 export function initRouter() {
-  // Set up the popstate event listener once
   window.addEventListener('popstate', render);
-  // Perform initial render
   render();
 }
 
@@ -59,6 +56,10 @@ export async function render() {
     app.innerHTML = content;
     updateAuthStatus();
     attachEventListeners();
+    const user = await checkAuthStatus();
+    if (user) {
+      initUserWebSocket();
+    }
   } catch (err) {
     console.error("Render error:", err);
     app.innerHTML = '<h2>Error rendering page</h2>';

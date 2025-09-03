@@ -1,7 +1,9 @@
 import { checkAuthStatus } from '../services';
+import { initUserWebSocket } from '../services/UserWebSocket';
 
 export async function homePage(): Promise<string> {
   const user = await checkAuthStatus();
+  console.log("USER IN HOMEPAGE:", user);
   if (!user) return '<h2>Welcome! Please login or register.</h2>';
 
   return `
@@ -16,5 +18,7 @@ export async function homePage(): Promise<string> {
 
 export function attachHomeListeners() {
   const playBtn = document.getElementById('play-now-btn');
-  if (playBtn) playBtn.addEventListener('click', () => (window as any).navigate('/play'));
+  if (playBtn) playBtn.addEventListener('click', () => {
+    (window as any).navigate('/play');
+  });
 }

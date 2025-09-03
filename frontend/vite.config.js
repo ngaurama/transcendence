@@ -4,15 +4,19 @@ import { resolve } from 'path';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default defineConfig({
   root: resolve(__dirname, 'src'),
   publicDir: resolve(__dirname, 'public'),
   build: {
+    target: 'esnext',
     outDir: '../dist',
     emptyOutDir: true,
     sourcemap: true
   },
-  server: {
+  server: isDev
+  ? {
     host: '0.0.0.0',
     port: 5173,
     https: {
@@ -51,7 +55,7 @@ export default defineConfig({
         secure: false,
       },
     }
-  },
+  } : undefined,
   css: {
     postcss: {
       plugins: [tailwindcss, autoprefixer]

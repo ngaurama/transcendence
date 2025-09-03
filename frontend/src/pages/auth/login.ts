@@ -1,4 +1,5 @@
 import { login, initiateOAuth, guestLogin } from '../../services';
+import { initUserWebSocket } from '../../services/UserWebSocket';
 import {  } from '../../utils/constants';
 
 export function loginPage(): string {

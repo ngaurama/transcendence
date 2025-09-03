@@ -3,18 +3,39 @@ import { acceptFriendRequest, getFriendsList, rejectFriendRequest } from './Frie
 import { acceptGameInvitation, declineGameInvitation } from './GameInvitationService';
 import { showMatchInvitation } from './NotificationService';
 
+let userWs: WebSocket | null = null;
+let reconnectTimeout: number | null = null;
+const RECONNECT_DELAY = 2000;
+
 export function initUserWebSocket(): WebSocket | null {
+  if (userWs && userWs.readyState === WebSocket.OPEN) {
+    console.log('WebSocket already connected');
+    return userWs;
+  }
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+
   const token = localStorage.getItem('access_token');
-  if (!token) return null;
+  if (!token) {
+    console.log('No token available for WebSocket connection');
+    return null;
+  }
+  if (userWs) {
+    userWs.close();
+    userWs = null;
+  }
 
-  const ws = new WebSocket(`wss://${window.location.host}/api/pong/ws/user`);
+  console.log('Creating new WebSocket connection');
+  userWs = new WebSocket(`wss://${window.location.host}/api/pong/ws/user`);
 
-  ws.onopen = () => {
+  userWs.onopen = () => {
     console.log('Connected to User WS');
-    ws.send(JSON.stringify({ type: 'auth', token }));
+    userWs!.send(JSON.stringify({ type: 'auth', token }));
   };
 
-  ws.onmessage = (event) => {
+  userWs.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
       handleUserWebSocketMessage(data);
@@ -23,15 +44,35 @@ export function initUserWebSocket(): WebSocket | null {
     }
   };
 
-  ws.onerror = (error) => {
+  userWs.onerror = (error) => {
     console.error('User WebSocket error:', error);
   };
 
-  ws.onclose = (event) => {
+  userWs.onclose = (event) => {
     console.log('User WebSocket closed:', event.code, event.reason);
+    
+    if (event.code !== 1000 && localStorage.getItem('access_token')) {
+      console.log('Will attempt reconnect in', RECONNECT_DELAY, 'ms');
+      reconnectTimeout = setTimeout(() => {
+        initUserWebSocket();
+      }, RECONNECT_DELAY);
+    } else {
+      userWs = null;
+    }
   };
 
-  return ws;
+  return userWs;
+}
+
+export function closeUserWebSocket(): void {
+  if (userWs) {
+    userWs.close(1000, 'Normal closure');
+    userWs = null;
+  }
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
 }
 
 function handleUserWebSocketMessage(data: any): void {
