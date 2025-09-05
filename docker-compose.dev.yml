@@ -131,16 +131,9 @@ services:
     volumes:
       - database_data:/app/data
       - ./database/init:/docker-entrypoint-initdb.d
-      - ./database/scripts:/app/scripts
     env_file: .env
     networks:
       - ft_transcendence
-    healthcheck:
-      test: ["CMD", "/app/scripts/health-check.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     restart: unless-stopped
 
   # i think we'll just leave vault in dev mode since it doesn't make sense to automate the manual sceret insertoin process in prod mode with shamir keys and such

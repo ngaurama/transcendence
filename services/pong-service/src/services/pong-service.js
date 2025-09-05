@@ -87,7 +87,6 @@ class PongService {
         status: 'registration'
       }
     });
-
     return tournament;
   }
 
@@ -172,8 +171,7 @@ class PongService {
   async acceptGameInvitation(userId, gameId) {
     const invitations = this.pendingInvitations.get(userId) || [];
     const invitation = invitations.find(inv => inv.game_id === gameId);
-
-    
+ 
     if (!invitation) {
       throw new Error('Invitation not found');
     }
@@ -182,7 +180,7 @@ class PongService {
       throw new Error('Invalid game');
     }
     const participant = await this.db.get(
-      'SELECT * FROM game_participants WHERE game_session_id = ? AND user_id = ? AND player_number = 2',
+      'SELECT * FROM game_participants WHERE game_session_id = ? AND user_id = ?',
       [gameId, userId]
     );
     if (!participant) {
@@ -193,7 +191,7 @@ class PongService {
     this.pendingInvitations.set(userId, invitations.filter(inv => inv.game_id !== gameId));
     
     const inviter = await this.db.get(
-      'SELECT user_id FROM game_participants WHERE game_session_id = ? AND player_number = 1',
+      'SELECT user_id FROM game_participants WHERE game_session_id = ?',
       [gameId]
     );
 

@@ -1,9 +1,28 @@
+import { checkAuthStatus } from "../../services";
+
 // pages/gdpr.ts - New GDPR pages
-export function gdprPage(): string {
+export async function gdprPage(): Promise<string> {
+  const user = await checkAuthStatus();
+  if (!user) {
+    (window as any).navigate('/');
+    return '';
+  }
+
+  const isOAuthUser = user.oauth_provider && user.oauth_provider !== 'local';
+
   return `
     <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-6">GDPR Compliance Center</h2>
-      
+
+      <!-- Add pending deletion status -->
+      <div id="deletion-status" class="hidden bg-yellow-900 bg-opacity-20 p-4 rounded mb-4">
+        <h3 class="text-lg font-semibold mb-2">Pending Account Deletion</h3>
+        <p class="text-gray-300" id="deletion-date"></p>
+        <button id="cancel-deletion" class="mt-2 bg-green-600 px-3 py-1 rounded text-sm">
+          Cancel Deletion Request
+        </button>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Data Management Card -->
         <div class="bg-gray-900 p-4 rounded">
@@ -20,13 +39,15 @@ export function gdprPage(): string {
         </div>
 
         <!-- Privacy Actions Card -->
-        <div class="bg-gray-900 p-4 rounded">
+        <div class="bg-gray-900 p-${isOAuthUser ? 2 : 3} rounded">
           <h3 class="text-lg font-semibold mb-3">Privacy Actions</h3>
           <p class="text-gray-400 mb-4">Exercise your privacy rights</p>
-          
-          <button onclick="navigate('/anonymize-account')" class="w-full bg-orange-600 p-2 rounded mb-2">
-            Anonymize Account
-          </button>
+          ${!isOAuthUser ? `
+            <button onclick="navigate('/anonymize-account')" class="w-full bg-orange-600 p-2 rounded mb-2">
+              Anonymize Account
+            </button>
+            ` : '' 
+          }
           
           <button onclick="navigate('/delete-account')" class="w-full bg-red-600 p-2 rounded">
             Delete Account
@@ -196,6 +217,11 @@ export function deleteAccountPage(): string {
 }
 
 export function attachGdprListeners() {
+
+  if (window.location.pathname === '/gdpr') {
+    loadDeletionStatus();
+  }
+
   if (window.location.pathname === '/view-data') {
     loadUserData();
   }
@@ -239,6 +265,55 @@ export function attachGdprListeners() {
     }
   }
 }
+
+async function loadDeletionStatus() {
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch('/api/auth/gdpr/deletion-status', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+    
+    if (data.pending_deletion) {
+      const statusEl = document.getElementById('deletion-status');
+      const dateEl = document.getElementById('deletion-date');
+      const cancelBtn = document.getElementById('cancel-deletion');
+      
+      if (statusEl && dateEl && cancelBtn) {
+        statusEl.classList.remove('hidden');
+        dateEl.textContent = `Scheduled for deletion on: ${new Date(data.deletion_date).toLocaleDateString()}`;
+        
+        cancelBtn.addEventListener('click', async () => {
+          if (confirm('Cancel account deletion request?')) {
+            await cancelDeletionRequest();
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load deletion status:', error);
+  }
+}
+
+async function cancelDeletionRequest() {
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch('/api/auth/gdpr/cancel-deletion', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+    if (data.success) {
+      alert('Deletion request cancelled successfully!');
+      window.location.reload();
+    }
+  } catch (error) {
+    alert('Failed to cancel deletion request');
+  }
+}
+
 
 async function loadUserData() {
   try {

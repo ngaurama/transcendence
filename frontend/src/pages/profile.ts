@@ -1,5 +1,6 @@
 // pages/profile.ts
 import { checkAuthStatus, getUserStats, checkFriendshipStatus, sendFriendRequest, inviteFriendToGame, removeFriend } from '../services';
+import { initWinLossChart } from '../utils/chart';
 import { renderStatsContent } from './dashboard';
 
 export async function profilePage(): Promise<string> {
@@ -16,6 +17,12 @@ export async function profilePage(): Promise<string> {
   const userStats = await getUserStats(userId);
   const isOwnProfile = currentUser?.id.toString() === userId;
   const friendshipStatus = isOwnProfile ? 'self' : await checkFriendshipStatus(userId);
+
+  setTimeout(() => {
+    if (userStats.stats) {
+      initWinLossChart(userStats.stats);
+    }  
+  }, 100);
 
   return `
     <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
@@ -63,6 +70,23 @@ export async function attachProfileListeners(userId: string) {
   const currentUser = await checkAuthStatus();
   
   if (!userId || currentUser?.id.toString() === userId) return;
+
+  document.querySelectorAll('.recent-game-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      const gameId = item.getAttribute('data-game-id');
+      const detailsElement = document.getElementById(`game-details-${gameId}`);
+      
+      document.querySelectorAll('[id^="game-details-"]').forEach(detail => {
+        if (detail.id !== `game-details-${gameId}`) {
+          detail.classList.add('hidden');
+        }
+      });
+      
+      if (detailsElement) {
+        detailsElement.classList.toggle('hidden');
+      }
+    });
+  });
 
   const addFriendBtn = document.getElementById('add-friend-btn');
   const playWithFriendBtn = document.getElementById('play-with-friend');

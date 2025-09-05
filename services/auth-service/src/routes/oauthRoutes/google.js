@@ -3,6 +3,15 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 module.exports = function setupGoogleOauthRoute(fastify, { dbService, emailService, secrets, authenticateToken }) {
+
+    async function permanentAccountCleanup(userId) {
+        await this.dbService.db.run(`DELETE FROM users WHERE id = ?`, [userId]);
+        await this.dbService.db.run(`DELETE FROM user_sessions WHERE user_id = ?`, [userId]);
+        await this.dbService.db.run(`DELETE FROM user_game_stats WHERE user_id = ?`, [userId]);
+        await this.dbService.db.run(`DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?`, [userId, userId]);
+        await this.dbService.db.run(`DELETE FROM tournament_participants WHERE user_id = ?`, [userId]);
+    }
+
     fastify.get("/oauth/google", async (request, reply) => {
         const { client_id, redirect_uri } = secrets.external.google;
         const scope = "profile email";
@@ -42,22 +51,32 @@ module.exports = function setupGoogleOauthRoute(fastify, { dbService, emailServi
             const { id: google_id, email, name } = userResponse.data;
             let user = await dbService.db.get(
                 `
-        SELECT id, username, email, display_name, avatar_url, is_active, 
-        is_verified, totp_enabled, totp_secret, oauth_provider
-        FROM users WHERE google_id = ? OR email = ?
-      `,
+                    SELECT id, username, email, display_name, avatar_url, is_active, 
+                    is_verified, totp_enabled, totp_secret, oauth_provider
+                    FROM users WHERE google_id = ? OR email = ?
+                `,
                 [google_id, email]
             );
+
+            if (user && user.deletion_requested_at) {
+                const deletionDate = new Date(user.deletion_requested_at);
+                const gracePeriodEnd = new Date(deletionDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+                
+                if (new Date() > gracePeriodEnd) {
+                    await permanentAccountCleanup(user.id);
+                    user = null;
+                }
+            }
 
             if (!user) {
                 const username = await dbService.generateUniqueUsername(email);
                 const result = await dbService.db.run(
                     `
-          INSERT INTO users (
-            username, email, display_name, avatar_url, google_id, oauth_provider,
-            is_active, is_verified, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-        `,
+                        INSERT INTO users (
+                            username, email, display_name, avatar_url, google_id, oauth_provider,
+                            is_active, is_verified, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                        `,
                     [
                         username,
                         email,

@@ -13,6 +13,7 @@ export interface User {
 }
 
 export interface GameOptions {
+  players: any;
   gameMode: string;
   gameType: string;
   points_to_win: number;

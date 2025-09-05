@@ -33,7 +33,7 @@ export function registerPage(): string {
         <button type="submit" class="w-full bg-green-500 p-2 rounded">Register</button>
       </form>
       <div class="mt-4">
-        <p class="text-center mb-2">Or sign up with:</p>
+        <p class="text-center mb-2">Or login with:</p>
         <button id="google-oauth" class="w-full bg-red-500 p-2 rounded mb-2">Google</button>
         <button id="github-oauth" class="w-full bg-gray-700 p-2 rounded">GitHub</button>
       </div>

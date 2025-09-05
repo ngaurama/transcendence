@@ -23,18 +23,26 @@ function setupRoutes(fastify, pongService) {
       gameType = '2player',
       player1_name,
       player2_name,
+      players,
+      is_rematch = true,
       powerups_enabled = false,
       points_to_win = 5,
       board_variant = 'classic',
       opponent_id,
     } = request.body;
 
+    console.log("REQUEST BODY: ", request.body);
     try {
       const gameSettings = {
         powerups_enabled,
         points_to_win,
         board_variant
       };
+
+      if (gameMode === 'online') {
+        userPlayerDetails = players[0].id === user.id ? players[0] : players[1];
+        opponentPlayerDetails = players[0].id === user.id ? players[1] : players[0];
+      }
 
       const gameResult = await pongService.db.run(`
         INSERT INTO game_sessions (status, game_settings, created_at) 
@@ -43,10 +51,17 @@ function setupRoutes(fastify, pongService) {
 
       const gameId = gameResult.lastID;
 
-      await pongService.db.run(`
-        INSERT INTO game_participants (game_session_id, user_id, player_number) 
-        VALUES (?, ?, 1)
-      `, [gameId, user.id]);
+      if (gameMode === 'local') {
+        await pongService.db.run(`
+          INSERT INTO game_participants (game_session_id, user_id, player_number) 
+          VALUES (?, ?, 1)
+        `, [gameId, user.id]);
+      } else {
+        await pongService.db.run(`
+          INSERT INTO game_participants (game_session_id, user_id, player_number) 
+          VALUES (?, ?, ?)
+        `, [gameId, user.id, userPlayerDetails.player_number]);
+      }
 
       const options = {
         gameMode,
@@ -80,8 +95,8 @@ function setupRoutes(fastify, pongService) {
 
         await pongService.db.run(`
           INSERT INTO game_participants (game_session_id, user_id, player_number) 
-          VALUES (?, ?, 2)
-        `, [gameId, opponent_id]);
+          VALUES (?, ?, ?)
+        `, [gameId, opponent_id, opponentPlayerDetails.player_number]);
 
         await pongService.handleGameInvitation(opponent_id, {
           game_id: gameId,
@@ -98,7 +113,7 @@ function setupRoutes(fastify, pongService) {
     }
   });
 
-    fastify.get('/game/:gameId', async (request, reply) => {
+  fastify.get('/game/:gameId', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
     const user = await validateToken(token);
     if (!user) {
@@ -136,7 +151,6 @@ function setupRoutes(fastify, pongService) {
         return reply.code(404).send({ error: 'Game not found' });
       }
 
-      // Check if user is a participant
       if (game.player1_id !== user.id && game.player2_id !== user.id) {
         return reply.code(403).send({ error: 'Not authorized to view this game' });
       }

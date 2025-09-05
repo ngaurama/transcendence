@@ -95,6 +95,18 @@ export async function inviteFriendToGame(friendId: number): Promise<void> {
             points_to_win,
             powerups_enabled,
             board_variant,
+            players: [
+              {
+                id: user?.id,
+                name: user?.display_name,
+                player_number: 1
+              },
+              {
+                id: friend.id,
+                name: friend.display_name,
+                player_number: 2
+              }
+            ],
             player1_name: user?.display_name,
             player2_name: friend.display_name,
         };

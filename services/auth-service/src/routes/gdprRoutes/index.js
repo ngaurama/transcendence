@@ -80,8 +80,7 @@ function setupGDPRRoutes(fastify, { dbService, authenticateToken }) {
 
       await dbService.db.run(
         `UPDATE users 
-         SET deletion_requested_at = datetime('now'),
-          is_active = FALSE
+         SET deletion_requested_at = datetime('now')
         WHERE id = ?`,
         [userId]
       );
@@ -99,7 +98,8 @@ function setupGDPRRoutes(fastify, { dbService, authenticateToken }) {
       return {
         success: true,
         message: "Account deletion requested. All data will be permanently erased after 30 days.",
-        deletion_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        deletion_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        can_cancel_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       };
     } catch (error) {
       console.error("Account deletion error:", error);
@@ -167,6 +167,33 @@ function setupGDPRRoutes(fastify, { dbService, authenticateToken }) {
     } catch (error) {
       console.error("Cancel deletion error:", error);
       return reply.code(500).send({ error: "Failed to cancel deletion" });
+    }
+  });
+
+  fastify.get("/gdpr/deletion-status", { preHandler: authenticateToken }, async (req, reply) => {
+    try {
+      const userId = req.user.user_id;
+      
+      const user = await dbService.db.get(
+        `SELECT deletion_requested_at FROM users WHERE id = ?`,
+        [userId]
+      );
+      
+      if (user && user.deletion_requested_at) {
+        const deletionDate = new Date(user.deletion_requested_at);
+        deletionDate.setDate(deletionDate.getDate() + 30);
+        
+        return {
+          pending_deletion: true,
+          deletion_date: deletionDate.toISOString(),
+          days_remaining: Math.ceil((deletionDate - new Date()) / (1000 * 60 * 60 * 24))
+        };
+      }
+      
+      return { pending_deletion: false };
+    } catch (error) {
+      console.error("Deletion status error:", error);
+      return reply.code(500).send({ error: "Failed to get deletion status" });
     }
   });
 }

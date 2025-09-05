@@ -29,7 +29,7 @@ async function setupCORS(fastify) {
 
       try {
         const hostname = new URL(origin).hostname;
-        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.transcendence.local') || hostname === process.env.HOST) {
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.transcendence.local') ||  hostname === process.env.ONLINE_URL ||  hostname === process.env.ONLINE_URL) {
           callback(null, true);
           return;
         }

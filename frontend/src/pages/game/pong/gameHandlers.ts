@@ -16,7 +16,11 @@ export function setupRematchHandler() {
       }
 
       const gameInfo = await getGameInfo(gameId);      
-      const options = gameInfo.settings;
+      const options = {
+        ...gameInfo.settings,
+        players: gameInfo.players
+      };
+      // const options = gameInfo.settings;
 
       if (options.gameMode === 'local') {
         const newGameId = await requestMatch(options);

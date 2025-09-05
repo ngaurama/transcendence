@@ -244,7 +244,7 @@ module.exports = function setupFriendsRoutes(fastify, socialService) {
     }
     try {
       const friends = await socialService.db.all(`
-        SELECT 
+        SELECT
           u.id, u.username, u.display_name, u.avatar_url,
           up.status as online_status,
           up.current_activity,
@@ -256,6 +256,8 @@ module.exports = function setupFriendsRoutes(fastify, socialService) {
         )
         LEFT JOIN user_presence up ON up.user_id = u.id
         WHERE f.status = 'accepted'
+        AND u.is_active = 1
+        AND u.data_anonymized = 0
         ORDER BY up.status = 'online' DESC, u.display_name
       `, [user.id, user.id]);
 

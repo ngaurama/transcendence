@@ -10,6 +10,7 @@ export async function createGame(options: GameOptions, opponent_id?: number): Pr
       gameType: '2player',
       player1_name: options.player1_name || 'Player 1',
       player2_name: options.player2_name || 'Player 2',
+      players: options.players,
       powerups_enabled: options.powerups_enabled,
       points_to_win: options.points_to_win,
       board_variant: options.board_variant,
@@ -18,6 +19,7 @@ export async function createGame(options: GameOptions, opponent_id?: number): Pr
     if (options.gameMode !== 'local' && opponent_id) {
       body.opponent_id = opponent_id;
     }
+
     const res = await fetchWithErrorHandling(`/api/pong/game/create`, {
       method: 'POST',
       headers: {

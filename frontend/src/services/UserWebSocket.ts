@@ -94,6 +94,7 @@ function handleUserWebSocketMessage(data: any): void {
       break;
 
     case 'game_invitation_accepted':
+      console.log("data from user wss, ", data);
       (window as any).navigate(`/game/pong?game_id=${data.game_id}`);
       if ((window as any).pendingRematch?.gameId === data.game_id) {
         delete (window as any).pendingRematch;

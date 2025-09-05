@@ -13,8 +13,8 @@ help:
 	@echo "  make ps        -> Show running containers"
 
 up:
-# 	@echo "Updating HOST in .env..."
-# 	@$(SCRIPT)
+	@echo "Updating HOST in .env..."
+	@$(SCRIPT)
 	@echo "Starting containers..."
 	@$(DOCKER_COMPOSE) up -d
 

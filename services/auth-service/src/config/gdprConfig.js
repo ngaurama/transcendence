@@ -65,15 +65,50 @@ class GDPRService {
   async cleanupDeletedAccounts(stats) {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     
-    const result = await this.dbService.db.run(
-      `DELETE FROM users 
-       WHERE deletion_requested_at IS NOT NULL 
-       AND deletion_requested_at < ?
-       AND data_anonymized = FALSE`,
+    const accountsToDelete = await this.dbService.db.all(
+      `SELECT id FROM users 
+      WHERE deletion_requested_at IS NOT NULL 
+      AND deletion_requested_at < ?`,
       [thirtyDaysAgo]
     );
 
-    stats.deletedAccounts = result.changes;
+    for (const account of accountsToDelete) {
+      await this.dbService.db.run(
+        `UPDATE users SET is_active = FALSE WHERE id = ?`,
+        [account.id]
+      );
+      
+      await this.permanentAccountCleanup(account.id);
+    }
+
+    stats.deletedAccounts = accountsToDelete.length;
+  }
+
+  async permanentAccountCleanup(userId) {
+    const tables = [
+      'user_sessions',
+      'friendships', 
+      'friend_requests',
+      'game_participants',
+      'tournament_participants',
+      'matchmaking_queue',
+      'user_game_stats',
+      'detailed_game_stats',
+      'email_verification_tokens',
+      'password_reset_tokens'
+    ];
+
+    for (const table of tables) {
+      try {
+        await this.dbService.db.run(
+          `DELETE FROM ${table} WHERE user_id = ?`,
+          [userId]
+        );
+      } catch (error) {
+        console.warn(`Could not clean table ${table} for user ${userId}:`, error.message);
+      }
+    }
+    await this.dbService.db.run(`DELETE FROM users WHERE id = ?`, [userId]);
   }
 
   async cleanupOrphanedData(stats) {

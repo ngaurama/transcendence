@@ -1,5 +1,4 @@
 import { login, initiateOAuth, guestLogin } from '../../services';
-import { initUserWebSocket } from '../../services/UserWebSocket';
 import {  } from '../../utils/constants';
 
 export function loginPage(): string {
@@ -43,6 +42,16 @@ export function loginPage(): string {
     </div>
   `;
 }
+
+      // ${window.location.hostname === 'localhost' 
+      //   ? `
+      //     <div class="mt-4">
+      //       <p class="text-center mb-2">Or login with:</p>
+      //       <button id="google-oauth" class="w-full bg-red-500 p-2 rounded mb-2">Google</button>
+      //       <button id="github-oauth" class="w-full bg-gray-700 p-2 rounded">GitHub</button>
+      //     </div>
+      //   ` : ''
+      // }
 
 export function attachLoginListeners() {
   const loginForm = document.getElementById('login-form');

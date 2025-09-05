@@ -168,7 +168,7 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
             </button>
           </div>
         </div>
-        
+
         <!-- Chart container showing win/loss -->
         <div class="relative">
           <canvas id="win-loss-chart" class="w-full h-48"></canvas>
@@ -186,8 +186,10 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
                     const userPlayerNumber = user.id === game.player1.id ? game.player1 : game.player2;
                     const opponentPlayerNumber = user.id === game.player1.id ? game.player2 : game.player1;
 
-                    const userWin = game.result === 'win' || game.winner_id === user.id;
-                    const opponentWin = game.result === 'loss' || game.winner_id !== user.id;
+                    const userWin = game.winner_id === user.id;
+                    const opponentWin = game.winner_id !== user.id;
+                    console.log("GAME: ", game);
+                    console.log("USER AND OPPONNENT: ", userPlayerNumber, userWin, opponentPlayerNumber, opponentWin);
 
                     return `
                       <div class="flex flex-col bg-gray-800 rounded recent-game-item" data-game-id="${game.id}">
@@ -494,13 +496,13 @@ export function attachDashboardListeners() {
     });
   }
 
-    if (winLossChartBtn && winLossChart) {      
-      winLossChartBtn.addEventListener('click', () => {
-        winLossChart.classList.remove('hidden');
-        winLossChartBtn.classList.add('active', 'bg-blue-600', 'text-white');
-        winLossChartBtn.classList.remove('bg-gray-700', 'text-gray-300');
-      });
-    }
+  if (winLossChartBtn && winLossChart) {      
+    winLossChartBtn.addEventListener('click', () => {
+      winLossChart.classList.remove('hidden');
+      winLossChartBtn.classList.add('active', 'bg-blue-600', 'text-white');
+      winLossChartBtn.classList.remove('bg-gray-700', 'text-gray-300');
+    });
+  }
 
   document.querySelectorAll('.recent-game-item').forEach(item => {
     item.addEventListener('click', (e) => {
@@ -616,7 +618,7 @@ export function attachDashboardListeners() {
         // if (confirm(`Invite ${username} to play a game?`)) {
           inviteFriendToGame(userId);
         // }
-      }else if (target.classList.contains('remove-friend-btn')) {
+      } else if (target.classList.contains('remove-friend-btn')) {
         if (confirm('Are you sure you want to remove this friend?')) {
           try {
             await removeFriend(userId);
