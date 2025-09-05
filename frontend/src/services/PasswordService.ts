@@ -1,6 +1,8 @@
+import { fetchWithErrorHandling } from ".";
+
 export async function changePassword(token: string, currentPassword: string, newPassword: string): Promise<void> {
   try {
-    const res = await fetch(`/api/auth/change-password`, {
+    const res = await fetchWithErrorHandling(`/api/auth/change-password`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -23,7 +25,7 @@ export async function changePassword(token: string, currentPassword: string, new
 
 export async function forgotPassword(email: string): Promise<void> {
   try {
-    const res = await fetch(`/api/auth/forgot-password`, {
+    const res = await fetchWithErrorHandling(`/api/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -43,7 +45,7 @@ export async function forgotPassword(email: string): Promise<void> {
 
 export async function validateResetToken(token: string): Promise<boolean> {
   try {
-    const res = await fetch(`/api/auth/validate-reset-token`, {
+    const res = await fetchWithErrorHandling(`/api/auth/validate-reset-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
@@ -63,7 +65,7 @@ export async function validateResetToken(token: string): Promise<boolean> {
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
   try {
-    const res = await fetch(`/api/auth/reset-password`, {
+    const res = await fetchWithErrorHandling(`/api/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, new_password: newPassword }),

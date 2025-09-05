@@ -1,8 +1,10 @@
+import { fetchWithErrorHandling } from ".";
+
 // services/FriendsService.ts
 export async function searchUsers(query: string): Promise<any> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/users/search?q=${encodeURIComponent(query)}`, {
+    const res = await fetchWithErrorHandling(`/api/social/users/search?q=${encodeURIComponent(query)}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -21,7 +23,7 @@ export async function searchUsers(query: string): Promise<any> {
 export async function sendFriendRequest(userId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends/request`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends/request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -42,7 +44,7 @@ export async function sendFriendRequest(userId: string): Promise<void> {
 export async function getFriendsList(): Promise<any[]> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -63,7 +65,7 @@ export async function getFriendsList(): Promise<any[]> {
 export async function getFriendRequests(): Promise<any[]> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends/requests`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends/requests`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -84,7 +86,7 @@ export async function getFriendRequests(): Promise<any[]> {
 export async function acceptFriendRequest(requestId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends/accept`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends/accept`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,7 +106,7 @@ export async function acceptFriendRequest(requestId: string): Promise<void> {
 export async function rejectFriendRequest(requestId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends/reject`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends/reject`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -124,7 +126,7 @@ export async function rejectFriendRequest(requestId: string): Promise<void> {
 export async function removeFriend(userId: number): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends/${userId}`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends/${userId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -142,7 +144,7 @@ export async function removeFriend(userId: number): Promise<void> {
 export async function checkFriendshipStatus(userId: string): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/social/friends/status/${userId}`, {
+    const res = await fetchWithErrorHandling(`/api/social/friends/status/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

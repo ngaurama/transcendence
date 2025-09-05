@@ -1,19 +1,26 @@
-// utils/charts.ts
+// In your chart.ts file
 import Chart from 'chart.js/auto';
+
+// Track chart instances
+let winLossChartInstance: Chart | null = null;
 
 export function initWinLossChart(stats: any): void {
   const canvas = document.getElementById('win-loss-chart') as HTMLCanvasElement;
   if (!canvas) return;
 
+  if (winLossChartInstance) {
+    winLossChartInstance.destroy();
+  }
+
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  new Chart(ctx, {
+  winLossChartInstance = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Wins', 'Losses', 'Draws'],
+      labels: ['Wins', 'Losses'],
       datasets: [{
-        data: [stats.games_won || 0, stats.games_lost || 0, stats.games_drawn || 0],
+        data: [stats.games_won || 0, stats.games_lost || 0],
         backgroundColor: ['#10B981', '#EF4444', '#F59E0B'],
         borderWidth: 0
       }]
@@ -27,50 +34,6 @@ export function initWinLossChart(stats: any): void {
           labels: {
             color: '#D1D5DB'
           }
-        }
-      }
-    }
-  });
-}
-
-export function initWeeklyPerformanceChart(weeklyData: any[]): void {
-  const canvas = document.getElementById('weekly-chart') as HTMLCanvasElement;
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  const weeks = weeklyData.map(item => item.week);
-  const wins = weeklyData.map(item => item.wins);
-  const losses = weeklyData.map(item => item.losses);
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: weeks,
-      datasets: [
-        {
-          label: 'Wins',
-          data: wins,
-          backgroundColor: '#10B981'
-        },
-        {
-          label: 'Losses',
-          data: losses,
-          backgroundColor: '#EF4444'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          stacked: true,
-          ticks: { color: '#D1D5DB' }
-        },
-        y: {
-          stacked: true,
-          ticks: { color: '#D1D5DB' }
         }
       }
     }

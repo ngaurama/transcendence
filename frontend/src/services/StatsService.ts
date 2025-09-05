@@ -1,11 +1,12 @@
 // services/StatsService.ts - New service for enhanced stats
+import { fetchWithErrorHandling } from '.';
 import { GameOptions } from '../utils/types';
 
 export interface GameHistoryItem {
   id: number;
   date: Date;
   opponent: string;
-  result: 'win' | 'loss' | 'draw';
+  result: 'win' | 'loss';
   score: string;
   duration: number;
   options: GameOptions;
@@ -15,7 +16,7 @@ export interface GameHistoryItem {
 export async function getGameHistory(): Promise<GameHistoryItem[]> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/game-history`, {
+    const res = await fetchWithErrorHandling(`/api/pong/game-history`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -83,13 +83,6 @@ function setupRoutes(fastify, pongService) {
           VALUES (?, ?, 2)
         `, [gameId, opponent_id]);
 
-        // pongService.sendToUser(opponent_id, {
-        //   type: 'game_invitation_received',
-        //   game_id: gameId,
-        //   inviter_id: user.id,
-        //   inviter_name: user.display_name,
-        //   game_settings: gameSettings
-        // });
         await pongService.handleGameInvitation(opponent_id, {
           game_id: gameId,
           inviter_id: user.id,
@@ -225,66 +218,6 @@ function setupRoutes(fastify, pongService) {
     const invitations = pongService.pendingInvitations.get(user.id) || [];
     return invitations;
   });
-
-
-  // fastify.get('/game-history', async (request, reply) => {
-  //   const token = request.headers.authorization?.replace('Bearer ', '');
-  //   const user = await validateToken(token);
-  //   if (!user) {
-  //     return reply.code(401).send({ error: 'Authentication required' });
-  //   }
-
-  //   try {
-  //     const games = await pongService.db.all(`
-  //       SELECT 
-  //         gs.id,
-  //         gs.created_at,
-  //         gs.final_score_player1,
-  //         gs.final_score_player2,
-  //         gs.game_duration_ms,
-  //         gs.game_settings,
-  //         gs.tournament_id,
-  //         gp1.user_id as player1_id,
-  //         gp2.user_id as player2_id,
-  //         u1.display_name as player1_name,
-  //         u2.display_name as player2_name,
-  //         CASE 
-  //           WHEN gs.winner_id = ? THEN 'win'
-  //           WHEN gs.winner_id IS NULL THEN 'draw'
-  //           ELSE 'loss'
-  //         END as result
-  //       FROM game_sessions gs
-  //       LEFT JOIN game_participants gp1 ON gp1.game_session_id = gs.id AND gp1.player_number = 1
-  //       LEFT JOIN game_participants gp2 ON gp2.game_session_id = gs.id AND gp2.player_number = 2
-  //       LEFT JOIN users u1 ON u1.id = gp1.user_id
-  //       LEFT JOIN users u2 ON u2.id = gp2.user_id
-  //       WHERE gs.id IN (
-  //         SELECT game_session_id 
-  //         FROM game_participants 
-  //         WHERE user_id = ?
-  //       )
-  //       AND gs.status = 'completed'
-  //       ORDER BY gs.created_at DESC
-  //       LIMIT 50
-  //     `, [user.id, user.id]);
-
-  //     const history = games.map(game => ({
-  //       id: game.id,
-  //       date: new Date(game.created_at),
-  //       opponent: game.player1_id === user.id ? game.player2_name : game.player1_name,
-  //       result: game.result,
-  //       score: `${game.final_score_player1}-${game.final_score_player2}`,
-  //       duration: game.game_duration_ms,
-  //       options: JSON.parse(game.game_settings),
-  //       tournament_id: game.tournament_id
-  //     }));
-
-  //     return history;
-  //   } catch (error) {
-  //     console.error('Error fetching game history:', error);
-  //     return reply.code(500).send({ error: 'Failed to fetch game history' });
-  //   }
-  // });
 
   fastify.post('/game/join/:gameId', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');

@@ -1,6 +1,7 @@
 // pages/dashboard.ts
 import { checkAuthStatus, getUserStats, getFriendsList, searchUsers, sendFriendRequest, getFriendRequests, removeFriend, inviteFriendToGame, acceptFriendRequest, rejectFriendRequest, updateProfile, uploadAvatar } from '../services';
 import { refreshFriendsList } from '../services/UserWebSocket';
+import { initWinLossChart } from '../utils/chart';
 
 export async function dashboardPage(): Promise<string> {
   const user = await checkAuthStatus();
@@ -10,10 +11,16 @@ export async function dashboardPage(): Promise<string> {
   }
 
   const fullStats = await getUserStats(user.id);
-  console.log("STATS:", fullStats);
   const friends = await getFriendsList();
   const isOAuthUser = user.oauth_provider && user.oauth_provider !== 'local';
   const isDefaultAvatar = user.avatar_url === '/avatars/default.png';
+
+  setTimeout(() => {
+    if (fullStats.stats) {
+      initWinLossChart(fullStats.stats);
+    }
+    
+  }, 100);
   
   return `
     <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
@@ -107,7 +114,7 @@ export async function dashboardPage(): Promise<string> {
 
       <!-- Stats Tab Content -->
       <div id="stats-content" class="tab-content">
-        ${await renderStatsContent(fullStats, user.id === (await checkAuthStatus())?.id)}
+        ${await renderStatsContent(fullStats, user.id === (await checkAuthStatus())?.id, user)}
       </div>
 
       <!-- Friends Tab Content -->
@@ -125,7 +132,7 @@ export async function dashboardPage(): Promise<string> {
   `;
 }
 
-export async function renderStatsContent(fullStats: any, isOwnProfile: boolean): Promise<string> {
+export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, user: any): Promise<string> {
   return `
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Overall Stats -->
@@ -151,36 +158,85 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean):
         </div>
       </div>
 
-      <!-- Win/Loss Chart -->
+      <!-- Win/Loss Chart with Toggle -->
       <div class="bg-gray-900 p-4 rounded">
-        <h3 class="text-lg font-semibold mb-3">Win/Loss Distribution</h3>
-        <canvas id="win-loss-chart" class="w-full h-48"></canvas>
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-lg font-semibold">Performance Charts</h3>
+          <div class="flex space-x-2">
+            <button id="win-loss-chart-btn" class="chart-toggle-btn bg-blue-600 text-white px-2 py-1 rounded text-xs active">
+              Win/Loss
+            </button>
+          </div>
+        </div>
+        
+        <!-- Chart container showing win/loss -->
+        <div class="relative">
+          <canvas id="win-loss-chart" class="w-full h-48"></canvas>
+        </div>
       </div>
 
       <!-- Recent Games -->
       <div class="md:col-span-2 bg-gray-900 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Recent Games</h3>
         <div class="space-y-2">
-          ${fullStats.recent_games && fullStats.recent_games.length > 0 ? 
-            fullStats.recent_games.map((game: any) => `
-              <div class="flex items-center justify-between p-2 bg-gray-800 rounded">
-                <div class="flex items-center">
-                  <img src="${game.opponent_avatar || '/avatars/default.png'}" 
-                       class="w-8 h-8 rounded-full mr-3">
-                  <span>${game.opponent_name}</span>
-                </div>
-                <div class="flex items-center">
-                  <span class="mx-2 ${game.result === 'win' ? 'text-green-400' : game.result === 'loss' ? 'text-red-400' : 'text-yellow-400'}">
-                    ${game.result.toUpperCase()}
-                  </span>
-                  <span class="text-sm text-gray-400">${game.final_score_player1}-${game.final_score_player2}</span>
-                  <span class="text-sm text-gray-400 ml-2">
-                    ${new Date(game.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            `).join('') : 
-            '<p class="text-gray-400 text-center py-4">No games played yet</p>'
+          ${
+            fullStats.recent_games && fullStats.recent_games.length > 0
+              ? fullStats.recent_games
+                  .map((game: any) => {
+                    const userPlayerNumber = user.id === game.player1.id ? game.player1 : game.player2;
+                    const opponentPlayerNumber = user.id === game.player1.id ? game.player2 : game.player1;
+
+                    const userWin = game.result === 'win' || game.winner_id === user.id;
+                    const opponentWin = game.result === 'loss' || game.winner_id !== user.id;
+
+                    return `
+                      <div class="flex flex-col bg-gray-800 rounded recent-game-item" data-game-id="${game.id}">
+                        <!-- Main line -->
+                        <div class="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-700">
+                          
+                          <!-- Player 1 (left) -->
+                          <div class="flex items-center space-x-2 w-1/3">
+                            <img src="${userPlayerNumber.avatar_url}" class="w-8 h-8 rounded-full">
+                            <span class="font-semibold">${userPlayerNumber.name}</span>
+                            <span class="${userWin ? 'text-green-400' : 'text-red-400'} font-bold">
+                              ${userWin ? 'WIN' : 'LOSS'}
+                            </span>
+                          </div>
+
+                          <!-- Score (center) -->
+                          <div class="flex justify-center w-1/3 text-lg font-bold space-x-1">
+                            <span class="${userWin ? 'text-green-400' : 'text-red-400'}">${userPlayerNumber.score}</span>
+                            <span>-</span>
+                            <span class="${opponentWin ? 'text-green-400' : 'text-red-400'}">${opponentPlayerNumber.score}</span>
+                          </div>
+
+                          <!-- Player 2 (right) -->
+                          <div class="flex items-center justify-end space-x-2 w-1/3">
+                            <span class="${opponentWin ? 'text-green-400' : 'text-red-400'} font-bold">
+                              ${opponentWin ? 'WIN' : 'LOSS'}
+                            </span>
+                            <span class="font-semibold">${opponentPlayerNumber.name}</span>
+                            <img src="${opponentPlayerNumber.avatar_url || '/avatars/default.png'}" class="w-8 h-8 rounded-full">
+                          </div>
+
+                        </div>
+
+                        <!-- Dropdown/details -->
+                        <div id="game-details-${game.id}" class="hidden bg-gray-700 p-3 rounded mt-1 text-sm">
+                          <div class="grid grid-cols-2 gap-2">
+                            <div><strong>Date:</strong> ${new Date(game.created_at + "Z").toLocaleString("en-GB", { timeZone: "UTC" })}</div>
+                            <div><strong>Duration:</strong> ${Math.round(game.game_duration_ms / 1000)}s</div>
+                            <div><strong>Powerups:</strong> ${JSON.parse(game.game_settings).powerups_enabled ? 'Yes' : 'No'}</div>
+                            <div><strong>Variant:</strong> ${JSON.parse(game.game_settings).board_variant}</div>
+                            <div><strong>Points to win:</strong> ${JSON.parse(game.game_settings).points_to_win}</div>
+                            <div><strong>Type:</strong> ${game.game_type === 'local' ? 'Local' : 'Online'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  })
+                .join('')
+              : '<p class="text-gray-400 text-center py-4">No games played yet</p>'
           }
         </div>
       </div>
@@ -318,6 +374,8 @@ export function attachDashboardListeners() {
   const avatarDropdown = document.getElementById('avatar-dropdown');
   const avatarFileInput = document.getElementById('avatar-file-input') as HTMLInputElement;
   const removeAvatarBtn = document.getElementById('remove-avatar-btn');
+  const winLossChartBtn = document.getElementById('win-loss-chart-btn');
+  const winLossChart = document.getElementById('win-loss-chart');
 
   if (avatarTrigger && avatarDropdown) {
     avatarTrigger.addEventListener('click', (e) => {
@@ -434,17 +492,40 @@ export function attachDashboardListeners() {
         alert(error instanceof Error ? error.message : 'Profile update failed');
       }
     });
-
   }
 
+    if (winLossChartBtn && winLossChart) {      
+      winLossChartBtn.addEventListener('click', () => {
+        winLossChart.classList.remove('hidden');
+        winLossChartBtn.classList.add('active', 'bg-blue-600', 'text-white');
+        winLossChartBtn.classList.remove('bg-gray-700', 'text-gray-300');
+      });
+    }
 
-  // Tab switching
+  document.querySelectorAll('.recent-game-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      const gameId = item.getAttribute('data-game-id');
+      const detailsElement = document.getElementById(`game-details-${gameId}`);
+      
+      document.querySelectorAll('[id^="game-details-"]').forEach(detail => {
+        if (detail.id !== `game-details-${gameId}`) {
+          detail.classList.add('hidden');
+        }
+      });
+      
+      if (detailsElement) {
+        detailsElement.classList.toggle('hidden');
+      }
+    });
+  });
+
+
+  // Tabs
   document.querySelectorAll('.tab-button').forEach(button => {
     button.addEventListener('click', (e) => {
       const tabId = (e.target as HTMLElement).id;
       const contentId = tabId.replace('-tab', '-content');
       
-      // Update active tab
       document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active', 'border-b-2', 'border-blue-400', 'text-blue-400');
         btn.classList.add('text-gray-400');
@@ -452,7 +533,6 @@ export function attachDashboardListeners() {
       (e.target as HTMLElement).classList.add('active', 'border-b-2', 'border-blue-400', 'text-blue-400');
       (e.target as HTMLElement).classList.remove('text-gray-400');
       
-      // Show correct content
       document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.add('hidden');
       });
@@ -460,7 +540,7 @@ export function attachDashboardListeners() {
     });
   });
 
-  // Friend search functionality
+  // Friend search
   const searchInput = document.getElementById('friend-search');
   const searchBtn = document.getElementById('search-friend-btn');
   const searchResults = document.getElementById('search-results');
@@ -502,7 +582,6 @@ export function attachDashboardListeners() {
       }
     });
 
-    // Add friend functionality
     searchResults.addEventListener('click', async (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('add-friend-btn')) {
@@ -521,7 +600,6 @@ export function attachDashboardListeners() {
     });
   }
 
-  // Friend list actions
   const friendsList = document.getElementById('friends-list');
   if (friendsList) {
     friendsList.addEventListener('click', async (e) => {

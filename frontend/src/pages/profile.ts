@@ -53,15 +53,13 @@ export async function profilePage(): Promise<string> {
 
       <!-- Stats Content (same as dashboard but read-only) -->
       <div id="profile-stats">
-        ${await renderStatsContent(userStats, false)}
+        ${await renderStatsContent(userStats, false, currentUser)}
       </div>
     </div>
   `;
 }
 
 export async function attachProfileListeners(userId: string) {
-  const urlParams = new URLSearchParams(window.location.search);
-//   const userId = urlParams.get('id');
   const currentUser = await checkAuthStatus();
   
   if (!userId || currentUser?.id.toString() === userId) return;
@@ -78,7 +76,6 @@ export async function attachProfileListeners(userId: string) {
         addFriendBtn.textContent = 'Friend Request Pending';
         addFriendBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
         addFriendBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
-        // addFriendBtn.disabled = true;
       } catch (error) {
         alert(error instanceof Error ? error.message : 'Failed to send friend request');
       }
@@ -87,7 +84,6 @@ export async function attachProfileListeners(userId: string) {
 
   if (playWithFriendBtn) {
     playWithFriendBtn.addEventListener('click', () => {
-      // Implement game invitation logic
       inviteFriendToGame(parseInt(userId));
     });
   }

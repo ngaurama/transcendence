@@ -406,13 +406,42 @@ class PongGame {
 
   async saveGameResults(winnerKey) {
     try {
-      const winnerId = [...this.players.entries()]
-        .find(([id, player]) => `player${player.playerNumber}` === winnerKey)?.[0];
+      // First, get all participants from the database
+      const participants = await this.db.all(`
+        SELECT gp.user_id, gp.player_number 
+        FROM game_participants gp
+        WHERE gp.game_session_id = ?
+      `, [this.gameId]);
 
+      console.log("Participants from DB:", participants);
+      console.log("Winner key:", winnerKey);
+
+      // Find the winner ID based on player number
+      let winnerId = null;
+      const winnerPlayerNumber = winnerKey === 'player1' ? 1 : 2;
+      
+      const winnerParticipant = participants.find(p => p.player_number === winnerPlayerNumber);
+      if (winnerParticipant) {
+        winnerId = winnerParticipant.user_id;
+      }
+
+      console.log("Winner ID determined:", winnerId);
+
+      // Get player IDs for game_sessions table
+      const player1Participant = participants.find(p => p.player_number === 1);
+      const player2Participant = participants.find(p => p.player_number === 2);
+      const player1_id = player1Participant ? player1Participant.user_id : null;
+      const player2_id = player2Participant ? player2Participant.user_id : null;
+
+      console.log("Player IDs:", { player1_id, player2_id });
+
+      // Update game_sessions with all required fields
       await this.db.run(`
         UPDATE game_sessions 
         SET status = 'completed', 
-            winner_id = ?, 
+            winner_id = ?,
+            player1_id = ?,
+            player2_id = ?,
             ended_at = datetime('now'),
             final_score_player1 = ?,
             final_score_player2 = ?,
@@ -421,6 +450,8 @@ class PongGame {
         WHERE id = ?
       `, [
         winnerId,
+        player1_id,
+        player2_id,
         this.gameState.score.player1,
         this.gameState.score.player2,
         this.endTime - this.startTime,
@@ -428,29 +459,26 @@ class PongGame {
         this.gameId
       ]);
 
-      const participants = await this.db.all(`
-        SELECT gp.user_id, gp.player_number 
-        FROM game_participants gp
-        WHERE gp.game_session_id = ?
-      `, [this.gameId]);
-
+      // Update user stats for all participants
       for (const participant of participants) {
         if (participant.user_id) {
-          console.log("WINNDER ID: ", winnerId);
           const isWin = participant.user_id === winnerId;
-          console.log("PARTICIPANT ID and is win: ", participant.user_id, isWin);
+          console.log("Updating stats for participant:", participant.user_id, "isWin:", isWin);
+          
           const updates = {
             games_played: 1,
             games_won: isWin ? 1 : 0,
             games_lost: isWin ? 0 : 1,
           };
+          
           await this.updateUserStats(participant.user_id, updates);
         }
       }
 
-      console.log(`Game ${this.gameId} results saved`);
+      console.log(`Game ${this.gameId} results saved successfully`);
     } catch (error) {
       console.error('Error saving game results:', error);
+      throw error;
     }
   }
 

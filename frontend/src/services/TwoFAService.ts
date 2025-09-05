@@ -1,3 +1,4 @@
+import { fetchWithErrorHandling } from ".";
 import { User } from "../utils/types"
 
 export async function verify2FACode(code: string): Promise<User> {
@@ -5,7 +6,7 @@ export async function verify2FACode(code: string): Promise<User> {
   if (!tempToken) throw new Error('No 2FA session');
 
   try {
-    const res = await fetch(`/api/auth/verify-2fa`, {
+    const res = await fetchWithErrorHandling(`/api/auth/verify-2fa`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ temp_token: tempToken, code }),
@@ -28,7 +29,7 @@ export async function verify2FACode(code: string): Promise<User> {
 
 export async function setup2FA(token: string): Promise<{ secret: string; qr_code: string }> {
   try {
-    const res = await fetch(`/api/auth/setup-2fa`, {
+    const res = await fetchWithErrorHandling(`/api/auth/setup-2fa`, {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${token}`
@@ -49,7 +50,7 @@ export async function setup2FA(token: string): Promise<{ secret: string; qr_code
 
 export async function enable2FA(token: string, code: string): Promise<void> {
   try {
-    const res = await fetch(`/api/auth/enable-2fa`, {
+    const res = await fetchWithErrorHandling(`/api/auth/enable-2fa`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

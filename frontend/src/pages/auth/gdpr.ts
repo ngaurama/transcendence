@@ -380,7 +380,8 @@ async function handleAnonymizeAccount() {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({})
     });
 
     const data = await response.json();
@@ -414,7 +415,8 @@ async function handleDeleteAccount() {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({})
     });
 
     const data = await response.json();

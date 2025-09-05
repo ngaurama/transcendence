@@ -1,25 +1,30 @@
 // services/PongService.ts
+import { fetchWithErrorHandling } from '.';
 import { GameOptions, TournamentOptions } from '../utils/types';
 
 export async function createGame(options: GameOptions, opponent_id?: number): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/game/create`, {
+    const body: any = {
+      gameMode: options.gameMode,
+      gameType: '2player',
+      player1_name: options.player1_name || 'Player 1',
+      player2_name: options.player2_name || 'Player 2',
+      powerups_enabled: options.powerups_enabled,
+      points_to_win: options.points_to_win,
+      board_variant: options.board_variant,
+    };
+
+    if (options.gameMode !== 'local' && opponent_id) {
+      body.opponent_id = opponent_id;
+    }
+    const res = await fetchWithErrorHandling(`/api/pong/game/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        gameMode: options.gameMode,
-        gameType: '2player',
-        player1_name: options.player1_name || 'Player 1',
-        player2_name: options.player2_name || 'Player 2',
-        powerups_enabled: options.powerups_enabled,
-        points_to_win: options.points_to_win,
-        board_variant: options.board_variant,
-        opponent_id: opponent_id || undefined,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -37,7 +42,7 @@ export async function createGame(options: GameOptions, opponent_id?: number): Pr
 export async function joinMatchmaking(options: GameOptions): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/matchmaking/join`, {
+    const res = await fetchWithErrorHandling(`/api/pong/matchmaking/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +67,7 @@ export async function joinMatchmaking(options: GameOptions): Promise<void> {
 export async function createTournament(options: TournamentOptions): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/tournament/create`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournament/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +103,7 @@ export async function createTournament(options: TournamentOptions): Promise<stri
 export async function joinTournament(tournamentId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/tournament/join/${tournamentId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournament/join/${tournamentId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -119,7 +124,7 @@ export async function joinTournament(tournamentId: string): Promise<void> {
 export async function leaveTournament(tournamentId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/tournament/${tournamentId}/leave`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournament/${tournamentId}/leave`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,7 +145,7 @@ export async function leaveTournament(tournamentId: string): Promise<void> {
 export async function startTournament(tournamentId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/tournament/start/${tournamentId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournament/start/${tournamentId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -161,7 +166,7 @@ export async function startTournament(tournamentId: string): Promise<void> {
 export async function deleteTournament(tournamentId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/tournament/${tournamentId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournament/${tournamentId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -182,7 +187,7 @@ export async function deleteTournament(tournamentId: string): Promise<void> {
 export async function startTournamentMatch(tournamentId: string, matchId: string): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/tournament/match/start/${matchId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournament/match/start/${matchId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -205,7 +210,7 @@ export async function startTournamentMatch(tournamentId: string, matchId: string
 
 export async function getOpenTournaments(): Promise<any[]> {
   try {
-    const res = await fetch(`/api/pong/tournaments/open`, {
+    const res = await fetchWithErrorHandling(`/api/pong/tournaments/open`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -214,7 +219,7 @@ export async function getOpenTournaments(): Promise<any[]> {
 
     if (!res.ok) {
       const errorData = await res.json();
-      throw new Error(errorData.error || 'Failed to fetch open tournaments');
+      throw new Error(errorData.error || 'Failed to fetchWithErrorHandling open tournaments');
     }
 
     return await res.json();
@@ -230,7 +235,7 @@ export async function getUserStats(userId?: number): Promise<any> {
       ? `/api/social/stats/${userId}`
       : `/api/social/stats`;
     
-    const res = await fetch(url, {
+    const res = await fetchWithErrorHandling(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -239,7 +244,7 @@ export async function getUserStats(userId?: number): Promise<any> {
     });
 
     if (!res.ok) {
-      throw new Error('Failed to fetch user stats');
+      throw new Error('Failed to fetchWithErrorHandling user stats');
     }
 
     return await res.json();
@@ -251,7 +256,7 @@ export async function getUserStats(userId?: number): Promise<any> {
 export async function getGameInfo(gameId: string): Promise<any> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/game/${gameId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/game/${gameId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -279,7 +284,7 @@ export async function requestMatch(options: GameOptions, opponentId?: number): P
         }
         gameId = await createGame(options, opponentId);
       }
-      console.log(`Rematch created: game_id=${gameId}`);
+      // console.log(`Rematch created: game_id=${gameId}`);
       return gameId;
     } catch (error) {
       console.error('Rematch failed:', error);

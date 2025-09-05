@@ -64,7 +64,7 @@ CREATE TABLE user_sessions (
     expires_at DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ip_address VARCHAR(45), -- IPv6 compatible
+    ip_address VARCHAR(45),
     user_agent TEXT,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -151,19 +151,19 @@ CREATE TABLE user_presence (
 
 CREATE TABLE game_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tournament_id INTEGER, -- nullable for casual games
+    tournament_id INTEGER, --nullable ofc
     player1_id INTEGER,
     player2_id INTEGER,
     
     -- Game state
     status VARCHAR(20) DEFAULT 'waiting', -- 'waiting', 'in_progress', 'completed', 'abandoned'
-    winner_id INTEGER, -- nullable for draws/abandoned games
+    winner_id INTEGER, -- nullable for abandoned games
     final_score_player1 INTEGER,
     final_score_player2 INTEGER,
-    result VARCHAR(20), -- 'win', 'draw', 'abandoned'
+    result VARCHAR(20), -- 'win', 'abandoned'
     
     -- Pong-specific settings (JSON)
-    game_settings TEXT DEFAULT '{}', -- JSON: powerups_enabled, ball_speed, paddle_size, etc.
+    game_settings TEXT DEFAULT '{}', -- JSON: powerups_enabled, and so on
     
     -- Timing
     started_at DATETIME,
@@ -183,10 +183,12 @@ CREATE TABLE game_sessions (
     -- FOREIGN KEY (game_session_id) REFERENCES game_sessions(id),
     
     CHECK (status IN ('waiting', 'in_progress', 'completed', 'abandoned', 'cancelled')),
-    CHECK (result IN ('win', 'draw', 'abandoned') OR result IS NULL)
+    CHECK (result IN ('win', 'abandoned') OR result IS NULL)
 );
 
 CREATE TABLE game_participants (
+
+    -- might not even bother doing ai but for keeping some values in case we need moremodules
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     game_session_id INTEGER NOT NULL,
     user_id INTEGER, -- nullable for AI players
@@ -194,9 +196,8 @@ CREATE TABLE game_participants (
     is_ai BOOLEAN DEFAULT FALSE,
     ai_difficulty INTEGER, -- 1-10 for Pong
     
-    -- Player-specific stats for this game
     score INTEGER DEFAULT 0,
-    final_position INTEGER, -- 1st or 2nd place
+    final_position INTEGER,
     
     -- Participation status
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -208,8 +209,8 @@ CREATE TABLE game_participants (
     UNIQUE(game_session_id, player_number),
     CHECK (player_number IN (1, 2)),
     CHECK (ai_difficulty IS NULL OR (ai_difficulty >= 1 AND ai_difficulty <= 10)),
-    CHECK (NOT (user_id IS NULL AND is_ai = FALSE)), -- AI players must have is_ai = TRUE
-    CHECK (NOT (user_id IS NOT NULL AND is_ai = TRUE)) -- Human players must have is_ai = FALSE
+    CHECK (NOT (user_id IS NULL AND is_ai = FALSE)),
+    CHECK (NOT (user_id IS NOT NULL AND is_ai = TRUE))
 );
 
 -- ============================================================================
@@ -230,10 +231,10 @@ CREATE TABLE tournaments (
     status VARCHAR(20) DEFAULT 'registration', -- 'registration', 'in_progress', 'completed', 'cancelled'
     winner_id INTEGER,
     current_round INTEGER DEFAULT 1,
-    total_rounds INTEGER, -- calculated based on participants
+    total_rounds INTEGER,
     
     -- Tournament settings (JSON)
-    tournament_settings TEXT DEFAULT '{}', -- JSON for pong-specific tournament rules
+    tournament_settings TEXT DEFAULT '{}',
     
     -- Scheduling
     registration_starts_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -250,7 +251,7 @@ CREATE TABLE tournaments (
     
     CHECK (status IN ('registration', 'in_progress', 'completed', 'cancelled')),
     CHECK (max_participants >= 4 AND max_participants <= 16),
-    CHECK (max_participants % 2 = 0), -- Even numbers only
+    CHECK (max_participants % 2 = 0),
     CHECK (current_participants >= 0),
     CHECK (current_participants <= max_participants),
     CHECK (current_round >= 1)
@@ -267,7 +268,7 @@ CREATE TABLE tournament_participants (
     current_round INTEGER DEFAULT 1,
     is_eliminated BOOLEAN DEFAULT FALSE,
     eliminated_in_round INTEGER,
-    final_position INTEGER, -- 1st, 2nd, 3rd, etc.
+    final_position INTEGER,
     
     -- Registration
     registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -287,11 +288,11 @@ CREATE TABLE tournament_matches (
     
     -- Match identification
     round_number INTEGER NOT NULL,
-    match_number INTEGER NOT NULL, -- Within the round
+    match_number INTEGER NOT NULL, -- Within the round ofc
     
     -- Players
-    player1_id INTEGER, -- Can be NULL for bye rounds
-    player2_id INTEGER, -- Can be NULL for bye rounds
+    player1_id INTEGER, -- nulable for bye rounds
+    player2_id INTEGER,
     
     -- Match state
     status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'in_progress', 'completed', 'abandoned'
@@ -349,7 +350,6 @@ CREATE TABLE user_game_stats (
     games_played INTEGER DEFAULT 0,
     games_won INTEGER DEFAULT 0,
     games_lost INTEGER DEFAULT 0,
-    games_drawn INTEGER DEFAULT 0,
     
     -- Performance metrics
     total_playtime_seconds INTEGER DEFAULT 0,
@@ -371,7 +371,6 @@ CREATE TABLE user_game_stats (
     -- Pong-specific stats (JSON)
     pong_stats TEXT DEFAULT '{}',
     
-    -- Last updated
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -380,18 +379,18 @@ CREATE TABLE user_game_stats (
     CHECK (games_played >= 0),
     CHECK (games_won >= 0),
     CHECK (games_lost >= 0),
-    CHECK (games_drawn >= 0),
     CHECK (tournaments_played >= 0)
 );
 
+
 CREATE TABLE detailed_game_stats (
+    -- uhhh ill get back to this
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     game_session_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     
     -- Pong performance metrics
     pong_stats TEXT NOT NULL DEFAULT '{}',
-    -- {"paddle_hits": 45, "perfect_returns": 12, "powerups_collected": 8, "max_ball_speed": 180}
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
@@ -411,11 +410,8 @@ CREATE TABLE pong_customizations (
     display_name VARCHAR(200) NOT NULL,
     description TEXT,
     
-    -- Pong customization data (JSON)
     settings TEXT NOT NULL DEFAULT '{}',
-    -- {"powerups_enabled": true, "powerup_spawn_score": 3, "available_powerups": ["multiball", "speed", "big_paddle"], "ball_speed_multiplier": 1.0}
     
-    -- Availability
     is_default BOOLEAN DEFAULT FALSE,
     is_public BOOLEAN DEFAULT TRUE,
     created_by_user_id INTEGER,
@@ -437,7 +433,7 @@ CREATE TABLE pong_powerups (
     rarity VARCHAR(20) DEFAULT 'common', -- 'common', 'rare', 'legendary'
     
     -- Visual properties
-    color VARCHAR(7) DEFAULT '#FF0000', -- Hex color
+    color VARCHAR(7) DEFAULT '#FF0000',
     icon_path VARCHAR(200),
     
     -- Game balance

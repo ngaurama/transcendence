@@ -48,7 +48,7 @@ export function initCanvas(canvas: HTMLCanvasElement): void {
     img.src = url;
     img.onload = () => {
       images[type] = img;
-      console.log(`Loaded image for ${type}`);
+      // console.log(`Loaded image for ${type}`);
     };
     img.onerror = () => {
       console.error(`Failed to load image for ${type}: ${url}`);
@@ -397,7 +397,7 @@ export function updateScene(state: Partial<GameState>): void {
     if (player1NameEl) player1NameEl.textContent = currentUserDisplayName;
     if (player2NameEl) player2NameEl.textContent = opponentAlias;
     
-    console.log(`Set player names: ${currentUserDisplayName} vs ${opponentAlias}`);
+    // console.log(`Set player names: ${currentUserDisplayName} vs ${opponentAlias}`);
     gameState.namesSet = true;
   }
 }

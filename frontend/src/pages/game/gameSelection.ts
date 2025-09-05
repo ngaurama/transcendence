@@ -276,7 +276,6 @@ export async function attachPlaySelectionListeners() {
   if (!user)
     return;
 
-  // Load saved options
   const savedOptions = getGameOptions();
   if (savedOptions.points_to_win) {
     const pointsSelect = document.getElementById('points-to-win') as HTMLSelectElement;
@@ -291,14 +290,12 @@ export async function attachPlaySelectionListeners() {
     if (variantSelect) variantSelect.value = savedOptions.board_variant;
   }
 
-  // Main navigation
   if (selectPong && modeSelection) {
     selectPong.addEventListener('click', () => {
       modeSelection.classList.remove('hidden');
     });
   }
 
-  // Mode selection
   if (playOnline && playLocal) {
     playOnline.addEventListener('click', () => {
       currentMode = 'online';

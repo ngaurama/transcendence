@@ -1,9 +1,7 @@
 import { checkAuthStatus } from '../services';
-import { initUserWebSocket } from '../services/UserWebSocket';
 
 export async function homePage(): Promise<string> {
   const user = await checkAuthStatus();
-  console.log("USER IN HOMEPAGE:", user);
   if (!user) return '<h2>Welcome! Please login or register.</h2>';
 
   return `

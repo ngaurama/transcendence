@@ -2,119 +2,150 @@
 const { validateToken } = require('../utils/auth');
 
 module.exports = function setupStatsRoutes(fastify, socialService) {
-  // Get comprehensive user stats
   fastify.get('/stats/:user_id?', async (request, reply) => {
-    const token = request.headers.authorization?.replace('Bearer ', '');
-    const user = await validateToken(token);
-    if (!user) {
-      return reply.code(401).send({ error: 'Authentication required' });
+  const token = request.headers.authorization?.replace('Bearer ', '');
+  const user = await validateToken(token);
+  if (!user) {
+    return reply.code(401).send({ error: 'Authentication required' });
+  }
+  try {
+    const targetUserId = parseInt(request.params.user_id || user.id);
+    const isOwnProfile = targetUserId == user.id;
+
+    const targetUser = await socialService.db.get(`
+      SELECT id, username, display_name, avatar_url, created_at
+      FROM users WHERE id = ? AND is_active = TRUE
+    `, [targetUserId]);
+
+    if (!targetUser) {
+      return reply.code(404).send({ error: 'User not found' });
     }
-    try {
-      const targetUserId = request.params.user_id || user.id;
-      const isOwnProfile = targetUserId == user.id;
 
-      const targetUser = await socialService.db.get(`
-        SELECT id, username, display_name, avatar_url, created_at
-        FROM users WHERE id = ? AND is_active = TRUE
-      `, [targetUserId]);
+    const stats = await socialService.db.get(`
+      SELECT 
+        games_played, games_won, games_lost,
+        total_playtime_seconds, average_game_duration,
+        longest_game_duration, shortest_game_duration,
+        current_win_streak, longest_win_streak,
+        current_loss_streak, longest_loss_streak,
+        tournaments_played, tournaments_won, tournaments_top3,
+        pong_stats
+      FROM user_game_stats WHERE user_id = ?
+    `, [targetUserId]);
 
-      if (!targetUser) {
-        return reply.code(404).send({ error: 'User not found' });
-      }
+    const winLossByType = await socialService.db.all(`
+      SELECT 
+        json_extract(gs.game_settings, '$.powerups_enabled') AS powerups_enabled,
+        json_extract(gs.game_settings, '$.board_variant') AS board_variant,
+        COUNT(*) AS total_games,
+        SUM(
+          CASE 
+            WHEN gs.winner_id = ? THEN 1
+            WHEN gs.winner_id IS NULL 
+              AND ((? = gs.player1_id AND gs.final_score_player1 > gs.final_score_player2) 
+                    OR (? = gs.player2_id AND gs.final_score_player2 > gs.final_score_player1))
+            THEN 1
+            ELSE 0
+          END
+        ) AS wins,
+        SUM(
+          CASE 
+            WHEN gs.winner_id IS NOT NULL AND gs.winner_id != ? THEN 1
+            WHEN gs.winner_id IS NULL 
+              AND ((? = gs.player1_id AND gs.final_score_player1 < gs.final_score_player2) 
+                    OR (? = gs.player2_id AND gs.final_score_player2 < gs.final_score_player1))
+            THEN 1
+            ELSE 0
+          END
+        ) AS losses
+      FROM game_sessions gs
+      WHERE (? IN (gs.player1_id, gs.player2_id)) 
+        AND gs.status = 'completed'
+      GROUP BY powerups_enabled, board_variant;
+    `, [
+      targetUserId, targetUserId, targetUserId,
+      targetUserId, targetUserId, targetUserId,
+      targetUserId
+    ]);
 
-      // Game statistics
-      const stats = await socialService.db.get(`
-        SELECT 
-          games_played, games_won, games_lost, games_drawn,
-          total_playtime_seconds, average_game_duration,
-          longest_game_duration, shortest_game_duration,
-          current_win_streak, longest_win_streak,
-          current_loss_streak, longest_loss_streak,
-          tournaments_played, tournaments_won, tournaments_top3,
-          pong_stats
-        FROM user_game_stats WHERE user_id = ?
-      `, [targetUserId]);
-
-      const winLossByType = await socialService.db.all(`
-        SELECT 
-          json_extract(gs.game_settings, '$.powerups_enabled') as powerups_enabled,
-          json_extract(gs.game_settings, '$.board_variant') as board_variant,
-          COUNT(*) as total_games,
-          SUM(CASE WHEN gs.winner_id = ? THEN 1 ELSE 0 END) as wins,
-          SUM(CASE WHEN gs.winner_id IS NULL AND gs.status = 'completed' THEN 1 ELSE 0 END) as draws,
-          SUM(CASE WHEN gs.winner_id != ? AND gs.winner_id IS NOT NULL THEN 1 ELSE 0 END) as losses
-        FROM game_sessions gs
-        JOIN game_participants gp ON gp.game_session_id = gs.id
-        WHERE gp.id = ? AND gs.status = 'completed'
-        GROUP BY powerups_enabled, board_variant
-      `, [targetUserId, targetUserId, targetUserId]);
-
-      // Recent games history
-      const recentGames = await socialService.db.all(`
+    const rawRecentGames = await socialService.db.all(`
       SELECT 
         gs.id, gs.created_at, gs.final_score_player1, gs.final_score_player2,
         gs.game_duration_ms, gs.game_settings, gs.winner_id,
-        u1.id as opponent_id, u1.display_name as opponent_name, u1.avatar_url as opponent_avatar,
+        gs.player1_id, gs.player2_id,
+        u1.display_name AS player1_name, u1.avatar_url AS player1_avatar,
+        u2.display_name AS player2_name, u2.avatar_url AS player2_avatar,
         CASE 
           WHEN gs.winner_id = ? THEN 'win'
-          WHEN gs.winner_id IS NULL THEN 'draw'
+          WHEN gs.winner_id IS NULL 
+            AND ((? = gs.player1_id AND gs.final_score_player1 > gs.final_score_player2) 
+                  OR (? = gs.player2_id AND gs.final_score_player2 > gs.final_score_player1))
+          THEN 'win'
           ELSE 'loss'
-        END as result
+        END AS result,
+        CASE 
+          WHEN u1.is_guest = 1 OR u2.is_guest = 1 THEN 'local'
+          ELSE 'online'
+        END AS game_type
       FROM game_sessions gs
-      JOIN game_participants gp ON gp.game_session_id = gs.id
-      JOIN game_participants gp_opp ON gp_opp.game_session_id = gs.id AND gp_opp.user_id != gp.user_id
-      LEFT JOIN users u1 ON u1.id = gp_opp.user_id
-      WHERE gp.user_id = ? AND gs.status = 'completed'
+      LEFT JOIN users u1 ON u1.id = gs.player1_id
+      LEFT JOIN users u2 ON u2.id = gs.player2_id
+      WHERE (? IN (gs.player1_id, gs.player2_id))
+        AND gs.status = 'completed'
       ORDER BY gs.created_at DESC
-      LIMIT 20
+      LIMIT 20;
+    `, [targetUserId, targetUserId, targetUserId, targetUserId]);
+
+    const recentGames = rawRecentGames.map(g => ({
+      id: g.id,
+      created_at: g.created_at,
+      game_duration_ms: g.game_duration_ms,
+      game_settings: g.game_settings,
+      winner_id: g.winner_id,
+      player1: {
+        id: g.player1_id,
+        score: g.final_score_player1,
+        name: g.player1_name,
+        avatar_url: g.player1_avatar
+      },
+      player2: {
+        id: g.player2_id,
+        score: g.final_score_player2,
+        name: g.player2_name,
+        avatar_url: g.player2_avatar
+      },
+      result: g.result,
+      game_type: g.game_type
+    }));
+
+    const tournamentStats = await socialService.db.all(`
+      SELECT 
+        t.id, t.name, t.status, t.winner_id,
+        tp.final_position, tp.eliminated_in_round,
+        CASE 
+          WHEN t.winner_id = ? THEN 'winner'
+          WHEN tp.final_position <= 3 THEN 'top3'
+          ELSE 'participant'
+        END as performance
+      FROM tournament_participants tp
+      JOIN tournaments t ON t.id = tp.tournament_id
+      WHERE tp.user_id = ?
+      ORDER BY t.created_at DESC
     `, [targetUserId, targetUserId]);
 
-      // Tournament performance
-      const tournamentStats = await socialService.db.all(`
-        SELECT 
-          t.id, t.name, t.status, t.winner_id,
-          tp.final_position, tp.eliminated_in_round,
-          CASE 
-            WHEN t.winner_id = ? THEN 'winner'
-            WHEN tp.final_position <= 3 THEN 'top3'
-            ELSE 'participant'
-          END as performance
-        FROM tournament_participants tp
-        JOIN tournaments t ON t.id = tp.tournament_id
-        WHERE tp.id = ?
-        ORDER BY t.created_at DESC
-      `, [targetUserId, targetUserId]);
-
-      // Weekaly performance
-      const weeklyPerformance = await socialService.db.all(`
-      SELECT 
-        strftime('%Y-%W', gs.created_at) as week,
-        COUNT(*) as total_games,
-        SUM(CASE WHEN gs.winner_id = ? THEN 1 ELSE 0 END) as wins,
-        SUM(CASE WHEN gs.winner_id IS NULL THEN 1 ELSE 0 END) as draws,
-        SUM(CASE WHEN gs.winner_id != ? AND gs.winner_id IS NOT NULL THEN 1 ELSE 0 END) as losses
-      FROM game_sessions gs
-      JOIN game_participants gp ON gp.game_session_id = gs.id
-      WHERE gp.user_id = ? AND gs.status = 'completed'
-      GROUP BY strftime('%Y-%W', gs.created_at)
-      ORDER BY week DESC
-      LIMIT 8
-    `, [targetUserId, targetUserId, targetUserId]);
-
-      return {
-        targetUser,
-        stats: stats || {},
-        win_loss_by_type: winLossByType,
-        recent_games: recentGames,
-        tournament_stats: tournamentStats,
-        weekly_performance: weeklyPerformance,
-        is_own_profile: isOwnProfile
-      };
-    } catch (error) {
-      console.error('Stats fetch error:', error);
-      return reply.code(500).send({ error: 'Failed to fetch statistics' });
-    }
-  });
+    return {
+      targetUser,
+      stats: stats || {},
+      win_loss_by_type: winLossByType,
+      recent_games: recentGames,
+      tournament_stats: tournamentStats,
+      is_own_profile: isOwnProfile
+    };
+  } catch (error) {
+    console.error('Stats fetch error:', error);
+    return reply.code(500).send({ error: 'Failed to fetch statistics' });
+  }
+});
 
   fastify.get('/game/:game_id/details', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
@@ -146,7 +177,6 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
         return reply.code(404).send({ error: 'Game not found' });
       }
 
-      // Check if user participated in this game
       const participant = await socialService.db.get(`
         SELECT * FROM game_participants 
         WHERE game_session_id = ? AND id = ?

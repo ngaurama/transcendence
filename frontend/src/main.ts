@@ -20,7 +20,6 @@ async function main() {
   }
 
   const user = await checkAuthStatus();
-  console.log("USER AFTER AUTHCHECK: ", user);
   const allowedUnauthenticatedRoutes = [
     '/login',
     '/register',

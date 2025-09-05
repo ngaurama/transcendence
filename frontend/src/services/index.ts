@@ -1,3 +1,4 @@
+import { handleApiError, showRateLimitModal } from "../utils/handleApiError";
 import { User } from "../utils/types"
 
 export async function checkAuthStatus(): Promise<User | null> {
@@ -5,7 +6,7 @@ export async function checkAuthStatus(): Promise<User | null> {
   if (!token) return null;
 
   try {
-    const res = await fetch(`/api/auth/validate-token`, {
+    const res = await fetchWithErrorHandling(`/api/auth/validate-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
@@ -27,6 +28,22 @@ export async function checkAuthStatus(): Promise<User | null> {
   }
 }
 
+export async function fetchWithErrorHandling(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  const response = await fetch(input, init);
+  
+  if (response.status === 429) {
+    const errorData = await response.json().catch(() => ({}));
+    showRateLimitModal(errorData);
+    throw new Error('Rate limit exceeded');
+  }
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+  }
+  
+  return response;
+}
 
 export * from "./AuthService"
 export * from "./PasswordService"

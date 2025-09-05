@@ -26,41 +26,7 @@ export async function tournamentSelectionPage(): Promise<string> {
       </div>
     </div>
   `;
-  // return `
-  //   <div class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg">
-  //     <h2 class="text-2xl mb-6 text-center">Tournaments</h2>
-  //     <button id="create-tournament" class="w-full bg-purple-500 p-2 rounded mb-4">Create New Tournament</button>
-  //     <h3 class="text-xl mb-4">Open Tournaments</h3>
-  //     ${tournaments.length > 0
-  //       ? `<ul class="space-y-2">
-  //           ${tournaments.map(t => `
-  //             <li class="bg-gray-700 p-3 rounded flex justify-between items-center">
-  //               <span>${t.name} (${t.current_participants}/${t.max_participants})</span>
-  //               <button class="join-tournament-btn bg-blue-500 p-2 rounded" data-id="${t.id}">Join</button>
-  //             </li>
-  //           `).join('')}
-  //         </ul>`
-  //       : '<p>No open tournaments available.</p>'
-  //     }
-  //   </div>
-  // `;
 }
-
-// function renderTournamentListItem(tournament: any): string {
-//   return `
-//     <li class="bg-gray-700 p-3 rounded flex justify-between items-center tournament-item" data-id="${tournament.id}">
-//       <div>
-//         <span class="font-semibold">${tournament.name}</span>
-//         <p class="text-sm text-gray-300">
-//           ${tournament.current_participants}/${tournament.max_participants} players • 
-//           ${tournament.tournament_settings?.powerups_enabled ? 'Powerups' : 'No Powerups'} • 
-//           ${tournament.tournament_settings?.points_to_win} points to win
-//         </p>
-//       </div>
-//       <button class="join-tournament-btn bg-blue-500 p-2 rounded" data-id="${tournament.id}">Join</button>
-//     </li>
-//   `;
-// }
 
 function renderTournamentListItem(tournament: any): string {
   return `

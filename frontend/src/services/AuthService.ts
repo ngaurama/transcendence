@@ -1,9 +1,10 @@
+import { fetchWithErrorHandling } from ".";
 import { User } from "../utils/types"
 import { closeUserWebSocket } from "./UserWebSocket";
 
 export async function login(username: string, password: string): Promise<{ requires2FA?: boolean; user?: User }> {
   try {
-    const res = await fetch(`/api/auth/login`, {
+    const res = await fetchWithErrorHandling(`/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -36,7 +37,7 @@ export async function register(
   acceptGdpr: boolean
 ): Promise<User> {
   try {
-    const res = await fetch(`/api/auth/register`, {
+    const res = await fetchWithErrorHandling(`/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -68,7 +69,7 @@ export async function logout(): Promise<void> {
 
   if (token && refreshToken) {
     try {
-      await fetch(`/api/auth/logout`, {
+      await fetchWithErrorHandling(`/api/auth/logout`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -89,7 +90,7 @@ export async function uploadAvatar(token: string, file: File): Promise<string> {
     const formData = new FormData();
     formData.append('avatar', file);
 
-    const res = await fetch(`/api/auth/upload-avatar`, {
+    const res = await fetchWithErrorHandling(`/api/auth/upload-avatar`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -111,7 +112,7 @@ export async function uploadAvatar(token: string, file: File): Promise<string> {
 
 export async function guestLogin(alias: string): Promise<{ user: User; access_token: string; refresh_token: string }> {
   try {
-    const res = await fetch(`/api/auth/guest-login`, {
+    const res = await fetchWithErrorHandling(`/api/auth/guest-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ alias }),
@@ -131,7 +132,7 @@ export async function guestLogin(alias: string): Promise<{ user: User; access_to
 
 export async function updateProfile(token: string, updates: { username?: string; display_name?: string }): Promise<void> {
   try {
-    const res = await fetch(`/api/auth/user/update`, {
+    const res = await fetchWithErrorHandling(`/api/auth/user/update`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

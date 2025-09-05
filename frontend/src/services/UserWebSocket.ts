@@ -76,6 +76,7 @@ export function closeUserWebSocket(): void {
 }
 
 function handleUserWebSocketMessage(data: any): void {
+  // console.log("DATA WS", data);
   switch (data.type) {
     case 'auth_success':
       console.log('User WebSocket authenticated');
@@ -229,7 +230,6 @@ function showFriendRequestAccepted(friend: any): void {
   
   document.body.appendChild(notification);
   
-  // Auto-remove after 10 seconds
   setTimeout(() => {
     if (document.body.contains(notification)) {
       notification.remove();
@@ -237,7 +237,6 @@ function showFriendRequestAccepted(friend: any): void {
   }, 10000);
 }
 
-// Refresh the friends list in the UI
 export async function refreshFriendsList(): Promise<void> {
   const friendsList = document.getElementById('friends-list');
   if (!friendsList) return;
@@ -282,7 +281,6 @@ export async function refreshFriendsList(): Promise<void> {
   }
 }
 
-// Update a friend's status in the UI
 function updateFriendStatus(userId: string, status: string, gameId?: string): void {
   const friendElement = document.querySelector(`[data-user-id="${userId}"]`)?.closest('.flex.items-center.justify-between');
   if (!friendElement) return;
@@ -300,7 +298,6 @@ function updateFriendStatus(userId: string, status: string, gameId?: string): vo
   }
 }
 
-// Show a general game invitation notification
 function showGameInvitation(inviter: any, gameId: string, gameSettings: any): void {
   const notification = document.createElement('div');
   notification.className = 'fixed bottom-4 right-4 bg-white p-4 rounded shadow-lg border z-50 max-w-sm';
@@ -320,7 +317,6 @@ function showGameInvitation(inviter: any, gameId: string, gameSettings: any): vo
     try {
       await acceptGameInvitation(gameId);
       notification.remove();
-      // (window as any).navigate(`/game/pong?game_id=${gameId}`);
     } catch (error) {
       console.error('Error accepting game invitation:', error);
       alert('Failed to accept game invitation');

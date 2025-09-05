@@ -5,8 +5,8 @@ export function showMatchInvitation(inviterName: string, gameId: string, gameSet
   notification.className = 'fixed bottom-4 right-4 bg-white p-4 rounded shadow-lg border z-50 max-w-sm';
   notification.innerHTML = `
     <h4 class="font-bold mb-2 text-gray-800">Match Invitation</h4>
-    <p class="text-gray-600 mb-3">${inviterName} wants a match!</p>
-    <p class="text-s text-gray-500">
+    <p class="text-gray-600">${inviterName} wants a match!</p>
+    <p class="text-s text-gray-500 mb-2">
       ${gameSettings.powerups_enabled ? 'Powerups: Yes' : 'Powerups: No'} | 
       ${gameSettings.points_to_win || 5} points | 
       ${gameSettings.board_variant || 'Classic'}

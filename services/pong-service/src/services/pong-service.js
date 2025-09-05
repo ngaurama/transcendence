@@ -209,7 +209,7 @@ class PongService {
 
     const gameRoom = this.gameRooms.get(gameId);
     if (gameRoom) {
-      // Add logic here if gameRoom needs to start the game (e.g., check connections)
+      //might need to get back to this
     }
 
     return gameId;

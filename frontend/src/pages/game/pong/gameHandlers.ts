@@ -17,21 +17,29 @@ export function setupRematchHandler() {
 
       const gameInfo = await getGameInfo(gameId);      
       const options = gameInfo.settings;
-      const currentUser = await checkAuthStatus();
-      const opponent = gameInfo.players.find((p: any) => p.id !== currentUser?.id);
 
-      if (opponent) {
-        console.log("OPTIONS AND OPPONENT: ", options, opponent.id);
-        const newGameId = await requestMatch(options, opponent.id);
-        rematchBtn.style.display = 'none';
-        rematchBtn.textContent = 'Waiting for opponent...';
+      if (options.gameMode === 'local') {
+        const newGameId = await requestMatch(options);
 
-        (window as any).pendingRematchGameId = { 
-          newGameId,
-          originaltext: 'Rematch'
-        };
+        console.log("Local rematch created, navigating to:", newGameId);
+        
+        (window as any).navigate(`/game/pong?game_id=${newGameId}`);
       } else {
-        throw new Error('Could not find opponent');
+        const currentUser = await checkAuthStatus();
+        const opponent = gameInfo.players.find((p: any) => p.id !== currentUser?.id);
+        
+        if (opponent) {
+          const newGameId = await requestMatch(options, opponent.id);
+          rematchBtn.style.display = 'none';
+          rematchBtn.textContent = 'Waiting for opponent...';
+
+          (window as any).pendingRematchGameId = { 
+            newGameId,
+            originaltext: 'Rematch'
+          };
+        } else {
+          throw new Error('Could not find opponent');
+        }
       }
     } catch (error) {
       console.error('Rematch failed:', error);

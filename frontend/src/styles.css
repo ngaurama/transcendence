@@ -30,7 +30,7 @@
   height: 500px;
   border: 1px solid #4b5563;
   border-radius: 0.5rem;
-  touch-action: none; /* For better touch controls if added */
+  touch-action: none;
 }
 
 /* TOURNAMENT BRACKET STUFF */
@@ -243,3 +243,38 @@
   display: none;
 }
  */
+
+
+ .recent-game-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.recent-game-item:hover {
+  background-color: #374151;
+}
+
+.game-details {
+  background-color: #374151;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.loader-state, .cancel-state {
+  transition: opacity 0.3s;
+}
+
+#rate-limit-modal {
+  font-family: inherit;
+}
+
+#rate-limit-modal > div {
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+#rate-limit-seconds {
+  color: #fbbf24;
+}

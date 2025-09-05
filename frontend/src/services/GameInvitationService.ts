@@ -1,6 +1,6 @@
 // services/GameInvitationService.ts
 
-import { checkAuthStatus, getFriendsList } from ".";
+import { checkAuthStatus, fetchWithErrorHandling, getFriendsList } from ".";
 import { getUserStats, requestMatch } from "./PongService";
 
 export async function inviteFriendToGame(friendId: number): Promise<void> {
@@ -117,7 +117,7 @@ export async function inviteFriendToGame(friendId: number): Promise<void> {
 export async function acceptGameInvitation(invitationId: string): Promise<string> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/game/invitation/accept/${invitationId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/game/invitation/accept/${invitationId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -140,7 +140,7 @@ export async function acceptGameInvitation(invitationId: string): Promise<string
 export async function declineGameInvitation(invitationId: string): Promise<void> {
   try {
     const token = localStorage.getItem('access_token');
-    const res = await fetch(`/api/pong/game/invitation/decline/${invitationId}`, {
+    const res = await fetchWithErrorHandling(`/api/pong/game/invitation/decline/${invitationId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
