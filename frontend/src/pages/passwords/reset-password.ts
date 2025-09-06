@@ -9,10 +9,10 @@ export async function resetPasswordPage(): Promise<string> {
       <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-2xl mb-4 text-red-400">Invalid Reset Link</h2>
         <p class="mb-4">The password reset link is invalid or missing.</p>
-        <button onclick="navigate('/forgot-password')" class="w-full bg-blue-500 p-2 rounded mb-2">
+        <button onclick="navigate('/forgot-password')" class="glass-button w-full bg-blue-500 p-2 rounded mb-2">
           Request New Reset Link
         </button>
-        <button onclick="navigate('/login')" class="w-full bg-gray-500 p-2 rounded">
+        <button onclick="navigate('/login')" class="glass-button w-full bg-gray-500 p-2 rounded">
           Back to Login
         </button>
       </div>
@@ -32,10 +32,10 @@ export async function resetPasswordPage(): Promise<string> {
         <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
           <h2 class="text-2xl mb-4 text-red-400">Invalid or Expired Reset Token</h2>
           <p class="mb-4">The password reset link is invalid or has expired. Please request a new one.</p>
-          <button onclick="navigate('/forgot-password')" class="w-full bg-blue-500 p-2 rounded mb-2">
+          <button onclick="navigate('/forgot-password')" class="glass-button w-full bg-blue-500 p-2 rounded mb-2">
             Request New Reset Link
           </button>
-          <button onclick="navigate('/login')" class="w-full bg-gray-500 p-2 rounded">
+          <button onclick="navigate('/login')" class="glass-button w-full bg-gray-500 p-2 rounded">
             Back to Login
           </button>
         </div>
@@ -49,7 +49,7 @@ export async function resetPasswordPage(): Promise<string> {
           <h3 class="font-bold mb-2">Password Reset Successfully!</h3>
           <p>Your password has been reset. You can now login with your new password.</p>
           <div class="mt-4">
-            <button onclick="navigate('/login')" class="w-full bg-blue-500 p-2 rounded">Go to Login</button>
+            <button onclick="navigate('/login')" class="glass-button w-full bg-blue-500 p-2 rounded">Go to Login</button>
           </div>
         </div>
         <form id="reset-password-form" class="space-y-4">
@@ -59,7 +59,7 @@ export async function resetPasswordPage(): Promise<string> {
           </p>
           <input type="password" id="new-password" placeholder="New Password" class="w-full p-2 bg-gray-700 rounded" minlength="6" required>
           <input type="password" id="confirm-password" placeholder="Confirm New Password" class="w-full p-2 bg-gray-700 rounded" minlength="6" required>
-          <button type="submit" class="w-full bg-blue-500 p-2 rounded">Reset Password</button>
+          <button type="submit" class="glass-button w-full bg-blue-500 p-2 rounded">Reset Password</button>
         </form>
         <div class="mt-4 text-center">
           <a href="#" onclick="navigate('/login')" class="text-blue-400 hover:underline">Back to Login</a>
@@ -71,10 +71,10 @@ export async function resetPasswordPage(): Promise<string> {
       <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-2xl mb-4 text-red-400">Reset Token Validation Error</h2>
         <p class="mb-4">Failed to validate reset token. Please try again later.</p>
-        <button onclick="navigate('/forgot-password')" class="w-full bg-blue-500 p-2 rounded mb-2">
+        <button onclick="navigate('/forgot-password')" class="glass-button w-full bg-blue-500 p-2 rounded mb-2">
           Request New Reset Link
         </button>
-        <button onclick="navigate('/login')" class="w-full bg-gray-500 p-2 rounded">
+        <button onclick="navigate('/login')" class="glass-button w-full bg-gray-500 p-2 rounded">
           Back to Login
         </button>
       </div>

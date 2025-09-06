@@ -25,7 +25,16 @@ export async function profilePage(): Promise<string> {
   }, 100);
 
   return `
-    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+     <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+      <!-- Back Arrow -->
+      <div class="mb-4">
+        <button onclick="navigateBack()" class="flex items-center text-gray-400 hover:text-white transition-colors">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back
+        </button>
+      </div>
       <!-- Profile Header -->
       <div class="text-center mb-6">
         <img src="${userStats.targetUser.avatar_url}" alt="Avatar" 
@@ -37,19 +46,19 @@ export async function profilePage(): Promise<string> {
         ${!isOwnProfile ? `
           <div class="mt-4">
             ${friendshipStatus === 'not_friends' ? `
-              <button id="add-friend-btn" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+              <button id="add-friend-btn" class="glass-button bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
                 Add Friend
               </button>
             ` : friendshipStatus === 'pending' ? `
-              <button class="bg-gray-600 px-4 py-2 rounded cursor-not-allowed" disabled>
+              <button class="glass-button bg-gray-600 px-4 py-2 rounded cursor-not-allowed" disabled>
                 Friend Request Pending
               </button>
             ` : friendshipStatus === 'accepted' ? `
               <div class="flex gap-2 justify-center">
-                <button id="play-with-friend" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
+                <button id="play-with-friend" class="glass-button bg-green-600 px-4 py-2 rounded hover:bg-green-700">
                   Play Game
                 </button>
-                <button id="remove-friend" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">
+                <button id="remove-friend" class="glass-button bg-red-600 px-4 py-2 rounded hover:bg-red-700">
                   Remove Friend
                 </button>
               </div>

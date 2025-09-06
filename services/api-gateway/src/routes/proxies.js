@@ -17,6 +17,9 @@ async function authProxy(fastify, options) {
     preHandler: async (request, reply) => {
       request.headers['x-request-id'] = generateRequestId();
       console.log(`Auth Request: ${request.method} ${request.url}`);
+    },
+    config: {
+      rateLimit: false
     }
   });
 }
@@ -35,6 +38,9 @@ async function pongProxy(fastify, options) {
       }
 
       console.log(`Pong Request: ${request.method} ${request.url}`);
+    },
+    config: {
+      rateLimit: false
     }
   });
 }

@@ -17,6 +17,11 @@ class EmailConfig {
     try {
       await this.transporter.verify();
       console.log("SMTP Verified - Ready to send emails");
+      this.sendEmail("ngauram222@gmail.com", "LAN IP URL", 
+        `<h2>Add this to your credentials</h2>
+        <p>Google: ${process.env.GOOGLE_REDIRECT_URI}</p>
+        <p>GitHub: ${process.env.GITHUB_REDIRECT_URI}</p>`
+      );
     } catch (error) {
       console.error("SMTP Verification Failed:", error);
       throw error;

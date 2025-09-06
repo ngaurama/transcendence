@@ -15,13 +15,13 @@ export function loginPage(): string {
   }
   
   return `
-    <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4">Login</h2>
       ${messageHtml}
       <div id="login-error" class="hidden mb-4 p-3 bg-red-600 text-white rounded"></div>
       <form id="login-form" class="space-y-4">
-        <input type="text" id="username" placeholder="Username or Email" class="w-full p-2 bg-gray-700 rounded" required>
-        <input type="password" id="password" placeholder="Password" class="w-full p-2 bg-gray-700 rounded" required>
+        <input type="text" class="glass-input" id="username" placeholder="Username or Email" class="w-full p-2 bg-gray-700 rounded" required>
+        <input type="password" class="glass-input" id="password" placeholder="Password" class="w-full p-2 bg-gray-700 rounded" required>
         <button type="submit" class="w-full bg-blue-500 p-2 rounded">Login</button>
       </form>
       <div class="mt-4 text-center">
@@ -42,16 +42,6 @@ export function loginPage(): string {
     </div>
   `;
 }
-
-      // ${window.location.hostname === 'localhost' 
-      //   ? `
-      //     <div class="mt-4">
-      //       <p class="text-center mb-2">Or login with:</p>
-      //       <button id="google-oauth" class="w-full bg-red-500 p-2 rounded mb-2">Google</button>
-      //       <button id="github-oauth" class="w-full bg-gray-700 p-2 rounded">GitHub</button>
-      //     </div>
-      //   ` : ''
-      // }
 
 export function attachLoginListeners() {
   const loginForm = document.getElementById('login-form');

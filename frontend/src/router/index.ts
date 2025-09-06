@@ -73,12 +73,12 @@ async function updateAuthStatus() {
       authStatus.innerHTML = `
         <div class="flex items-center gap-2">
           <span class="text-m text-white">Guest: ${user.display_name}</span>
-          <button onclick="navigate('/logout')" class="bg-red-800 px-2 py-1 rounded text-sm">Logout</button>
+          <button onclick="navigate('/logout')" class="glass-button bg-red-800 px-2 py-1 rounded text-sm">Logout</button>
         </div>
       `;
     } else {
       authStatus.innerHTML = `
-        <div class="relative">
+        <div class="absolute">
           <img src="${user.avatar_url}" alt="Avatar" class="w-10 h-10 rounded-full cursor-pointer" id="avatar-dropdown-trigger">
           <div id="avatar-dropdown" class="hidden dropdown-menu">
             <div class="dropdown-item" onclick="navigate('/dashboard')">Dashboard</div>
@@ -90,8 +90,8 @@ async function updateAuthStatus() {
     }
   } else {
     authStatus.innerHTML = `
-      <button onclick="navigate('/login')" class="bg-blue-500 px-3 py-1 rounded mr-2">Login</button>
-      <button onclick="navigate('/register')" class="bg-green-500 px-3 py-1 rounded">Register</button>
+      <button onclick="navigate('/login')" class="glass-button bg-blue-500 px-3 py-1 rounded mr-2">Login</button>
+      <button onclick="navigate('/register')" class="glass-button bg-green-500 px-3 py-1 rounded">Register</button>
     `;
   }
 }

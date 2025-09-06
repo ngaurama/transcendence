@@ -11,7 +11,7 @@ export async function authCallbackPage(): Promise<string> {
         <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
           <h2 class="text-2xl mb-4 text-red-400">Account Mismatch</h2>
           <p>This account was created via ${provider}. Please use ${provider} login.</p>
-          <button onclick="navigate('/login')" class="w-full bg-blue-500 p-2 rounded mt-4">Back to Login</button>
+          <button onclick="navigate('/login')" class="glass-button w-full bg-blue-500 p-2 rounded mt-4">Back to Login</button>
         </div>
       `;
     }
@@ -19,7 +19,7 @@ export async function authCallbackPage(): Promise<string> {
       <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-2xl mb-4 text-red-400">OAuth Error</h2>
         <p class="mb-4">${error}</p>
-        <button onclick="navigate('/login')" class="w-full bg-blue-500 p-2 rounded">Back to Login</button>
+        <button onclick="navigate('/login')" class="glass-button w-full bg-blue-500 p-2 rounded">Back to Login</button>
       </div>
     `;
   }
@@ -34,7 +34,7 @@ export async function authCallbackPage(): Promise<string> {
   return `
     <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4 text-red-400">Invalid OAuth Callback</h2>
-      <button onclick="navigate('/login')" class="w-full bg-blue-500 p-2 rounded">Back to Login</button>
+      <button onclick="navigate('/login')" class="glass-button w-full bg-blue-500 p-2 rounded">Back to Login</button>
     </div>
   `;
 }

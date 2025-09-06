@@ -3,14 +3,14 @@ import { initUserWebSocket } from '../../services/UserWebSocket';
 
 export function registerPage(): string {
   return `
-    <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4">Register</h2>
       <div id="register-error" class="hidden mb-4 p-3 bg-red-600 text-white rounded"></div>
       <form id="register-form" class="space-y-4">
-        <input type="text" id="reg-username" placeholder="Username" class="w-full p-2 bg-gray-700 rounded" minlength="3" required>
-        <input type="email" id="reg-email" placeholder="Email" class="w-full p-2 bg-gray-700 rounded" required>
-        <input type="password" id="reg-password" placeholder="Password" class="w-full p-2 bg-gray-700 rounded" minlength="6" required>
-        <input type="text" id="reg-display-name" placeholder="Display Name" class="w-full p-2 bg-gray-700 rounded" minlength="2" required>
+        <input type="text" id="reg-username" placeholder="Username" class="glass-input w-full p-2 bg-gray-700 rounded" minlength="3" required>
+        <input type="email" id="reg-email" placeholder="Email" class="glass-input w-full p-2 bg-gray-700 rounded" required>
+        <input type="password" id="reg-password" placeholder="Password" class="glass-input w-full p-2 bg-gray-700 rounded" minlength="6" required>
+        <input type="text" id="reg-display-name" placeholder="Display Name" class="glass-input w-full p-2 bg-gray-700 rounded" minlength="2" required>
 
         <div class="flex flex-col">
           <div class="flex items-center">
@@ -30,12 +30,12 @@ export function registerPage(): string {
           </div>
         </div>
 
-        <button type="submit" class="w-full bg-green-500 p-2 rounded">Register</button>
+        <button type="submit" class="glass-button w-full bg-green-700 p-2 rounded">Register</button>
       </form>
       <div class="mt-4">
         <p class="text-center mb-2">Or login with:</p>
-        <button id="google-oauth" class="w-full bg-red-500 p-2 rounded mb-2">Google</button>
-        <button id="github-oauth" class="w-full bg-gray-700 p-2 rounded">GitHub</button>
+        <button id="google-oauth" class="glass-button w-full bg-red-500 p-2 rounded mb-2">Google</button>
+        <button id="github-oauth" class="glass-button w-full bg-gray-700 p-2 rounded">GitHub</button>
       </div>
       <div class="mt-4 text-center">
         <span class="text-gray-400">Already have an account? </span>

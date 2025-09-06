@@ -44,10 +44,10 @@ export async function inviteFriendToGame(friendId: number): Promise<void> {
           </div>
           
           <div class="flex space-x-4">
-            <button id="popup-cancel" class="flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
+            <button id="popup-cancel" class="glass-button flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
               Cancel
             </button>
-            <button id="popup-confirm" class="flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
+            <button id="popup-confirm" class="glass-button flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
               Send Invite
             </button>
           </div>

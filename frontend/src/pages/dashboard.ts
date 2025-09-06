@@ -10,6 +10,8 @@ export async function dashboardPage(): Promise<string> {
     return '';
   }
 
+  (window as any).dashboardHistory.push('/dashboard');
+
   const fullStats = await getUserStats(user.id);
   const friends = await getFriendsList();
   const isOAuthUser = user.oauth_provider && user.oauth_provider !== 'local';
@@ -23,7 +25,16 @@ export async function dashboardPage(): Promise<string> {
   }, 100);
   
   return `
-    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+      <!-- Back Arrow -->
+      <div class="mb-4">
+        <button onclick="navigateBack()" class="flex items-center text-gray-400 hover:text-white transition-colors">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back
+        </button>
+      </div>
       <!-- User Profile Header -->
       <div class="text-center mb-6">
         <!-- Avatar Section -->      
@@ -54,14 +65,14 @@ export async function dashboardPage(): Promise<string> {
               >
               <button 
                 onclick="document.getElementById('avatar-file-input').click()" 
-                class="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
+                class="glass-button block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
               >
                 Upload new avatar
               </button>
               ${!isDefaultAvatar ? `
                 <button 
                   id="remove-avatar-btn" 
-                  class="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
+                  class="glass-button block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-600"
                 >
                   Remove avatar
                 </button>
@@ -98,15 +109,15 @@ export async function dashboardPage(): Promise<string> {
       </div>
 
       <!-- Tabs Navigation -->
-      <div class="flex border-b border-gray-700 mb-6">
-        <button id="stats-tab" class="tab-button active px-4 py-2 text-blue-400 border-b-2 border-blue-400">
+      <div class="flex border-b justify-between border-gray-700 mb-6">
+        <button id="stats-tab" class="tab-button active px-4 py-2 text-blue-400 border-b-2 border-blue-400 hover:rounded-t-lg">
           Statistics
         </button>
-        <button id="friends-tab" class="tab-button px-4 py-2 text-gray-400 hover:text-white">
+        <button id="friends-tab" class="tab-button px-4 py-2 text-gray-400 hover:text-white hover:rounded-t-lg">
           Friends
         </button>
         ${user.id === (await checkAuthStatus())?.id ? `
-          <button id="settings-tab" class="tab-button px-4 py-2 text-gray-400 hover:text-white">
+          <button id="settings-tab" class="tab-button px-4 py-2 text-gray-400 hover:text-white hover:rounded-t-lg">
             Settings
           </button>
         ` : ''}
@@ -136,36 +147,36 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
   return `
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Overall Stats -->
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Overall Performance</h3>
         <div class="grid grid-cols-2 gap-2">
-          <div class="text-center p-3 bg-gray-800 rounded">
+          <div class="text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold">${fullStats.stats.games_played || 0}</div>
-            <div class="text-sm text-gray-400">Games Played</div>
+            <div class="text-sm text-gray-300">Games Played</div>
           </div>
-          <div class="text-center p-3 bg-gray-800 rounded">
+          <div class="text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold text-green-400">${fullStats.stats.games_won || 0}</div>
-            <div class="text-sm text-gray-400">Wins</div>
+            <div class="text-sm text-gray-300">Wins</div>
           </div>
-          <div class="text-center p-3 bg-gray-800 rounded">
+          <div class="text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold text-red-400">${fullStats.stats.games_lost || 0}</div>
-            <div class="text-sm text-gray-400">Losses</div>
+            <div class="text-sm text-gray-300">Losses</div>
           </div>
-          <div class="text-center p-3 bg-gray-800 rounded">
+          <div class="text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold">${Math.round((fullStats.stats.games_won || 0) / (fullStats.stats.games_played || 1) * 100)}%</div>
-            <div class="text-sm text-gray-400">Win Rate</div>
+            <div class="text-sm text-gray-300">Win Rate</div>
           </div>
         </div>
       </div>
 
       <!-- Win/Loss Chart with Toggle -->
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <div class="flex justify-between items-center mb-3">
           <h3 class="text-lg font-semibold">Performance Charts</h3>
           <div class="flex space-x-2">
-            <button id="win-loss-chart-btn" class="chart-toggle-btn bg-blue-600 text-white px-2 py-1 rounded text-xs active">
+            <!-- <button id="win-loss-chart-btn" class="disabled chart-toggle-btn bg-blue-600 text-white px-2 py-1 rounded text-xs active">
               Win/Loss
-            </button>
+            </button> -->
           </div>
         </div>
 
@@ -176,7 +187,7 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
       </div>
 
       <!-- Recent Games -->
-      <div class="md:col-span-2 bg-gray-900 p-4 rounded">
+      <div class="glass-card md:col-span-2 bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Recent Games</h3>
         <div class="space-y-2">
           ${
@@ -188,13 +199,11 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
 
                     const userWin = game.winner_id === user.id;
                     const opponentWin = game.winner_id !== user.id;
-                    console.log("GAME: ", game);
-                    console.log("USER AND OPPONNENT: ", userPlayerNumber, userWin, opponentPlayerNumber, opponentWin);
 
                     return `
                       <div class="flex flex-col bg-gray-800 rounded recent-game-item" data-game-id="${game.id}">
                         <!-- Main line -->
-                        <div class="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-700">
+                        <div class="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-800">
                           
                           <!-- Player 1 (left) -->
                           <div class="flex items-center space-x-2 w-1/3">
@@ -224,7 +233,7 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
                         </div>
 
                         <!-- Dropdown/details -->
-                        <div id="game-details-${game.id}" class="hidden bg-gray-700 p-3 rounded mt-1 text-sm">
+                        <div id="game-details-${game.id}" class="hidden bg-gray-800 p-3 rounded mt-1 text-sm">
                           <div class="grid grid-cols-2 gap-2">
                             <div><strong>Date:</strong> ${new Date(game.created_at + "Z").toLocaleString("en-GB", { timeZone: "UTC" })}</div>
                             <div><strong>Duration:</strong> ${Math.round(game.game_duration_ms / 1000)}s</div>
@@ -245,7 +254,7 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
 
       <!-- Tournament Performance -->
       ${fullStats.stats.tournament_stats && fullStats.stats.tournament_stats.length > 0 ? `
-        <div class="md:col-span-2 bg-gray-900 p-4 rounded">
+        <div class="glass-card md:col-span-2 bg-gray-800 p-4 rounded">
           <h3 class="text-lg font-semibold mb-3">Tournament Performance</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             ${fullStats.stats.tournament_stats.map((tournament: any) => `
@@ -275,12 +284,12 @@ function renderFriendsContent(friends: any[], isOwnProfile: boolean): string {
   return `
     <div class="grid grid-cols-1 gap-6">
       <!-- Add Friend Section -->
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Add Friend</h3>
         <div class="flex gap-2">
-          <input type="text" id="friend-search" placeholder="Search by username..." 
+          <input type="text" class="glass-input" id="friend-search" placeholder="Search by username..." 
                  class="flex-1 p-2 bg-gray-800 rounded border border-gray-700">
-          <button id="search-friend-btn" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+          <button id="search-friend-btn" class="glass-button glass-button bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
             Search
           </button>
         </div>
@@ -288,7 +297,7 @@ function renderFriendsContent(friends: any[], isOwnProfile: boolean): string {
       </div>
 
       <!-- Friends List -->
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Friends (${friends.length})</h3>
         <div id="friends-list" class="space-y-2">
           ${friends.length > 0 ? friends.map(friend => `
@@ -308,15 +317,15 @@ function renderFriendsContent(friends: any[], isOwnProfile: boolean): string {
                 </div>
               </div>
               <div class="flex gap-2">
-                <button class="view-profile-btn bg-gray-600 px-3 py-1 rounded text-sm hover:bg-gray-700"
+                <button class="glass-button view-profile-btn bg-gray-600 px-3 py-1 rounded text-sm hover:bg-gray-700"
                         data-user-id="${friend.id}">
                   Profile
                 </button>
-                <button class="play-friend-btn bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-700"
+                <button class="glass-button play-friend-btn bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-700"
                         data-user-id="${friend.id}" data-username="${friend.username}">
                   Play
                 </button>
-                <button class="remove-friend-btn bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700"
+                <button class="glass-button remove-friend-btn bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700"
                         data-user-id="${friend.id}">
                   Remove
                 </button>
@@ -328,7 +337,7 @@ function renderFriendsContent(friends: any[], isOwnProfile: boolean): string {
       </div>
 
       <!-- Pending Requests -->
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Pending Requests</h3>
         <div id="pending-requests" class="space-y-2">
           <!-- Will be populated by JavaScript -->
@@ -343,7 +352,7 @@ function renderSettingsContent(user: any): string {
   
   return `
     <div class="space-y-4">
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Account Settings</h3>
           ${!isOAuthUser
           ? `
@@ -361,9 +370,9 @@ function renderSettingsContent(user: any): string {
         `}
       </div>
       
-      <div class="bg-gray-900 p-4 rounded">
+      <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Privacy & Data</h3>
-        <button onclick="navigate('/gdpr')" class="w-full bg-blue-600 p-2 rounded mb-2">
+        <button onclick="navigate('/gdpr')" class="glass-button w-full bg-blue-600 p-2 rounded mb-2">
           GDPR Compliance Center
         </button>
       </div>
@@ -569,7 +578,7 @@ export function attachDashboardListeners() {
                   <div class="text-sm text-gray-400">@${user.username}</div>
                 </div>
               </div>
-              <button class="add-friend-btn bg-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-700"
+              <button class="glass-button add-friend-btn bg-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-700"
                       data-user-id="${user.id}">
                 Add Friend
               </button>
@@ -653,11 +662,11 @@ async function loadPendingRequests() {
               </div>
             </div>
             <div class="flex gap-2">
-              <button class="accept-request-btn bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-700"
+              <button class="glass-button accept-request-btn bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-700"
                       data-request-id="${request.id}">
                 Accept
               </button>
-              <button class="reject-request-btn bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700"
+              <button class="glass-button reject-request-btn bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700"
                       data-request-id="${request.id}">
                 Reject
               </button>

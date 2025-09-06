@@ -7,7 +7,7 @@ export async function homePage(): Promise<string> {
   return `
     <div class="text-center py-20">
       <h2 class="text-4xl mb-8">Welcome, ${user.display_name}!</h2>
-      <button id="play-now-btn" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-xl hover:bg-blue-700">
+      <button id="play-now-btn" class="glass-button bg-blue-600 text-white px-8 py-4 rounded-lg text-xl hover:bg-blue-700">
         Play Now
       </button>
     </div>

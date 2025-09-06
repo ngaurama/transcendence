@@ -37,11 +37,11 @@ export async function tournamentPage(): Promise<string> {
     const hasWinner = tournament.winner_id && tournament.winner_name;
 
     return `
-      <div class="max-w-6xl mx-auto bg-gray-800 p-6 rounded-lg">
+      <div class="glass-card max-w-6xl mx-auto bg-gray-800 p-6 rounded-lg">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl">${tournament.name}</h2>
           ${tournament.creator_id === user.id
-        ? `<button id="delete-tournament" class="bg-red-600 p-2 rounded text-sm">Delete Tournament</button>`
+        ? `<button id="delete-tournament" class="glass-button bg-red-600 p-2 rounded text-sm">Delete Tournament</button>`
         : ''
       }
         </div>
@@ -51,7 +51,7 @@ export async function tournamentPage(): Promise<string> {
               <h3 class="text-xl font-bold text-green-300 mb-2">🏆 Tournament Completed! 🏆</h3>
               <p class="text-lg text-green-200">Winner: <span class="font-bold">${tournament.winner_name}</span></p>
               <p class="text-sm text-green-400 mt-2">Congratulations to the champion!</p>
-              <button id="leave-tournament" class="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+              <button id="leave-tournament" class="glass-button mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
                 Leave Tournament
               </button>
             </div>`
@@ -88,14 +88,14 @@ export async function tournamentPage(): Promise<string> {
         </div>
 
         ${tournament.status === 'registration' && tournament.creator_id === user.id
-        ? `<button id="start-tournament" class="w-full bg-green-500 p-2 rounded mb-4">Start Tournament</button>`
+        ? `<button id="start-tournament" class="glass-button w-full bg-green-500 p-2 rounded mb-4">Start Tournament</button>`
         : ''
       }
 
         ${tournament.status !== 'registration'
         ? `<div>
               <h3 class="text-lg mb-3">Tournament Bracket</h3>
-              <div id="tournament-bracket" class="bg-gray-700 p-4 rounded overflow-x-auto">
+              <div id="tournament-bracket" class="glass-card bg-gray-700 p-4 rounded overflow-x-auto">
                 ${await renderTournamentBracket(tournament)}
               </div>
             </div>`
@@ -104,7 +104,7 @@ export async function tournamentPage(): Promise<string> {
 
         ${!isCompleted
         ? `<div class="mt-6">
-              <button id="leave-tournament" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+              <button id="leave-tournament" class="glass-button bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
                 Leave Tournament
               </button>
             </div>`

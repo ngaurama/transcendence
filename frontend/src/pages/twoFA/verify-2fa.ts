@@ -7,10 +7,10 @@ export function verify2FAPage(): string {
       <p class="mb-4 text-gray-300">Please enter the 6-digit code from your authenticator app.</p>
       <form id="verify-2fa-form" class="space-y-4">
         <input type="text" id="2fa-verify-code" placeholder="Enter 6-digit code" class="w-full p-2 bg-gray-700 rounded" maxlength="6" pattern="[0-9]{6}" required>
-        <button type="submit" class="w-full bg-blue-500 p-2 rounded">Verify Code</button>
+        <button type="submit" class="glass-button w-full bg-blue-500 p-2 rounded">Verify Code</button>
       </form>
       <div class="mt-4 text-center">
-        <button onclick="navigate('/login')" class="text-gray-400 hover:underline">Back to Login</button>
+        <button onclick="navigate('/login')" class="glass-button text-gray-400 hover:underline">Back to Login</button>
       </div>
     </div>
   `;

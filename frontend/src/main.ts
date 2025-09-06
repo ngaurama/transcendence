@@ -2,6 +2,33 @@
 import { initRouter, render } from './router';
 import { checkAuthStatus } from './services';
 import { initUserWebSocket } from './services/UserWebSocket';
+import { ParticleSystem } from './utils/particles';
+
+let particleSystem: ParticleSystem | null = null;
+
+(window as any).dashboardHistory = {
+  history: [] as string[],
+  
+  push: function(path: string) {
+    this.history.push(path);
+    if (this.history.length > 10) {
+      this.history = this.history.slice(-10);
+    }
+  },
+  
+  pop: function(): string | null {
+    return this.history.pop() || null;
+  },
+  
+  getPrevious: function(): string | null {
+    if (this.history.length < 2) return null;
+    return this.history[this.history.length - 2];
+  },
+  
+  clear: function() {
+    this.history = [];
+  }
+};
 
 async function main() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -32,6 +59,12 @@ async function main() {
     window.history.replaceState({}, '', '/login');
   }
 
+  const currentPath = window.location.pathname;
+  if (currentPath.startsWith('/dashboard') || currentPath.startsWith('/profile/')) {
+    (window as any).dashboardHistory.push(currentPath);
+  }
+
+  particleSystem = new ParticleSystem();
   if (user) {
     initUserWebSocket();
   }
@@ -45,6 +78,33 @@ if (document.readyState === 'loading') {
 }
 
 (window as any).navigate = (path: string) => {
+  if (path.startsWith('/dashboard') || path.startsWith('/profile/')) {
+    (window as any).dashboardHistory.push(path);
+  }
+  
   history.pushState({}, '', path);
   render();
 };
+
+(window as any).navigateBack = () => {
+  const currentPath = window.location.pathname;
+  const previousPath = (window as any).dashboardHistory.getPrevious();
+  
+  if (currentPath === '/dashboard' && (!previousPath || previousPath === '/dashboard')) {
+    (window as any).navigate('/play');
+    return;
+  }
+  
+  if (previousPath) {
+    (window as any).dashboardHistory.pop();
+    (window as any).navigate(previousPath);
+    return;
+  }
+  
+  (window as any).navigate('/play');
+};
+
+// (window as any).navigate = (path: string) => {
+//   history.pushState({}, '', path);
+//   render();
+// };

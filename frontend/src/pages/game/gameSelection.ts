@@ -15,15 +15,15 @@ export async function playSelectionPage(): Promise<string> {
   const openTournaments = await getOpenTournaments();
 
   return `
-    <div class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-6 text-center">Choose Your Game</h2>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <button id="select-pong" class="bg-blue-500 p-4 rounded hover:bg-blue-600">
+        <button id="select-pong" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-600">
           <h3 class="text-xl">Pong</h3>
           <p class="text-sm text-gray-300">Classic paddle game</p>
         </button>
-        <button id="select-none" class="bg-green-500 p-4 rounded hover:bg-green-600 opacity-50 cursor-not-allowed">
+        <button id="select-none" class="glass-button disabled bg-green-500 p-4 rounded opacity-50 cursor-not-allowed">
           <h3 class="text-xl">Another Game</h3>
           <p class="text-sm text-gray-300">Coming soon</p>
         </button>
@@ -33,11 +33,11 @@ export async function playSelectionPage(): Promise<string> {
         <h3 class="text-xl mb-4">Choose How to Play</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <button id="play-online" class="bg-purple-600 p-4 rounded hover:bg-purple-700">
+          <button id="play-online" class="bg-purple-600 p-4 rounded-lg hover:bg-purple-700">
             <h4 class="text-lg">Play Online</h4>
             <p class="text-sm text-gray-300">Match with other players</p>
           </button>
-          <button id="play-local" class="bg-orange-600 p-4 rounded hover:bg-orange-700">
+          <button id="play-local" class="bg-orange-600 p-4 rounded-lg hover:bg-orange-700">
             <h4 class="text-lg">Play Local</h4>
             <p class="text-sm text-gray-300">Multiple players on same device</p>
           </button>
@@ -47,30 +47,30 @@ export async function playSelectionPage(): Promise<string> {
         <div id="game-options" class="mb-4 hidden">
           <h4 class="text-lg mb-3">Game Settings</h4>
           <label class="block mb-2">Points to Win:</label>
-          <select id="points-to-win" class="w-full p-2 bg-gray-700 rounded mb-3">
+          <select id="points-to-win" class="glass-dropdown w-full p-2 bg-gray-700 rounded mb-3">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="15">15</option>
           </select>
           
           <label class="block mb-2">Powerups:</label>
-          <select id="powerups" class="w-full p-2 bg-gray-700 rounded mb-3">
+          <select id="powerups" class="glass-dropdown w-full p-2 bg-gray-700 rounded mb-3">
             <option value="false">Disabled</option>
             <option value="true">Enabled</option>
           </select>
           
           <label class="block mb-2">Board Variant:</label>
-          <select id="board-variant" class="w-full p-2 bg-gray-700 rounded mb-4">
+          <select id="board-variant" class="glass-dropdown w-full p-2 bg-gray-700 rounded mb-4">
             <option value="classic">Classic</option>
             <option value="neon">Neon</option>
             <option value="space">Space</option>
           </select>
 
           <div class="flex space-x-4">
-            <button id="back-to-mode" class="flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
+            <button id="back-to-mode" class="glass-button flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
               ← Back
             </button>
-            <button id="confirm-settings" class="flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
+            <button id="confirm-settings" class="glass-button flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
               Confirm Settings
             </button>
           </div>
@@ -80,14 +80,14 @@ export async function playSelectionPage(): Promise<string> {
         <div id="online-options" class="mb-4 hidden">
           <h4 class="text-lg mb-3">Online Play Options</h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <button id="start-matchmaking" class="bg-green-600 p-4 rounded hover:bg-green-700 relative group transition-all duration-300">
+            <button id="start-matchmaking" class="glass-button  bg-green-600 p-4 rounded hover:bg-green-700 relative group transition-all duration-300">
               <div id="matchmaking-content" class="text-center">
                 <h5 class="font-semibold">Start Matchmaking</h5>
                 <p class="text-sm text-gray-300">Find a random opponent</p>
               </div>
               <div 
                 id="matchmaking-loading" 
-                class="hidden absolute inset-0 bg-green-700 rounded flex flex-col items-center justify-center transition-opacity duration-300">
+                class="hidden absolute inset-0 rounded-[inherit] bg-green-700 rounded flex flex-col items-center justify-center transition-opacity duration-300">
                 <div class="loader-state flex flex-col items-center group-hover:hidden">
                   <svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -105,16 +105,16 @@ export async function playSelectionPage(): Promise<string> {
                 </div>
               </div>
             </button>
-            <button id="online-create-tournament" class="bg-blue-600 p-4 rounded hover:bg-blue-700">
+            <button id="online-create-tournament" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-700">
               <h5 class="font-semibold">Create Tournament</h5>
               <p class="text-sm text-gray-300">Host a tournament</p>
             </button>
-            <button id="join-tournament" class="bg-purple-600 p-4 rounded hover:bg-purple-700">
+            <button id="join-tournament" class="glass-button bg-purple-600 p-4 rounded hover:bg-purple-700">
               <h5 class="font-semibold">Join Tournament</h5>
               <p class="text-sm text-gray-300">Join an open tournament</p>
             </button>
           </div>
-          <button id="back-to-settings-online" class="w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
+          <button id="back-to-settings-online" class="glass-button w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
             ← Back to Settings
           </button>
         </div>
@@ -123,16 +123,16 @@ export async function playSelectionPage(): Promise<string> {
         <div id="local-options" class="mb-4 hidden">
           <h4 class="text-lg mb-3">Local Play Options</h4>
           <div class="grid grid-cols-1 gap-4 mb-4">
-            <button id="start-local-game" class="bg-green-600 p-4 rounded hover:bg-green-700">
+            <button id="start-local-game" class="glass-button bg-green-600 p-4 rounded hover:bg-green-700">
               <h5 class="font-semibold">Start 2-Player Game</h5>
               <p class="text-sm text-gray-300">Play against one opponent</p>
             </button>
-            <button id="local-create-tournament" class="bg-blue-600 p-4 rounded hover:bg-blue-700">
+            <button id="local-create-tournament" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-700">
               <h5 class="font-semibold">Create Tournament</h5>
               <p class="text-sm text-gray-300">4+ players bracket</p>
             </button>
           </div>
-          <button id="back-to-settings-local" class="w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
+          <button id="back-to-settings-local" class="glass-button w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
             ← Back to Settings
           </button>
         </div>
@@ -146,15 +146,15 @@ export async function playSelectionPage(): Promise<string> {
               type="text"
               id="opponent-alias"
               placeholder="Enter opponent name"
-              class="w-full p-2 bg-gray-700 rounded mb-3"
+              class="glass-input w-full p-2 bg-gray-700 rounded mb-3"
               value="Player 2"
             />
           </div>
           <div class="flex space-x-4">
-            <button id="back-from-local-confirm" class="flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
+            <button id="back-from-local-confirm" class="glass-button flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
               ← Back
             </button>
-            <button id="confirm-local-game" class="flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
+            <button id="confirm-local-game" class="glass-button flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
               Start Game
             </button>
           </div>
@@ -165,10 +165,10 @@ export async function playSelectionPage(): Promise<string> {
           <h4 class="text-lg mb-3">Create Tournament</h4>
           
           <label class="block mb-2">Tournament Name:</label>
-          <input id="tournament-name" class="w-full p-2 bg-gray-700 rounded mb-3" placeholder="My Tournament">
+          <input id="tournament-name" class="glass-input w-full p-2 bg-gray-700 rounded mb-3" placeholder="My Tournament">
           
           <label class="block mb-2">Number of Players:</label>
-          <select id="tournament-num-players" class="w-full p-2 bg-gray-700 rounded mb-3">
+          <select id="tournament-num-players" class="glass-dropdown w-full p-2 bg-gray-700 rounded mb-3">
             <option value="4">4 Players</option>
             <option value="8">8 Players</option>
             <option value="16">16 Players</option>
@@ -180,10 +180,10 @@ export async function playSelectionPage(): Promise<string> {
           </div>
 
           <div class="flex space-x-4">
-            <button id="back-from-tournament" class="flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
+            <button id="back-from-tournament" class="glass-button flex-1 bg-gray-600 p-3 rounded hover:bg-gray-700">
               ← Back
             </button>
-            <button id="create-tournament" class="flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
+            <button id="create-tournament" class="glass-button flex-1 bg-green-600 p-3 rounded hover:bg-green-700">
               Create Tournament
             </button>
           </div>
@@ -200,7 +200,7 @@ export async function playSelectionPage(): Promise<string> {
                     const isCreator = user && t.creator_id === user.id;
                     
                     return `
-                    <li class="bg-gray-700 p-3 rounded" data-id="${t.id}">
+                    <li class="glass-card bg-gray-700 p-3 rounded" data-id="${t.id}">
                       <div class="flex justify-between items-start mb-2">
                         <div class="flex-1">
                           <span class="font-semibold">${t.name}</span>
@@ -213,10 +213,10 @@ export async function playSelectionPage(): Promise<string> {
                         </div>
                         <div class="flex flex-col items-end space-y-2">
                           ${isCreator 
-                            ? `<button class="delete-tournament-btn bg-red-500 px-3 py-1 rounded text-xs" data-id="${t.id}">Delete</button>` 
+                            ? `<button class="glass-button delete-tournament-btn bg-red-500 px-3 py-1 rounded text-sm" data-id="${t.id}">Delete</button>` 
                             : ''
                           }
-                          <button class="join-tournament-btn bg-blue-500 px-3 py-1 rounded text-sm" data-id="${t.id}">
+                          <button class="glass-button join-tournament-btn bg-blue-500 px-3 py-1 rounded text-sm" data-id="${t.id}">
                             ${isCreator ? 'Manage' : 'Join'}
                           </button>
                         </div>
@@ -228,7 +228,7 @@ export async function playSelectionPage(): Promise<string> {
               : '<p class="text-gray-400 text-center py-4">No open tournaments available</p>'
             }
           </div>
-          <button id="back-from-join" class="w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
+          <button id="back-from-join" class="glass-button w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
             ← Back to Online Options
           </button>
         </div>
@@ -759,7 +759,7 @@ function updatePlayerAliases() {
     ${Array.from({ length: numPlayers }, (_, i) => `
       <div class="mb-2">
         <label class="text-sm text-gray-400">Player ${i + 1}:</label>
-        <input id="alias-${i}" class="w-full p-2 bg-gray-700 rounded" placeholder="Player ${i + 1} name" value="Player ${i + 1}">
+        <input id="alias-${i}" class="glass-input w-full p-2 bg-gray-700 rounded" placeholder="Player ${i + 1} name" value="Player ${i + 1}">
       </div>
     `).join('')}
   `;

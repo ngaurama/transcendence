@@ -177,11 +177,11 @@ function showFriendRequestNotification(fromUser: any, requestId: string): void {
     <h4 class="font-bold mb-2 text-gray-800">Friend Request</h4>
     <p class="text-gray-600 mb-3">${fromUser.display_name} wants to be your friend!</p>
     <div class="flex justify-between">
-      <button class="accept-friend-request bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+      <button class="glass-button accept-friend-request bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
               data-request-id="${requestId}">
         Accept
       </button>
-      <button class="reject-friend-request bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+      <button class="glass-button reject-friend-request bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
               data-request-id="${requestId}">
         Reject
       </button>
@@ -223,7 +223,7 @@ function showFriendRequestAccepted(friend: any): void {
   notification.innerHTML = `
     <h4 class="font-bold mb-2 text-gray-800">Friend Request Accepted</h4>
     <p class="text-gray-600 mb-3">${friend.display_name} is now your friend!</p>
-    <button class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+    <button class="glass-button bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
             onclick="navigate('/dashboard')">
       View Friends
     </button>
@@ -261,15 +261,15 @@ export async function refreshFriendsList(): Promise<void> {
           </div>
         </div>
         <div class="flex gap-2">
-          <button class="view-profile-btn bg-gray-600 px-3 py-1 rounded text-sm hover:bg-gray-700"
+          <button class="glass-button view-profile-btn bg-gray-600 px-3 py-1 rounded text-sm hover:bg-gray-700"
                   data-user-id="${friend.id}">
             Profile
           </button>
-          <button class="play-friend-btn bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-700"
+          <button class="glass-button play-friend-btn bg-green-600 px-3 py-1 rounded text-sm hover:bg-green-700"
                   data-user-id="${friend.id}" data-username="${friend.username}">
             Play
           </button>
-          <button class="remove-friend-btn bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700"
+          <button class="glass-button remove-friend-btn bg-red-600 px-3 py-1 rounded text-sm hover:bg-red-700"
                   data-user-id="${friend.id}">
             Remove
           </button>
@@ -307,8 +307,8 @@ function showGameInvitation(inviter: any, gameId: string, gameSettings: any): vo
     <p class="text-gray-600 mb-3">${inviter.display_name} invited you to a game!</p>
     <p class="text-sm text-gray-500">Settings: ${JSON.stringify(gameSettings)}</p>
     <div class="flex justify-between mt-3">
-      <button id="accept-game-invitation" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">✓ Accept</button>
-      <button id="decline-game-invitation" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">✗ Decline</button>
+      <button id="accept-game-invitation" class="glass-button bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">✓ Accept</button>
+      <button id="decline-game-invitation" class="glass-button bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">✗ Decline</button>
     </div>
   `;
   
@@ -348,7 +348,7 @@ function showFriendRequestRejected(addresseeId: string): void {
   notification.innerHTML = `
     <h4 class="font-bold mb-2 text-gray-800">Friend Request Rejected</h4>
     <p class="text-gray-600 mb-3">Your friend request was rejected.</p>
-    <button class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+    <button class="glass-button bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
             onclick="notification.remove()">
       Close
     </button>

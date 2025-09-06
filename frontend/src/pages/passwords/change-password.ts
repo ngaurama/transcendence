@@ -8,7 +8,7 @@ export function changePasswordPage(): string {
         <input type="password" id="current-password" placeholder="Current Password" class="w-full p-2 bg-gray-700 rounded" required>
         <input type="password" id="new-password" placeholder="New Password" class="w-full p-2 bg-gray-700 rounded" minlength="6" required>
         <input type="password" id="confirm-new-password" placeholder="Confirm New Password" class="w-full p-2 bg-gray-700 rounded" minlength="6" required>
-        <button type="submit" class="w-full bg-blue-500 p-2 rounded">Change Password</button>
+        <button type="submit" class="glass-button w-full bg-blue-500 p-2 rounded">Change Password</button>
       </form>
     </div>
   `;

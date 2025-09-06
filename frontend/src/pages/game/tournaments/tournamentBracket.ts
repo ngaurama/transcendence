@@ -83,14 +83,14 @@ export async function renderTournamentBracket(tournament: any): Promise<string> 
                         </div>
                       </div>
                       ${(await shouldShowStartButton(match, tournament))
-                        ? `<button class="start-match-btn" data-match-id="${match.id}">Start Match</button>`
+                        ? `<button class="glass-button start-match-btn" data-match-id="${match.id}">Start Match</button>`
                         : match.status === 'in_progress'
-                          ? `<button class="match-status in-progress">In Progress</button>`
+                          ? `<button class="glass-button match-status in-progress">In Progress</button>`
                           : match.status === 'completed'
-                            ? `<button class="match-status completed">Completed</button>`
+                            ? `<button class="glass-button match-status completed">Completed</button>`
                             : tournament.tournament_settings.gameMode === 'online' 
-                              ? `<button class="match-status not-your-match">Not Your Match</button>`
-                              : `<button class="match-status waiting">Waiting</button>`
+                              ? `<button class="glass-button match-status not-your-match">Not Your Match</button>`
+                              : `<button class="glass-button match-status waiting">Waiting</button>`
                       }
                     </div>
                     ${roundNumber < totalRounds && index % 2 === 0 ? `<div class="connector ${connectorClass}"></div>` : ''}

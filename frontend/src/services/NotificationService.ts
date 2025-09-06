@@ -12,8 +12,8 @@ export function showMatchInvitation(inviterName: string, gameId: string, gameSet
       ${gameSettings.board_variant || 'Classic'}
     </p>
     <div class="flex justify-between">
-      <button id="accept-rematch" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">✓ Accept</button>
-      <button id="decline-rematch" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">✗ Decline</button>
+      <button id="accept-rematch" class="glass-button bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">✓ Accept</button>
+      <button id="decline-rematch" class="glass-button bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">✗ Decline</button>
     </div>
   `;
   

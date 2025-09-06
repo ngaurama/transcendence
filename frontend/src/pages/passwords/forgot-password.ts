@@ -9,7 +9,7 @@ export function forgotPasswordPage(): string {
         <h3 class="font-bold mb-2">Reset Instructions Sent!</h3>
         <p>Password reset instructions have been sent to your email address. Please check your inbox and follow the link to reset your password.</p>
         <div class="mt-4">
-          <button onclick="navigate('/login')" class="w-full bg-blue-500 p-2 rounded">Back to Login</button>
+          <button onclick="navigate('/login')" class="glass-button w-full bg-blue-500 p-2 rounded">Back to Login</button>
         </div>
       </div>
       <form id="forgot-password-form" class="space-y-4">
@@ -17,7 +17,7 @@ export function forgotPasswordPage(): string {
           Enter your email address and we'll send you instructions to reset your password.
         </p>
         <input type="email" id="forgot-email" placeholder="Email Address" class="w-full p-2 bg-gray-700 rounded" required>
-        <button type="submit" class="w-full bg-blue-500 p-2 rounded">Send Reset Instructions</button>
+        <button type="submit" class="glass-button w-full bg-blue-500 p-2 rounded">Send Reset Instructions</button>
       </form>
       <div class="mt-4 text-center">
         <a href="#" onclick="navigate('/login')" class="text-blue-400 hover:underline">Back to Login</a>

@@ -12,13 +12,22 @@ export async function gdprPage(): Promise<string> {
 
   return `
     <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+      <!-- Back Arrow -->
+      <div class="mb-4">
+        <button onclick="navigateBack()" class="flex items-center text-gray-400 hover:text-white transition-colors">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back
+        </button>
+      </div>
       <h2 class="text-2xl mb-6">GDPR Compliance Center</h2>
 
       <!-- Add pending deletion status -->
       <div id="deletion-status" class="hidden bg-yellow-900 bg-opacity-20 p-4 rounded mb-4">
         <h3 class="text-lg font-semibold mb-2">Pending Account Deletion</h3>
         <p class="text-gray-300" id="deletion-date"></p>
-        <button id="cancel-deletion" class="mt-2 bg-green-600 px-3 py-1 rounded text-sm">
+        <button id="cancel-deletion" class="glass-button mt-2 bg-green-600 px-3 py-1 rounded text-sm">
           Cancel Deletion Request
         </button>
       </div>
@@ -29,11 +38,11 @@ export async function gdprPage(): Promise<string> {
           <h3 class="text-lg font-semibold mb-3">Data Management</h3>
           <p class="text-gray-400 mb-4">Manage your personal information and data</p>
           
-          <button onclick="navigate('/view-data')" class="w-full bg-blue-600 p-2 rounded mb-2">
+          <button onclick="navigate('/view-data')" class="glass-button w-full bg-blue-600 p-2 rounded mb-2">
             View My Data
           </button>
           
-          <button onclick="navigate('/export-data')" class="w-full bg-purple-600 p-2 rounded mb-2">
+          <button onclick="navigate('/export-data')" class="glass-button w-full bg-purple-600 p-2 rounded mb-2">
             Export My Data
           </button>
         </div>
@@ -43,13 +52,13 @@ export async function gdprPage(): Promise<string> {
           <h3 class="text-lg font-semibold mb-3">Privacy Actions</h3>
           <p class="text-gray-400 mb-4">Exercise your privacy rights</p>
           ${!isOAuthUser ? `
-            <button onclick="navigate('/anonymize-account')" class="w-full bg-orange-600 p-2 rounded mb-2">
+            <button onclick="navigate('/anonymize-account')" class="glass-button w-full bg-orange-600 p-2 rounded mb-2">
               Anonymize Account
             </button>
             ` : '' 
           }
           
-          <button onclick="navigate('/delete-account')" class="w-full bg-red-600 p-2 rounded">
+          <button onclick="navigate('/delete-account')" class="w-full glass-button bg-red-600 p-2 rounded">
             Delete Account
           </button>
         </div>
@@ -87,7 +96,7 @@ export function viewDataPage(): string {
         </div>
       </div>
       
-      <button onclick="navigate('/gdpr')" class="bg-gray-600 px-4 py-2 rounded">
+      <button onclick="navigate('/gdpr')" class="glass-button bg-gray-600 px-4 py-2 rounded">
         Back to GDPR Center
       </button>
     </div>
@@ -111,14 +120,14 @@ export function exportDataPage(): string {
           <li>Tournament participation</li>
         </ul>
         
-        <button id="export-btn" class="w-full bg-purple-600 p-2 rounded">
+        <button id="export-btn" class="glass-button w-full bg-purple-600 p-2 rounded">
           Export My Data
         </button>
       </div>
       
       <div id="export-result" class="hidden"></div>
       
-      <button onclick="navigate('/gdpr')" class="bg-gray-600 px-4 py-2 rounded">
+      <button onclick="navigate('/gdpr')" class="glass-button bg-gray-600 px-4 py-2 rounded">
         Back to GDPR Center
       </button>
     </div>
@@ -154,12 +163,12 @@ export function anonymizeAccountPage(): string {
         </label>
       </div>
       
-      <button id="anonymize-btn" disabled class="w-full bg-orange-600 p-2 rounded opacity-50">
+      <button id="anonymize-btn" disabled class="glass-button w-full bg-orange-600 p-2 rounded opacity-50">
         Anonymize My Account
       </button>
       
       <div class="mt-4">
-        <button onclick="navigate('/gdpr')" class="bg-gray-600 px-4 py-2 rounded">
+        <button onclick="navigate('/gdpr')" class="glass-button bg-gray-600 px-4 py-2 rounded">
           Back to GDPR Center
         </button>
       </div>
@@ -203,12 +212,12 @@ export function deleteAccountPage(): string {
         </label>
       </div>
       
-      <button id="delete-btn" disabled class="w-full bg-red-600 p-2 rounded opacity-50">
+      <button id="delete-btn" disabled class="glass-button w-full bg-red-600 p-2 rounded opacity-50">
         Delete My Account
       </button>
       
       <div class="mt-4">
-        <button onclick="navigate('/gdpr')" class="bg-gray-600 px-4 py-2 rounded">
+        <button onclick="navigate('/gdpr')" class="glass-button bg-gray-600 px-4 py-2 rounded">
           Back to GDPR Center
         </button>
       </div>
@@ -313,7 +322,6 @@ async function cancelDeletionRequest() {
     alert('Failed to cancel deletion request');
   }
 }
-
 
 async function loadUserData() {
   try {
