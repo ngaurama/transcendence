@@ -23,10 +23,10 @@ fi
 
 echo "Detected IP: $IP on interface $INTERFACE"
 
-if grep -q "^ONLINE_URL=" .env 2>/dev/null; then
-    sed -i.bak "s|^ONLINE_URL=.*|ONLINE_URL=$IP|" .env
+if grep -q "^HOST=" .env 2>/dev/null; then
+    sed -i.bak "s|^HOST=.*|HOST=$IP|" .env
 else
-    echo "ONLINE_URL=$IP" >> .env
+    echo "HOST=$IP" >> .env
 fi
 
-echo "Updated .env with ONLINE_URL=$IP"
+echo "Updated .env with HOST=$IP"

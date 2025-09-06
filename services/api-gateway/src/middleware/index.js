@@ -29,7 +29,7 @@ async function setupCORS(fastify) {
 
       try {
         const hostname = new URL(origin).hostname;
-        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.transcendence.local') ||  hostname === process.env.ONLINE_URL ||  hostname === process.env.ONLINE_URL) {
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.transcendence.local') ||  hostname === process.env.HOST) {
           callback(null, true);
           return;
         }
@@ -46,7 +46,7 @@ async function setupCORS(fastify) {
 
 async function setupRateLimiting(fastify) {
   await fastify.register(rateLimit, {
-    max: 100,
+    max: 500,
     timeWindow: '1 minute',
     errorResponseBuilder: function (request, context) {
       return {

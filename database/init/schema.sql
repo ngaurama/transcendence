@@ -198,11 +198,11 @@ CREATE TABLE game_participants (
     
     score INTEGER DEFAULT 0,
     final_position INTEGER,
-    
+
     -- Participation status
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     left_at DATETIME, -- for disconnections
-    
+
     FOREIGN KEY (game_session_id) REFERENCES game_sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     
@@ -426,7 +426,7 @@ CREATE TABLE pong_customizations (
 -- Pong power-up definitions
 CREATE TABLE pong_powerups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(50) UNIQUE NOT NULL, -- 'multiball', 'speed', 'big_paddle', 'unstoppable', 'freeze'
+    name VARCHAR(50) UNIQUE NOT NULL, -- 'multiball', 'speed', 'big_paddle'
     display_name VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
     effect_duration_ms INTEGER, -- NULL for instant effects
