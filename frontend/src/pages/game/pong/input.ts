@@ -67,12 +67,12 @@ export class InputHandler {
           sendPaddleMove(this.ws, { player2_direction: 'stop' });
         }
       } else {
-        if (this.keyState['w']) {
+        if (this.keyState['arrowup']) {
           sendPaddleMove(this.ws, { 
             direction: 'up' ,
             player_number: this.playerNumber
           });
-        } else if (this.keyState['s']) {
+        } else if (this.keyState['arrowdown']) {
           sendPaddleMove(this.ws, { 
             direction: 'down',
             player_number: this.playerNumber

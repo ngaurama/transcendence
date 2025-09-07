@@ -150,19 +150,19 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
       <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Overall Performance</h3>
         <div class="grid grid-cols-2 gap-2">
-          <div class="text-center p-3 bg-gray-900 rounded">
+          <div class="glass-card b-4 text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold">${fullStats.stats.games_played || 0}</div>
             <div class="text-sm text-gray-300">Games Played</div>
           </div>
-          <div class="text-center p-3 bg-gray-900 rounded">
+          <div class="glass-card text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold text-green-400">${fullStats.stats.games_won || 0}</div>
             <div class="text-sm text-gray-300">Wins</div>
           </div>
-          <div class="text-center p-3 bg-gray-900 rounded">
+          <div class="glass-card text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold text-red-400">${fullStats.stats.games_lost || 0}</div>
             <div class="text-sm text-gray-300">Losses</div>
           </div>
-          <div class="text-center p-3 bg-gray-900 rounded">
+          <div class="glass-card text-center p-3 bg-gray-900 rounded">
             <div class="text-2xl font-bold">${Math.round((fullStats.stats.games_won || 0) / (fullStats.stats.games_played || 1) * 100)}%</div>
             <div class="text-sm text-gray-300">Win Rate</div>
           </div>
@@ -187,8 +187,8 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
       </div>
 
       <!-- Recent Games -->
-      <div class="glass-card md:col-span-2 bg-gray-800 p-4 rounded">
-        <h3 class="text-lg font-semibold mb-3">Recent Games</h3>
+      <div class="glass-card recent-games-dropdown md:col-span-2 bg-gray-900 p-4 rounded">
+        <h3 class="text-lg font-semibold mb-4 mt-2">Recent Games</h3>
         <div class="space-y-2">
           ${
             fullStats.recent_games && fullStats.recent_games.length > 0
@@ -201,9 +201,9 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
                     const opponentWin = game.winner_id !== user.id;
 
                     return `
-                      <div class="flex flex-col bg-gray-800 rounded recent-game-item" data-game-id="${game.id}">
+                      <div class="glass-card flex flex-col bg-gray-900 rounded recent-game-item hover:bg-gray-900" data-game-id="${game.id}">
                         <!-- Main line -->
-                        <div class="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-800">
+                        <div class="flex items-center justify-between p-2 cursor-pointer">
                           
                           <!-- Player 1 (left) -->
                           <div class="flex items-center space-x-2 w-1/3">
@@ -233,9 +233,9 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
                         </div>
 
                         <!-- Dropdown/details -->
-                        <div id="game-details-${game.id}" class="hidden bg-gray-800 p-3 rounded mt-1 text-sm">
+                        <div id="game-details-${game.id}" class="hidden glass-card bg-gray-800 p-3 rounded mt-1 text-sm">
                           <div class="grid grid-cols-2 gap-2">
-                            <div><strong>Date:</strong> ${new Date(game.created_at + "Z").toLocaleString("en-GB", { timeZone: "UTC" })}</div>
+                            <div><strong>Date:</strong> ${new Date(game.created_at + "Z").toLocaleString()}</div>
                             <div><strong>Duration:</strong> ${Math.round(game.game_duration_ms / 1000)}s</div>
                             <div><strong>Powerups:</strong> ${JSON.parse(game.game_settings).powerups_enabled ? 'Yes' : 'No'}</div>
                             <div><strong>Variant:</strong> ${JSON.parse(game.game_settings).board_variant}</div>
@@ -340,7 +340,6 @@ function renderFriendsContent(friends: any[], isOwnProfile: boolean): string {
       <div class="glass-card bg-gray-800 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Pending Requests</h3>
         <div id="pending-requests" class="space-y-2">
-          <!-- Will be populated by JavaScript -->
         </div>
       </div>
     </div>
@@ -513,23 +512,49 @@ export function attachDashboardListeners() {
     });
   }
 
+  // document.querySelectorAll('.recent-game-item').forEach(item => {
+  //   item.addEventListener('click', (e) => {
+  //     const gameId = item.getAttribute('data-game-id');
+  //     const detailsElement = document.getElementById(`game-details-${gameId}`);
+      
+  //     document.querySelectorAll('[id^="game-details-"]').forEach(detail => {
+  //       if (detail.id !== `game-details-${gameId}`) {
+  //         detail.classList.add('hidden');
+  //       }
+  //     });
+      
+  //     if (detailsElement) {
+  //       detailsElement.classList.toggle('hidden');
+  //     }
+  //   });
+  // });
+
   document.querySelectorAll('.recent-game-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      const gameId = item.getAttribute('data-game-id');
-      const detailsElement = document.getElementById(`game-details-${gameId}`);
-      
-      document.querySelectorAll('[id^="game-details-"]').forEach(detail => {
-        if (detail.id !== `game-details-${gameId}`) {
-          detail.classList.add('hidden');
-        }
-      });
-      
-      if (detailsElement) {
-        detailsElement.classList.toggle('hidden');
+  item.addEventListener('click', (e) => {
+    const gameId = item.getAttribute('data-game-id');
+    const detailsElement = document.getElementById(`game-details-${gameId}`);
+    
+    document.querySelectorAll('.recent-game-item').forEach(otherItem => {
+      otherItem.setAttribute('data-expanded', 'false');
+    });
+    
+    document.querySelectorAll('[id^="game-details-"]').forEach(detail => {
+      if (detail.id !== `game-details-${gameId}`) {
+        detail.classList.add('hidden');
       }
     });
+    
+    if (detailsElement) {
+      const isNowExpanded = detailsElement.classList.toggle('hidden');
+      
+      if (!isNowExpanded) {
+        item.setAttribute('data-expanded', 'true');
+      } else {
+        item.setAttribute('data-expanded', 'false');
+      }
+    }
   });
-
+});
 
   // Tabs
   document.querySelectorAll('.tab-button').forEach(button => {
@@ -652,7 +677,7 @@ async function loadPendingRequests() {
         container.innerHTML = '<p class="text-gray-400 text-center py-4">No pending requests</p>';
       } else {
         container.innerHTML = requests.map(request => `
-          <div class="flex items-center justify-between p-3 bg-gray-800 rounded">
+          <div class="glass-card flex items-center justify-between p-3 bg-gray-800 rounded">
             <div class="flex items-center">
               <img src="${request.avatar_url}" class="w-10 h-10 rounded-full mr-3">
               <div>

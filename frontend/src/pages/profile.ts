@@ -25,7 +25,7 @@ export async function profilePage(): Promise<string> {
   }, 100);
 
   return `
-     <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+     <div class="glass-card max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
       <!-- Back Arrow -->
       <div class="mb-4">
         <button onclick="navigateBack()" class="flex items-center text-gray-400 hover:text-white transition-colors">

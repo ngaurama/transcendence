@@ -80,33 +80,33 @@ export async function creditsPage(): Promise<string> {
             );
             
             if (response.ok) {
-            const userData = await response.json();
-            
-            const projects = userData.projects_users
-                ?.filter((project: any) => project.status === 'finished')
-                ?.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-                ?.slice(0, 5) || [];
-            
-            membersWithDetails.push({
-                ...member,
-                name: userData.displayname || userData.usual_full_name,
-                email: userData.email,
-                location: userData.location || 'Unavailable',
-                level: userData.cursus_users?.[1]?.level || 0,
-                wallet: userData.wallet || 0,
-                correctionPoints: userData.correction_point || 0,
-                projects: projects,
-                avatar: userData.image?.link || member.avatar,
-                status: userData.status || 'Unknown',
-                poolYear: userData.pool_year,
-                poolMonth: userData.pool_month
-            });
+                const userData = await response.json();
+                
+                const projects = userData.projects_users
+                    ?.filter((project: any) => project.status === 'finished')
+                    ?.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                    ?.slice(0, 5) || [];
+                
+                membersWithDetails.push({
+                    ...member,
+                    name: userData.displayname || userData.usual_full_name,
+                    email: userData.email,
+                    location: userData.location || 'Unavailable',
+                    level: userData.cursus_users?.[1]?.level || 0,
+                    wallet: userData.wallet || 0,
+                    correctionPoints: userData.correction_point || 0,
+                    projects: projects,
+                    avatar: userData.image?.link || member.avatar,
+                    status: userData.status || 'Unknown',
+                    poolYear: userData.pool_year,
+                    poolMonth: userData.pool_month
+                });
             } else {
                 membersWithDetails.push(member);
             }
             
             if (teamMembers.indexOf(member) < teamMembers.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
             
         } catch (error) {
