@@ -31,7 +31,6 @@ function setupRoutes(fastify, pongService) {
       opponent_id,
     } = request.body;
 
-    console.log("REQUEST BODY: ", request.body);
     try {
       const gameSettings = {
         powerups_enabled,

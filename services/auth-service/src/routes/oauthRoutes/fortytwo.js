@@ -186,7 +186,6 @@ module.exports = function setup42OauthRoute(fastify, { dbService, emailService, 
             
             userCache.set(login, userResponse.data);
             
-            console.log("RESPONSE: ", userResponse.data);
             return userResponse.data;
             
         } catch (error) {

@@ -385,7 +385,6 @@ class PongGame {
 
   async updateUserStats(userId, updates) {
 
-    console.log("USER ID AND UPDATES: ", userId, updates);
     const existing = await this.db.get('SELECT * FROM user_game_stats WHERE user_id = ?', [userId]);
     if (existing) {
       let sql = 'UPDATE user_game_stats SET ';

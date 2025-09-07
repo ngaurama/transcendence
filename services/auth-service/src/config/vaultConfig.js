@@ -39,8 +39,6 @@ async function loadSecrets() {
     load("secret/data/database/config", secrets.database, "config")
   ]);
 
-  console.log("RAHHAH", secrets.external.fortytwo);
-
   return secrets;
 }
 

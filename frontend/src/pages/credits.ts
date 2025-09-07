@@ -65,51 +65,6 @@ export async function creditsPage(): Promise<string> {
       console.error('Error loading checklist data:', error);
     }
 
-    // const membersWithDetails = await Promise.all(
-    //   teamMembers.map(async (member) => {
-    //     try {
-    //       const response = await fetchWithErrorHandling(
-    //         `/api/auth/oauth/fortytwo/user/${member.intraLogin}`,
-    //         {
-    //           method: 'GET',
-    //           headers: {
-    //             'Content-Type': 'application/json',
-    //           },
-    //         }
-    //       );
-          
-          
-    //       if (response.ok) {
-    //         const userData = await response.json();
-            
-    //         const projects = userData.projects_users
-    //           ?.filter((project: any) => project.status === 'finished')
-    //           ?.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-    //           ?.slice(0, 5) || [];
-            
-    //         return {
-    //           ...member,
-    //           name: userData.displayname || userData.usual_full_name,
-    //           email: userData.email,
-    //           location: userData.location || 'Unavailable',
-    //           level: userData.cursus_users?.[1]?.level || 0,
-    //           wallet: userData.wallet || 0,
-    //           correctionPoints: userData.correction_point || 0,
-    //           projects: projects,
-    //           avatar: userData.image?.link || member.avatar,
-    //           status: userData.status || 'Unknown',
-    //           poolYear: userData.pool_year,
-    //           poolMonth: userData.pool_month
-    //         };
-    //       }
-    //       return member;
-    //     } catch (error) {
-    //       console.error(`Failed to fetch data for ${member.intraLogin}:`, error);
-    //       return member;
-    //     }
-    //   })
-    // );
-
     const membersWithDetails: TeamMember[] = [];
 
     for (const member of teamMembers) {
@@ -147,18 +102,15 @@ export async function creditsPage(): Promise<string> {
                 poolMonth: userData.pool_month
             });
             } else {
-            // If the request fails, push the basic member info
-            membersWithDetails.push(member);
+                membersWithDetails.push(member);
             }
             
-            // Add a 1-second delay between requests to avoid rate limiting
             if (teamMembers.indexOf(member) < teamMembers.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
         } catch (error) {
             console.error(`Failed to fetch data for ${member.intraLogin}:`, error);
-            // Push basic member info if there's an error
             membersWithDetails.push(member);
         }
     }
