@@ -293,6 +293,7 @@ export async function attachPlaySelectionListeners() {
   if (selectPong && modeSelection) {
     selectPong.addEventListener('click', () => {
       modeSelection.classList.remove('hidden');
+      selectPong.classList.add('select-btn-border');
     });
   }
 
@@ -305,8 +306,12 @@ export async function attachPlaySelectionListeners() {
       localConfirmation?.classList.add('hidden');
       tournamentCreation?.classList.add('hidden');
       joinTournamentSection?.classList.add('hidden');
-      playOnline.classList.add('ring-2', 'ring-white');
-      playLocal.classList.remove('ring-2', 'ring-white');
+      playLocal.classList.remove('select-btn-border');
+      playOnline.classList.add('select-btn-border');
+      playLocal.classList.add('opacity-50');
+      playOnline.classList.remove('opacity-50');
+      // playOnline.classList.add('ring-2', 'ring-white');
+      // playLocal.classList.remove('ring-2', 'ring-white');
     });
 
     playLocal.addEventListener('click', () => {
@@ -317,8 +322,12 @@ export async function attachPlaySelectionListeners() {
       localConfirmation?.classList.add('hidden');
       tournamentCreation?.classList.add('hidden');
       joinTournamentSection?.classList.add('hidden');
-      playLocal.classList.add('ring-2', 'ring-white');
-      playOnline.classList.remove('ring-2', 'ring-white');
+      // playLocal.classList.add('ring-2', 'ring-white');
+      // playOnline.classList.remove('ring-2', 'ring-white');
+      playLocal.classList.add('select-btn-border');
+      playOnline.classList.remove('select-btn-border');
+      playOnline.classList.add('opacity-50');
+      playLocal.classList.remove('opacity-50');
     });
   }
 
