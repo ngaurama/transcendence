@@ -21,15 +21,6 @@ export class ParticleSystem {
   private width: number = 0;
   private height: number = 0;
 
-  // constructor(canvasId: string = 'particle-canvas') {
-  //   this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-  //   this.ctx = this.canvas.getContext('2d')!;
-    
-  //   this.init();
-  //   this.bindEvents();
-  //   this.animate();
-  // }
-
   private backgroundImage: HTMLImageElement | null = null;
 
   constructor(canvasId: string = 'particle-canvas') {
@@ -86,7 +77,7 @@ export class ParticleSystem {
       const distance = Math.sqrt(dx * dx + dy * dy);
       
       if (distance > 0 && distance < 150) {
-        const force = 0.5;
+        const force = 0.005;
         p.speedX += (dx / distance) * force;
         p.speedY += (dy / distance) * force;
       }
@@ -146,16 +137,6 @@ export class ParticleSystem {
 
   
   private drawParticles(): void {
-    // const gradient = this.ctx.createRadialGradient(
-    //   this.width / 2, this.height / 2, 0,
-    //   this.width / 2, this.height / 2, Math.max(this.width, this.height) / 2
-    // );
-    // gradient.addColorStop(0, 'rgba(41, 0, 34, 0.1)');
-    // gradient.addColorStop(1, 'rgba(76, 53, 110, 0.3)');
-    
-    // this.ctx.fillStyle = gradient;
-    // this.ctx.fillRect(0, 0, this.width, this.height);
-
     if (this.backgroundImage) {
       this.ctx.save();
       this.ctx.filter = 'blur(20px)';

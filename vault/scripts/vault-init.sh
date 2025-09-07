@@ -102,6 +102,19 @@ if [ ! -z "$GITHUB_CLIENT_ID" ] && [ ! -z "$GITHUB_CLIENT_SECRET" ]; then
        $VAULT_ADDR/v1/secret/data/external/github
 fi
 
+if [ ! -z "$FORTYTWO_CLIENT_ID" ] && [ ! -z "$FORTYTWO_CLIENT_SECRET" ]; then
+  echo "storing 42 OAuth secrets..."
+  curl -s --insecure -H "X-Vault-Token: $VAULT_TOKEN" \
+       -X POST \
+       -d '{
+         "data": {
+           "client_id": "'$FORTYTWO_CLIENT_ID'",
+           "client_secret": "'$FORTYTWO_CLIENT_SECRET'",
+           "redirect_uri": "'${FORTYTWO_REDIRECT_URI}'"
+         }
+       }' \
+       $VAULT_ADDR/v1/secret/data/external/fortytwo
+fi
 
 if [ ! -z "$SMTP_EMAIL" ] && [ ! -z "$SMTP_PASSWORD" ]; then
   echo "storing SMTP secrets..."

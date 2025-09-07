@@ -22,6 +22,11 @@ services:
     volumes:
       - ./nginx/certs:/etc/nginx/certs:ro
       - frontend_dist:/usr/share/nginx/html:ro
+      - ./nginx/confs/modsecurity.conf:/etc/nginx/modsecurity/modsecurity.conf:ro
+      - ./nginx/confs/main.conf:/etc/nginx/modsecurity/main.conf:ro
+      - ./nginx/confs/logs:/var/log/nginx
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - api-gateway
       - frontend
@@ -49,6 +54,8 @@ services:
       - /app/node_modules
       - avatars_data:/app/public/avatars
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   auth-service:
     build:
@@ -56,7 +63,6 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
-      # - .env.generated
     volumes:
       - database_data:/app/data
       - ./services/auth-service:/app
@@ -64,6 +70,8 @@ services:
       - /app/node_modules
       - ./nginx/certs:/app/certs:ro
       - ./.env.generated:/app/.env.generated:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - vault
     networks:
@@ -81,6 +89,8 @@ services:
       - ./services/social-service:/app
       - /app/node_modules
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - vault
       - auth-service
@@ -99,6 +109,8 @@ services:
       - ./services/pong-service:/app
       - /app/node_modules
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - vault
       - auth-service
@@ -120,6 +132,8 @@ services:
       - /app/node_modules
       - frontend_dist:/app/dist
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - ft_transcendence
     restart: unless-stopped
@@ -131,6 +145,8 @@ services:
     volumes:
       - database_data:/app/data
       - ./database/init:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     env_file: .env
     networks:
       - ft_transcendence
@@ -153,6 +169,8 @@ services:
       - ./vault/config/policies:/vault/config/policies:ro
       - ./vault/scripts:/vault/scripts:ro
       - ./.env.generated:/app/.env.generated:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "--insecure", "https://localhost:8200/v1/sys/health"]
       interval: 10s

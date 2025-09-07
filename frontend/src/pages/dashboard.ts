@@ -365,7 +365,7 @@ function renderSettingsContent(user: any): string {
         `
           : `
           <p class="text-sm text-gray-400 mb-4">
-            Account management is handled through ${user.oauth_provider}.
+            Account management is handled through ${user.oauth_provider === 'fortytwo' ? "42" : user.oauth_provider}.
           </p>
         `}
       </div>

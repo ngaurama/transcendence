@@ -25,6 +25,7 @@ const routes: { [key: string]: () => Promise<string> | string } = {
   '/export-data': Pages.exportDataPage,
   '/anonymize-account': Pages.anonymizeAccountPage,
   '/delete-account': Pages.deleteAccountPage,
+  '/credits': Pages.creditsPage,
 };
 
 const app = document.getElementById('app') as HTMLElement;
@@ -68,7 +69,13 @@ export async function render() {
 
 async function updateAuthStatus() {
   const user = await checkAuthStatus();
+  const creditsLink = document.getElementById("credits-link");
   if (user) {
+    if (creditsLink) {
+      creditsLink.className = "text-blue-400 hover:cursor-pointer hover:underline";
+      creditsLink.setAttribute("href", "/credits");
+      creditsLink.style.pointerEvents = "auto";
+    }
     if (user.is_guest) {
       authStatus.innerHTML = `
         <div class="flex items-center gap-2">
@@ -78,7 +85,7 @@ async function updateAuthStatus() {
       `;
     } else {
       authStatus.innerHTML = `
-        <div class="absolute">
+        <div class="relative">
           <img src="${user.avatar_url}" alt="Avatar" class="w-10 h-10 rounded-full cursor-pointer" id="avatar-dropdown-trigger">
           <div id="avatar-dropdown" class="hidden dropdown-menu">
             <div class="dropdown-item" onclick="navigate('/dashboard')">Dashboard</div>
@@ -89,6 +96,11 @@ async function updateAuthStatus() {
       attachDropdownListener();
     }
   } else {
+    if (creditsLink) {
+      creditsLink.className = "text-white cursor-default";
+      creditsLink.removeAttribute("href");
+      creditsLink.style.pointerEvents = "none";
+    }
     authStatus.innerHTML = `
       <button onclick="navigate('/login')" class="glass-button bg-blue-500 px-3 py-1 rounded mr-2">Login</button>
       <button onclick="navigate('/register')" class="glass-button bg-green-500 px-3 py-1 rounded">Register</button>
@@ -99,11 +111,18 @@ async function updateAuthStatus() {
 function attachDropdownListener() {
   const trigger = document.getElementById('avatar-dropdown-trigger');
   const menu = document.getElementById('avatar-dropdown');
+  
   if (trigger && menu) {
-    trigger.addEventListener('click', () => menu.classList.toggle('hidden'));
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+    });
+    
     document.addEventListener('click', (e) => {
-      if (!trigger.contains(e.target as Node)) menu.classList.add('hidden');
-    }, { once: true });
+      if (!trigger.contains(e.target as Node) && !menu.contains(e.target as Node)) {
+        menu.classList.add('hidden');
+      }
+    });
   }
 }
 
@@ -137,6 +156,7 @@ function attachEventListeners() {
       case '/update-data': 
       case '/anonymize-account': 
       case '/delete-account': Pages.attachGdprListeners(); break;
+      case '/credits': Pages.attachCreditsListeners(); break;
     }
   }
 }

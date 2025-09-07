@@ -6,3 +6,4 @@ test*
 .DS_Store
 *dist
 *.txt
+waf-test*

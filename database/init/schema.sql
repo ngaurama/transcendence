@@ -18,7 +18,8 @@ CREATE TABLE users (
     -- OAuth integration
     google_id VARCHAR(255) UNIQUE,
     github_id VARCHAR(255) UNIQUE,
-    oauth_provider VARCHAR(50) DEFAULT 'local', -- 'github', 'google', 'local'
+    fortytwo_id VARCHAR(255) UNIQUE,
+    oauth_provider VARCHAR(50) DEFAULT 'local', -- 'github', 'google', 'local', 'fortytwo'
     
     -- 2FA
     totp_secret VARCHAR(255), -- encrypted TOTP secret
@@ -54,7 +55,7 @@ CREATE TABLE users (
         (is_guest = FALSE AND email != '' AND email LIKE '%@%')
     ),
     CHECK (display_name != '' AND length(display_name) >= 2),
-    CHECK (oauth_provider IN ('local', 'google', 'github'))
+    CHECK (oauth_provider IN ('local', 'google', 'github', 'fortytwo'))
 );
 
 CREATE TABLE user_sessions (
@@ -454,6 +455,7 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL;
 CREATE INDEX idx_users_github_id ON users(github_id) WHERE github_id IS NOT NULL;
+CREATE INDEX idx_users_fortytwo_id ON users(fortytwo_id) WHERE fortytwo_id IS NOT NULL;
 CREATE INDEX idx_users_active ON users(is_active);
 CREATE INDEX idx_email_verification_tokens_token ON email_verification_tokens(token);
 

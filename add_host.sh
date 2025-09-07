@@ -4,11 +4,9 @@ IP=""
 INTERFACE=""
 
 if [[ "$OS" == "Darwin" ]]; then
-    # macOS
     INTERFACE=$(route get default 2>/dev/null | awk '/interface:/ {print $2}')
     IP=$(ifconfig "$INTERFACE" | awk '/inet / {print $2}' | head -n1)
 elif [[ "$OS" == "Linux" ]]; then
-    # Linux
     INTERFACE=$(ip route | awk '/default/ {print $5}' | head -n1)
     IP=$(ip -4 addr show "$INTERFACE" | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
 else

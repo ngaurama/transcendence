@@ -1,0 +1,30 @@
+Module,Type,Status
+Web - Backend Framework,Major,TRUE
+Web - Frontend Framework/Toolkit,Minor,TRUE
+Web - Database (SQLite),Minor,TRUE
+Web - Blockchain Tournament Scores,Major,FALSE
+User Management - Standard Authentication & Accounts,Major,TRUE
+User Management - Remote Authentication (Google/Github Sign-In),Major,TRUE
+Gameplay - Remote Players,Major,TRUE
+Gameplay - Multiple Players,Major,FALSE
+Gameplay - Another Game with History & Matchmaking,Major,FALSE
+Gameplay - Game Customization Options,Minor,TRUE
+Gameplay - Live Chat,Major,FALSE
+AI - AI Opponent,Major,FALSE
+AI - Stats Dashboards,Minor,TRUE
+Cybersecurity - WAF/ModSecurity + Vault,Major,TRUE
+Cybersecurity - GDPR Compliance & Data Management,Minor,TRUE
+Cybersecurity - 2FA + JWT,Major,TRUE
+DevOps - ELK Log Management,Major,FALSE
+DevOps - Monitoring (Prometheus + Grafana),Minor,FALSE
+DevOps - Microservices Backend,Major,TRUE
+Graphics - Advanced 3D (Babylon.js),Major,FALSE
+Accessibility - Support All Devices,Minor,FALSE
+Accessibility - Expanding Browser Compatibility,Minor,TRUE
+Accessibility - Multi-language Support,Minor,FALSE
+Accessibility - Visually Impaired Accessibility,Minor,FALSE
+Accessibility - SSR Integration,Minor,FALSE
+Server-Side Pong - API & Server-side Logic,Major,TRUE
+Server-Side Pong - CLI vs Web Users,Major,FALSE
+TOTAL MAJOR:,16,8
+TOTAL MINOR:,11,6

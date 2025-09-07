@@ -1,0 +1,718 @@
+---nwJlA3wO---A--
+[07/Sep/2025:14:47:22 +0200] 175724924231.059731 192.168.65.1 36155 172.18.0.9 443
+---nwJlA3wO---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---nwJlA3wO---D--
+
+---nwJlA3wO---F--
+HTTP/1.1 403
+
+---nwJlA3wO---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175724924231.059731"] [ref "o0,6v60,6"]
+
+---nwJlA3wO---I--
+
+---nwJlA3wO---J--
+
+---nwJlA3wO---Z--
+
+---ZjGtqVn3---A--
+[07/Sep/2025:14:47:22 +0200] 175724924270.666765 192.168.65.1 36155 172.18.0.9 443
+---ZjGtqVn3---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---ZjGtqVn3---D--
+
+---ZjGtqVn3---F--
+HTTP/1.1 403
+
+---ZjGtqVn3---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175724924270.666765"] [ref "o0,6v60,6"]
+
+---ZjGtqVn3---I--
+
+---ZjGtqVn3---J--
+
+---ZjGtqVn3---Z--
+
+---zr5YNZYD---A--
+[07/Sep/2025:14:47:22 +0200] 175724924283.911903 192.168.65.1 36155 172.18.0.9 443
+---zr5YNZYD---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---zr5YNZYD---D--
+
+---zr5YNZYD---F--
+HTTP/1.1 403
+
+---zr5YNZYD---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175724924283.911903"] [ref "o0,6v60,6"]
+
+---zr5YNZYD---I--
+
+---zr5YNZYD---J--
+
+---zr5YNZYD---Z--
+
+---TxJ4DUtS---A--
+[07/Sep/2025:19:39:17 +0200] 175726675750.899732 192.168.65.1 46426 172.18.0.9 443
+---TxJ4DUtS---B--
+GET /api/auth/oauth/fortytwo/user/macheuk- HTTP/1.1
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+sec-ch-ua-mobile: ?0
+DNT: 1
+Content-Type: application/json
+Accept: */*
+sec-ch-ua: "Chromium";v="139", "Not;A=Brand";v="99"
+sec-ch-ua-platform: "macOS"
+Referer: https://localhost:8443/credits
+Sec-Fetch-Mode: cors
+Connection: keep-alive
+Host: localhost:8443
+Sec-Fetch-Dest: empty
+Accept-Encoding: gzip, deflate, br, zstd
+Cookie: adminer_key=d0d27b58b1fde9da4c227d5bd7190e3e; adminer_sid=k8jrbq4kgk2nsa8jt4s0c400vi
+Accept-Language: en-US,en;q=0.9
+
+---TxJ4DUtS---D--
+
+---TxJ4DUtS---E--
+{"error":"Rate limit exceeded"}
+
+---TxJ4DUtS---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Sun, 07 Sep 2025 17:39:17 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---TxJ4DUtS---H--
+
+---TxJ4DUtS---I--
+
+---TxJ4DUtS---J--
+
+---TxJ4DUtS---Z--
+
+---UmEgo6Fm---A--
+[07/Sep/2025:19:39:17 +0200] 175726675749.055479 192.168.65.1 20008 172.18.0.9 443
+---UmEgo6Fm---B--
+GET /api/auth/oauth/fortytwo/user/ilymegy HTTP/1.1
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+sec-ch-ua-mobile: ?0
+DNT: 1
+Content-Type: application/json
+Accept: */*
+sec-ch-ua: "Chromium";v="139", "Not;A=Brand";v="99"
+sec-ch-ua-platform: "macOS"
+Referer: https://localhost:8443/credits
+Sec-Fetch-Mode: cors
+Connection: keep-alive
+Host: localhost:8443
+Sec-Fetch-Dest: empty
+Accept-Encoding: gzip, deflate, br, zstd
+Cookie: adminer_key=d0d27b58b1fde9da4c227d5bd7190e3e; adminer_sid=k8jrbq4kgk2nsa8jt4s0c400vi
+Accept-Language: en-US,en;q=0.9
+
+---UmEgo6Fm---D--
+
+---UmEgo6Fm---E--
+{"error":"Rate limit exceeded"}
+
+---UmEgo6Fm---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Sun, 07 Sep 2025 17:39:17 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---UmEgo6Fm---H--
+
+---UmEgo6Fm---I--
+
+---UmEgo6Fm---J--
+
+---UmEgo6Fm---Z--
+
+---TxJ4DUtS---A--
+[07/Sep/2025:19:39:17 +0200] 17572667578.495623 192.168.65.1 38044 172.18.0.9 443
+---TxJ4DUtS---B--
+GET /api/auth/oauth/fortytwo/user/ngaurama HTTP/1.1
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+sec-ch-ua-mobile: ?0
+DNT: 1
+Content-Type: application/json
+Accept: */*
+sec-ch-ua: "Chromium";v="139", "Not;A=Brand";v="99"
+sec-ch-ua-platform: "macOS"
+Referer: https://localhost:8443/credits
+Sec-Fetch-Mode: cors
+Connection: keep-alive
+Host: localhost:8443
+Sec-Fetch-Dest: empty
+Accept-Encoding: gzip, deflate, br, zstd
+Cookie: adminer_key=d0d27b58b1fde9da4c227d5bd7190e3e; adminer_sid=k8jrbq4kgk2nsa8jt4s0c400vi
+Accept-Language: en-US,en;q=0.9
+
+---TxJ4DUtS---D--
+
+---TxJ4DUtS---E--
+{"error":"Rate limit exceeded"}
+
+---TxJ4DUtS---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Sun, 07 Sep 2025 17:39:17 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---TxJ4DUtS---H--
+
+---TxJ4DUtS---I--
+
+---TxJ4DUtS---J--
+
+---TxJ4DUtS---Z--
+
+---UmEgo6Fm---A--
+[07/Sep/2025:19:40:19 +0200] 17572668192.785546 192.168.65.1 37225 172.18.0.9 443
+---UmEgo6Fm---B--
+GET /api/auth/oauth/fortytwo/user/macheuk- HTTP/1.1
+sec-ch-ua-mobile: ?0
+DNT: 1
+Content-Type: application/json
+Accept: */*
+Cache-Control: no-cache
+sec-ch-ua: "Chromium";v="139", "Not;A=Brand";v="99"
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+Sec-Fetch-Site: same-origin
+sec-ch-ua-platform: "macOS"
+Pragma: no-cache
+Referer: https://localhost:8443/credits
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+Host: localhost:8443
+Sec-Fetch-Dest: empty
+Accept-Encoding: gzip, deflate, br, zstd
+Cookie: adminer_key=d0d27b58b1fde9da4c227d5bd7190e3e; adminer_sid=k8jrbq4kgk2nsa8jt4s0c400vi
+Accept-Language: en-US,en;q=0.9
+
+---UmEgo6Fm---D--
+
+---UmEgo6Fm---E--
+{"error":"Rate limit exceeded"}
+
+---UmEgo6Fm---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Sun, 07 Sep 2025 17:40:20 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---UmEgo6Fm---H--
+
+---UmEgo6Fm---I--
+
+---UmEgo6Fm---J--
+
+---UmEgo6Fm---Z--
+
+---5Q9MnKOE---A--
+[07/Sep/2025:19:40:36 +0200] 175726683660.123890 192.168.65.1 30372 172.18.0.9 443
+---5Q9MnKOE---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---5Q9MnKOE---D--
+
+---5Q9MnKOE---F--
+HTTP/1.1 403
+
+---5Q9MnKOE---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726683660.123890"] [ref "o0,6v60,6"]
+
+---5Q9MnKOE---I--
+
+---5Q9MnKOE---J--
+
+---5Q9MnKOE---Z--
+
+---syuAaS9b---A--
+[07/Sep/2025:19:40:36 +0200] 175726683669.478037 192.168.65.1 30372 172.18.0.9 443
+---syuAaS9b---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---syuAaS9b---D--
+
+---syuAaS9b---F--
+HTTP/1.1 403
+
+---syuAaS9b---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726683669.478037"] [ref "o0,6v60,6"]
+
+---syuAaS9b---I--
+
+---syuAaS9b---J--
+
+---syuAaS9b---Z--
+
+---9x985wqm---A--
+[07/Sep/2025:19:40:36 +0200] 175726683663.086112 192.168.65.1 30372 172.18.0.9 443
+---9x985wqm---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---9x985wqm---D--
+
+---9x985wqm---F--
+HTTP/1.1 403
+
+---9x985wqm---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726683663.086112"] [ref "o0,6v60,6"]
+
+---9x985wqm---I--
+
+---9x985wqm---J--
+
+---9x985wqm---Z--
+
+---m6HhHHrn---A--
+[07/Sep/2025:19:44:26 +0200] 17572670667.819103 192.168.65.1 21928 172.18.0.9 443
+---m6HhHHrn---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+Cache-Control: no-cache
+Pragma: no-cache
+
+---m6HhHHrn---D--
+
+---m6HhHHrn---F--
+HTTP/1.1 403
+
+---m6HhHHrn---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "17572670667.819103"] [ref "o0,6v60,6"]
+
+---m6HhHHrn---I--
+
+---m6HhHHrn---J--
+
+---m6HhHHrn---Z--
+
+---e9aw46ZJ---A--
+[07/Sep/2025:19:44:26 +0200] 175726706655.787922 192.168.65.1 21928 172.18.0.9 443
+---e9aw46ZJ---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+Cache-Control: no-cache
+Pragma: no-cache
+
+---e9aw46ZJ---D--
+
+---e9aw46ZJ---F--
+HTTP/1.1 403
+
+---e9aw46ZJ---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726706655.787922"] [ref "o0,6v60,6"]
+
+---e9aw46ZJ---I--
+
+---e9aw46ZJ---J--
+
+---e9aw46ZJ---Z--
+
+---orcKsTZd---A--
+[07/Sep/2025:19:44:26 +0200] 175726706652.035377 192.168.65.1 21928 172.18.0.9 443
+---orcKsTZd---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+Cache-Control: no-cache
+Pragma: no-cache
+
+---orcKsTZd---D--
+
+---orcKsTZd---F--
+HTTP/1.1 403
+
+---orcKsTZd---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726706652.035377"] [ref "o0,6v60,6"]
+
+---orcKsTZd---I--
+
+---orcKsTZd---J--
+
+---orcKsTZd---Z--
+
+---Y4H870eS---A--
+[07/Sep/2025:19:44:33 +0200] 175726707315.517242 192.168.65.1 56480 172.18.0.9 443
+---Y4H870eS---B--
+HEAD / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---Y4H870eS---D--
+
+---Y4H870eS---F--
+HTTP/1.1 403
+
+---Y4H870eS---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726707315.517242"] [ref "o0,6v61,6"]
+
+---Y4H870eS---I--
+
+---Y4H870eS---J--
+
+---Y4H870eS---Z--
+
+---ZuS1OcH9---A--
+[07/Sep/2025:19:44:33 +0200] 17572670731.227165 192.168.65.1 56480 172.18.0.9 443
+---ZuS1OcH9---B--
+HEAD / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---ZuS1OcH9---D--
+
+---ZuS1OcH9---F--
+HTTP/1.1 403
+
+---ZuS1OcH9---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "17572670731.227165"] [ref "o0,6v61,6"]
+
+---ZuS1OcH9---I--
+
+---ZuS1OcH9---J--
+
+---ZuS1OcH9---Z--
+
+---VQBlrJcj---A--
+[07/Sep/2025:19:44:33 +0200] 175726707344.168801 192.168.65.1 56480 172.18.0.9 443
+---VQBlrJcj---B--
+HEAD / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---VQBlrJcj---D--
+
+---VQBlrJcj---F--
+HTTP/1.1 403
+
+---VQBlrJcj---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726707344.168801"] [ref "o0,6v61,6"]
+
+---VQBlrJcj---I--
+
+---VQBlrJcj---J--
+
+---VQBlrJcj---Z--
+
+---DAEhLQ6L---A--
+[07/Sep/2025:19:44:44 +0200] 175726708429.864077 192.168.65.1 42525 172.18.0.9 443
+---DAEhLQ6L---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---DAEhLQ6L---D--
+
+---DAEhLQ6L---F--
+HTTP/1.1 403
+
+---DAEhLQ6L---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726708429.864077"] [ref "o0,6v60,6"]
+
+---DAEhLQ6L---I--
+
+---DAEhLQ6L---J--
+
+---DAEhLQ6L---Z--
+
+---fNm0DU2P---A--
+[07/Sep/2025:19:44:44 +0200] 175726708439.387868 192.168.65.1 42525 172.18.0.9 443
+---fNm0DU2P---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---fNm0DU2P---D--
+
+---fNm0DU2P---F--
+HTTP/1.1 403
+
+---fNm0DU2P---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726708439.387868"] [ref "o0,6v60,6"]
+
+---fNm0DU2P---I--
+
+---fNm0DU2P---J--
+
+---fNm0DU2P---Z--
+
+---HrI0LLjE---A--
+[07/Sep/2025:19:44:44 +0200] 175726708462.478013 192.168.65.1 42525 172.18.0.9 443
+---HrI0LLjE---B--
+GET / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---HrI0LLjE---D--
+
+---HrI0LLjE---F--
+HTTP/1.1 403
+
+---HrI0LLjE---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726708462.478013"] [ref "o0,6v60,6"]
+
+---HrI0LLjE---I--
+
+---HrI0LLjE---J--
+
+---HrI0LLjE---Z--
+
+---a930E4KF---A--
+[07/Sep/2025:19:44:51 +0200] 175726709167.852848 192.168.65.1 24369 172.18.0.9 443
+---a930E4KF---B--
+GET /?test=1757267091 HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---a930E4KF---D--
+
+---a930E4KF---F--
+HTTP/1.1 403
+
+---a930E4KF---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726709167.852848"] [ref "o0,6v76,6"]
+
+---a930E4KF---I--
+
+---a930E4KF---J--
+
+---a930E4KF---Z--
+
+---M6T6ZirA---A--
+[07/Sep/2025:19:44:51 +0200] 175726709161.163119 192.168.65.1 24369 172.18.0.9 443
+---M6T6ZirA---B--
+GET /?test=1757267091 HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---M6T6ZirA---D--
+
+---M6T6ZirA---F--
+HTTP/1.1 403
+
+---M6T6ZirA---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726709161.163119"] [ref "o0,6v76,6"]
+
+---M6T6ZirA---I--
+
+---M6T6ZirA---J--
+
+---M6T6ZirA---Z--
+
+---RRfwEein---A--
+[07/Sep/2025:19:44:51 +0200] 175726709159.201213 192.168.65.1 24369 172.18.0.9 443
+---RRfwEein---B--
+GET /?test=1757267091 HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---RRfwEein---D--
+
+---RRfwEein---F--
+HTTP/1.1 403
+
+---RRfwEein---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726709159.201213"] [ref "o0,6v76,6"]
+
+---RRfwEein---I--
+
+---RRfwEein---J--
+
+---RRfwEein---Z--
+
+---cZw0kOpP---A--
+[07/Sep/2025:19:46:14 +0200] 17572671741.976254 192.168.65.1 57944 172.18.0.9 443
+---cZw0kOpP---B--
+HEAD / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---cZw0kOpP---D--
+
+---cZw0kOpP---F--
+HTTP/1.1 403
+
+---cZw0kOpP---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "17572671741.976254"] [ref "o0,6v61,6"]
+
+---cZw0kOpP---I--
+
+---cZw0kOpP---J--
+
+---cZw0kOpP---Z--
+
+---bC7m4SFL---A--
+[07/Sep/2025:19:46:14 +0200] 175726717469.031965 192.168.65.1 57944 172.18.0.9 443
+---bC7m4SFL---B--
+HEAD / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---bC7m4SFL---D--
+
+---bC7m4SFL---F--
+HTTP/1.1 403
+
+---bC7m4SFL---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726717469.031965"] [ref "o0,6v61,6"]
+
+---bC7m4SFL---I--
+
+---bC7m4SFL---J--
+
+---bC7m4SFL---Z--
+
+---rIZUf2qu---A--
+[07/Sep/2025:19:46:14 +0200] 175726717417.967858 192.168.65.1 57944 172.18.0.9 443
+---rIZUf2qu---B--
+HEAD / HTTP/1.1
+Host: localhost:8443
+Accept: */*
+User-Agent: sqlmap
+
+---rIZUf2qu---D--
+
+---rIZUf2qu---F--
+HTTP/1.1 403
+
+---rIZUf2qu---H--
+ModSecurity: Access denied with code 403 (phase 1). Matched "Operator `Rx' with parameter `nikto|sqlmap|w3af|acunetix|havij' against variable `REQUEST_HEADERS:User-Agent' (Value: `sqlmap' ) [file "/etc/nginx/modsecurity/main.conf"] [line "9"] [id "1001"] [rev ""] [msg "Malicious User-Agent detected"] [data ""] [severity "0"] [ver ""] [maturity "0"] [accuracy "0"] [hostname "172.18.0.9"] [uri "/"] [unique_id "175726717417.967858"] [ref "o0,6v61,6"]
+
+---rIZUf2qu---I--
+
+---rIZUf2qu---J--
+
+---rIZUf2qu---Z--
+

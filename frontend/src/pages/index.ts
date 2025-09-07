@@ -10,3 +10,4 @@ export * from './passwords';
 export * from './game/tournaments/tournament';
 export * from './profile';
 export * from './auth/gdpr'
+export * from './credits'

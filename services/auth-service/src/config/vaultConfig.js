@@ -34,9 +34,12 @@ async function loadSecrets() {
     load("secret/data/auth/jwt", secrets.auth, "jwt"),
     load("secret/data/external/github", secrets.external, "github"),
     load("secret/data/external/google", secrets.external, "google"),
+    load("secret/data/external/fortytwo", secrets.external, "fortytwo"),
     load("secret/data/external/smtp", secrets.external, "smtp"),
     load("secret/data/database/config", secrets.database, "config")
   ]);
+
+  console.log("RAHHAH", secrets.external.fortytwo);
 
   return secrets;
 }

@@ -1,20 +1,18 @@
 DOCKER_COMPOSE = docker-compose -f docker-compose.dev.yml
-SCRIPT = ./add_host.sh
+SCRIPT_PROD = ./add_host.sh
+SCRIPT_DEV = ./remove_host.sh
 
-.DEFAULT_GOAL := help
-
-help:
-	@echo "Usage:"
-	@echo "  make up        -> Run add_host.sh & docker-compose up -d"
-	@echo "  make down      -> docker-compose down"
-	@echo "  make restart   -> Restart all services"
-	@echo "  make logs      -> Tail logs of all containers"
-	@echo "  make rebuild   -> Rebuild all containers"
-	@echo "  make ps        -> Show running containers"
-
-up:
+up-dev:
+	@touch .env.generated
 	@echo "Updating HOST in .env..."
-	@$(SCRIPT)
+	@$(SCRIPT_DEV)
+	@echo "Starting containers..."
+	@$(DOCKER_COMPOSE) up -d
+
+up-prod:
+	@touch .env.generated
+	@echo "Updating HOST in .env..."
+	@$(SCRIPT_PROD)
 	@echo "Starting containers..."
 	@$(DOCKER_COMPOSE) up -d
 
@@ -22,27 +20,13 @@ down:
 	@echo "Stopping containers..."
 	@$(DOCKER_COMPOSE) down -v
 
-restart:
-	@echo "Restarting containers..."
-	@$(MAKE) down
-	@$(MAKE) up
-
 reset:
-	@echo "Resetting everything and starting again..."
-	@$(DOCKER_COMPOSE) down --rmi all -v
-	@$(MAKE) up
+	@echo "Resetting everything..."
+	@$(DOCKER_COMPOSE) down -v && docker rmi $$(docker images -a -q)
 
 logs:
 	@echo "Showing logs..."
 	@$(DOCKER_COMPOSE) logs -f
-
-rebuild:
-	@echo "Rebuilding containers..."
-	@$(DOCKER_COMPOSE) up -d --build
-
-ps:
-	@echo "Running containers:"
-	@$(DOCKER_COMPOSE) ps
 
 addhost:
 	@echo "Updating .env with current IP..."

@@ -8,13 +8,9 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "dependencies": {
-    "@babylonjs/core": "^8.24.0",
-    "@babylonjs/loaders": "^8.24.0",
-    "@babylonjs/materials": "^8.24.0",
     "@types/chart.js": "^2.9.41",
     "@types/node": "^20.0.0",
     "autoprefixer": "^10.4.16",
-    "babylonjs": "^8.24.0",
     "chart.js": "^4.5.0",
     "postcss": "^8.4.31",
     "qrcode": "^1.5.3",

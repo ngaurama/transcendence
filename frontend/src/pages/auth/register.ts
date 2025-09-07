@@ -34,8 +34,19 @@ export function registerPage(): string {
       </form>
       <div class="mt-4">
         <p class="text-center mb-2">Or login with:</p>
-        <button id="google-oauth" class="glass-button w-full bg-red-500 p-2 rounded mb-2">Google</button>
-        <button id="github-oauth" class="glass-button w-full bg-gray-700 p-2 rounded">GitHub</button>
+        <div class="flex justify-evenly">
+          <div class="flex justify-center gap-6">
+            <button id="google-oauth" class="bg-blue-500/50 w-16 h-16 rounded-full flex items-center justify-center">
+              <i class="fab fa-google text-white text-3xl block"></i>
+            </button>
+            <button id="github-oauth" class="bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center hover:bg-gray-800">
+              <i class="fab fa-github text-white text-3xl block"></i>
+            </button>
+            <button id="fortytwo-oauth" class="bg-white w-16 h-16 rounded-full flex items-center justify-center hover:bg-gray-200">
+              <img src="/fortytwo.png" alt="42 Logo" class="w-10 h-10 object-contain">
+            </button>
+          </div>
+        </div>
       </div>
       <div class="mt-4 text-center">
         <span class="text-gray-400">Already have an account? </span>
@@ -90,5 +101,10 @@ export function attachRegisterListeners() {
   const githubOAuthBtn = document.getElementById('github-oauth');
   if (githubOAuthBtn) {
     githubOAuthBtn.addEventListener('click', () => initiateOAuth('github'));
+  }
+
+  const fortytwoOAuthBtn = document.getElementById('fortytwo-oauth');
+  if (fortytwoOAuthBtn) {
+    fortytwoOAuthBtn.addEventListener('click', () => initiateOAuth('fortytwo'));
   }
 }

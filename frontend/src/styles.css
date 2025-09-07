@@ -4,14 +4,13 @@
 
 /* Avatar Dropdown */
 .dropdown-menu {
-  position: relative;
+  position: absolute;
   right: 0;
-  /* top: 100%; */
   background-color: #374151;
   border: 1px solid #4b5563;
   border-radius: 0.25rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10001;
+  z-index: 50;
 }
 
 .dropdown-item {
@@ -23,7 +22,6 @@
 .dropdown-item:hover {
   background-color: #4b5563;
 }
-
 
 /* TOURNAMENT BRACKET STUFF */
 .round {

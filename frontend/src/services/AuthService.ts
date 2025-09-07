@@ -153,6 +153,6 @@ export async function updateProfile(token: string, updates: { username?: string;
   }
 }
 
-export function initiateOAuth(provider: 'google' | 'github'): void {
+export function initiateOAuth(provider: 'google' | 'github' | 'fortytwo'): void {
   window.location.href = `/api/auth/oauth/${provider}`;
 }

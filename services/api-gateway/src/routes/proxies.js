@@ -59,6 +59,9 @@ async function socialProxy(fastify, options) {
       // }
 
       console.log(`Social Request: ${request.method} ${request.url}`);
+    },
+    config: {
+      rateLimit: false
     }
   });
 }
