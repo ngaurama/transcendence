@@ -31,6 +31,36 @@ let particleSystem: ParticleSystem | null = null;
 };
 
 async function main() {
+  const homeBtnContainer = document.getElementById('home-btn-container');
+  const lottieContainer = document.getElementById('home-lottie');
+  const homeText = homeBtnContainer?.querySelector('.home-text') as HTMLElement | null;
+  if (homeBtnContainer && lottieContainer && homeText) {
+    let lottieAnim: any = null;
+    homeBtnContainer.addEventListener('mouseenter', () => {
+      homeText.style.opacity = '0';
+      lottieContainer.style.display = 'flex';
+      if (lottieAnim) {
+        lottieAnim.destroy();
+        lottieAnim = null;
+      }
+      lottieAnim = (window as any).lottie.loadAnimation({
+        container: lottieContainer,
+        renderer: 'svg',
+        loop: false,
+        autoplay: true,
+        path: '/home_icon.json'
+      });
+    });
+    homeBtnContainer.addEventListener('mouseleave', () => {
+      homeText.style.opacity = '1';
+      lottieContainer.style.display = 'none';
+      if (lottieAnim) {
+        lottieAnim.destroy();
+        lottieAnim = null;
+      }
+    });
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
 
   if (urlParams.has('access_token')) {
@@ -62,6 +92,14 @@ async function main() {
   const currentPath = window.location.pathname;
   if (currentPath.startsWith('/dashboard') || currentPath.startsWith('/profile/')) {
     (window as any).dashboardHistory.push(currentPath);
+  }
+
+  const homeLink = document.querySelector('a[href="/"]');
+  if (homeLink) {
+    homeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      (window as any).navigate('/');
+    });
   }
 
   particleSystem = new ParticleSystem();

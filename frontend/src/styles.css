@@ -2,6 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Home Button with Lottie Animation */
+#home-btn {
+  display: flex;
+  align-items: center;
+}
+#home-btn a {
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: color 0.2s;
+}
+#home-btn .home-text {
+  transition: opacity 0.2s;
+}
+#home-btn a:hover .home-text {
+  opacity: 0;
+}
+#home-btn a:hover #home-lottie {
+  display: inline-block !important;
+}
+#home-lottie {
+  vertical-align: left;
+  width: 42px;
+  height: 42px;
+  margin-left: 42px;
+  display: none;
+}
+
+#home-btn-container {
+  position: relative;
+  width: 120px;
+  height: 42px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.superimposed {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+#home-btn-container .home-text {
+  opacity: 1;
+  z-index: 2;
+}
+#home-btn-container:hover .home-text {
+  opacity: 0;
+}
+#home-btn-container #home-lottie {
+  display: flex;
+  opacity: 1;
+  z-index: 3;
+}
+#home-btn-container:not(:hover) #home-lottie {
+  display: none;
+  opacity: 0;
+}
+
 /* Avatar Dropdown */
 .dropdown-menu {
   position: absolute;
@@ -326,7 +387,12 @@ nav, main, footer {
   transition: all 0.3s ease;
 }
 
-#start-matchmaking {
+.select-btn-border {
+  border: 2px solid transparent;
+  border-image: linear-gradient(transparent 10%, #dadadae8 40%, #e6e5e5e8 60%, transparent 90%) 1;
+}
+
+#start-matchmaking { 
   min-height: 70px;
 }
 
@@ -379,7 +445,6 @@ button:hover {
   background: rgba(31, 41, 55, 0.6);
   box-shadow: 0 6px 15px rgba(0,0,0,0.3);
 }
-
 
 .glass-input {
   position: relative;
