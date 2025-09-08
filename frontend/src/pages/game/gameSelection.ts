@@ -19,7 +19,7 @@ export async function playSelectionPage(): Promise<string> {
       <h2 class="text-2xl mb-6 text-center">Choose Your Game</h2>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <button id="F-pong" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-600">
+        <button id="select-pong" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-600">
           <h3 class="text-xl">Pong</h3>
           <p class="text-md text-gray-300">Classic paddle game</p>
         </button>
@@ -293,6 +293,7 @@ export async function attachPlaySelectionListeners() {
   if (selectPong && modeSelection) {
     selectPong.addEventListener('click', () => {
       modeSelection.classList.remove('hidden');
+      selectPong.classList.add('select-btn-border');
     });
   }
 
