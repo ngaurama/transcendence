@@ -11,7 +11,7 @@ export async function gdprPage(): Promise<string> {
   const isOAuthUser = user.oauth_provider && user.oauth_provider !== 'local';
 
   return `
-    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
       <!-- Back Arrow -->
       <div class="mb-4">
         <button onclick="navigateBack()" class="flex items-center text-gray-400 hover:text-white transition-colors">
@@ -24,7 +24,7 @@ export async function gdprPage(): Promise<string> {
       <h2 class="text-2xl mb-6">GDPR Compliance Center</h2>
 
       <!-- Add pending deletion status -->
-      <div id="deletion-status" class="hidden bg-yellow-900 bg-opacity-20 p-4 rounded mb-4">
+      <div id="deletion-status" class="glass-card hidden bg-yellow-900 bg-opacity-20 p-4 rounded mb-4">
         <h3 class="text-lg font-semibold mb-2">Pending Account Deletion</h3>
         <p class="text-gray-300" id="deletion-date"></p>
         <button id="cancel-deletion" class="glass-button mt-2 bg-green-600 px-3 py-1 rounded text-sm">
@@ -34,7 +34,7 @@ export async function gdprPage(): Promise<string> {
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Data Management Card -->
-        <div class="bg-gray-900 p-4 rounded">
+        <div class="glass-card bg-gray-900 p-4 rounded">
           <h3 class="text-lg font-semibold mb-3">Data Management</h3>
           <p class="text-gray-400 mb-4">Manage your personal information and data</p>
           
@@ -48,7 +48,7 @@ export async function gdprPage(): Promise<string> {
         </div>
 
         <!-- Privacy Actions Card -->
-        <div class="bg-gray-900 p-${isOAuthUser ? 2 : 3} rounded">
+        <div class="glass-card bg-gray-900 p-${isOAuthUser ? 2 : 3} rounded">
           <h3 class="text-lg font-semibold mb-3">Privacy Actions</h3>
           <p class="text-gray-400 mb-4">Exercise your privacy rights</p>
           ${!isOAuthUser ? `
@@ -65,7 +65,7 @@ export async function gdprPage(): Promise<string> {
       </div>
 
       <!-- Information Section -->
-      <div class="mt-6 bg-gray-900 p-4 rounded">
+      <div class="glass-card mt-6 bg-gray-900 p-4 rounded">
         <h3 class="text-lg font-semibold mb-3">Your Privacy Rights</h3>
         <div class="text-sm text-gray-400 space-y-2">
           <p>Under GDPR, you have the right to:</p>
@@ -86,7 +86,7 @@ export async function gdprPage(): Promise<string> {
 
 export function viewDataPage(): string {
   return `
-    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-6">View My Data</h2>
       
       <div id="user-data" class="bg-gray-900 p-4 rounded mb-4">
@@ -105,7 +105,7 @@ export function viewDataPage(): string {
 
 export function exportDataPage(): string {
   return `
-    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-6">Export My Data</h2>
       
       <div class="bg-gray-900 p-4 rounded mb-4">
@@ -179,9 +179,9 @@ export function anonymizeAccountPage(): string {
 export function deleteAccountPage(): string {
   return `
     <div class="max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg">
-      <h2 class="text-2xl mb-6 text-red-400">Delete Account</h2>
+      <h2 class="text-2xl mb-6 text-red-500">Delete Account</h2>
       
-      <div class="bg-red-900 bg-opacity-20 p-4 rounded mb-4">
+      <div class="bg-red-900/50 bg-opacity-20 p-4 rounded mb-4">
         <h3 class="text-lg font-semibold mb-2">🚫 Permanent Deletion</h3>
         <p class="text-gray-300 mb-2">
           Deleting your account will:
@@ -346,10 +346,10 @@ async function loadUserData() {
     if (data.success) {
       const toggleBtn = document.createElement('button');
       toggleBtn.textContent = 'View JSON';
-      toggleBtn.className = 'mb-2 px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-600';
+      toggleBtn.className = 'glass-button mb-2 px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-600';
       
       const prettyDiv = document.createElement('div');
-      prettyDiv.className = 'bg-gray-800 p-4 rounded space-y-2 text-sm text-gray-100';
+      prettyDiv.className = 'glass-card bg-gray-800 p-4 rounded space-y-2 text-sm text-gray-100';
       prettyDiv.innerHTML = `
         <div><strong>ID:</strong> ${data.data.id}</div>
         <div><strong>Username:</strong> ${data.data.username}</div>

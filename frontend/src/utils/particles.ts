@@ -21,20 +21,20 @@ export class ParticleSystem {
   private width: number = 0;
   private height: number = 0;
 
-  private backgroundImage: HTMLImageElement | null = null;
+  // private backgroundImage: HTMLImageElement | null = null;
 
   constructor(canvasId: string = 'particle-canvas') {
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d')!;
 
-    this.backgroundImage = new Image();
-    this.backgroundImage.src = "background.jpg";
+    // this.backgroundImage = new Image();
+    // this.backgroundImage.src = "gradient_flow.gif";
 
-    this.backgroundImage.onload = () => {
+    // this.backgroundImage.onload = () => {
       this.init();
       this.bindEvents();
       this.animate();
-    };
+    // };
   }
 
   private init(): void {
@@ -137,12 +137,13 @@ export class ParticleSystem {
 
   
   private drawParticles(): void {
-    if (this.backgroundImage) {
-      this.ctx.save();
-      this.ctx.filter = 'blur(20px)';
-      this.ctx.drawImage(this.backgroundImage, 0, 0, this.width, this.height);
-      this.ctx.restore();
-    }
+    // if (this.backgroundImage) {
+    //   this.ctx.save();
+    //   this.ctx.filter = 'blur(20px)';
+    //   this.ctx.drawImage(this.backgroundImage, 0, 0, this.width, this.height);
+    //   this.ctx.restore();
+    // }
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
     for (let i = 0; i < this.particles.length; i++) {
       for (let j = i + 1; j < this.particles.length; j++) {

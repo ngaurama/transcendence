@@ -284,6 +284,11 @@ class PongGame {
     this.gameState.status = 'paused';
     this.inputStates.player1 = null;
     this.inputStates.player2 = null;
+    this.resetBall(loserKey);
+    // this.broadcast({ 
+    //   type: 'game_update',
+    //   state: this.gameState 
+    // });
     this.broadcast({ type: 'round_pause' });
 
     this.powerUpSystem.clearAllPowerUpsAndBalls();
@@ -323,6 +328,7 @@ class PongGame {
   async endGame(winnerKey) {
     this.gameState.status = 'finished';
     this.endTime = Date.now();
+
 
     if (this.gameLoop) {
       clearInterval(this.gameLoop);

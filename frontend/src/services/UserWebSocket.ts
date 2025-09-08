@@ -102,7 +102,7 @@ function handleUserWebSocketMessage(data: any): void {
       break;
 
     case 'game_invitation_declined':
-      alert('Your rematch invitation was declined.');
+      alert('Your match invitation was declined.');
       if ((window as any).pendingRematch?.gameId === data.game_id) {
         const rematchBtn = document.getElementById('rematch');
         if (rematchBtn) {

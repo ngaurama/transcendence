@@ -1,4 +1,3 @@
-// pages/game.ts - Updated game end section
 import { createWebSocketHandler } from './websocket';
 import { InputHandler } from './input';
 import { initCanvas, updateScene, cleanupRenderer, gameState } from './renderer';
@@ -8,12 +7,15 @@ export async function pongGamePage(): Promise<string> {
   const urlParams = new URLSearchParams(window.location.search);
   const gameId = urlParams.get('game_id');
   const tournamentId = urlParams.get('tournament_id');
+  console.log("WINDOW AS ANY: ", (window as any).gameOptions);
   
   return `
     <div class="max-w-4xl mx-auto px-2">
       <h2 class="text-2xl mb-4 text-center">${tournamentId ? `Tournament #${tournamentId} Match` : `Pong Game #${gameId}`}</h2>
       <div id="player-info" class="text-center mb-2">
-        <p>Player 1: Use W/S keys | Player 2: Use Arrow Up/Down keys</p>
+        <p>${(window as any).gameOptions.gameMode === 'local' ? 
+          "Player 1: Use W/S keys | Player 2: Use Arrow Up/Down keys" 
+          : "Use Arrow Up/Down keys"}</p>
       </div>
       <div class="relative">
         <canvas id="game-canvas" class="game-canvas border border-gray-500 mx-auto block"></canvas>

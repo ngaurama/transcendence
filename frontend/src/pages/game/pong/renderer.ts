@@ -48,7 +48,6 @@ export function initCanvas(canvas: HTMLCanvasElement): void {
     img.src = url;
     img.onload = () => {
       images[type] = img;
-      // console.log(`Loaded image for ${type}`);
     };
     img.onerror = () => {
       console.error(`Failed to load image for ${type}: ${url}`);
