@@ -33,7 +33,10 @@ function setupUserRoutes(fastify, { dbService, secrets, authenticateToken }) {
         return reply.code(400).send({ error: 'Invalid image format' });
       }
 
-      const filename = `${request.user.user_id}_${Date.now()}.${data.mimetype.split('/')[1]}`;
+
+      const isDefault = data.mimetype === 'image/png' && data.filename === 'default.png';
+      const filename = isDefault ? 'default.png' : `${request.user.user_id}_${Date.now()}.${data.mimetype.split('/')[1]}`;
+      
       const filePath = path.join(__dirname, '../../../public/avatars', filename);
 
       await fs.writeFile(filePath, await data.toBuffer());

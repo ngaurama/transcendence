@@ -460,7 +460,7 @@ export async function attachPlaySelectionListeners() {
         },
         body: JSON.stringify({}),      
       });
-      console.log('Left matchmaking queue');
+      // console.log('Left matchmaking queue');
     } catch (error) {
       console.error('Error leaving matchmaking queue:', error);
       showMatchmakingLoading(false);
@@ -521,7 +521,7 @@ export async function attachPlaySelectionListeners() {
   }
 
   (window as any).addTournamentToList = function(tournament: any) {
-    console.log("Adding new tournament dynamically:", tournament);
+    // console.log("Adding new tournament dynamically:", tournament);
     const container = document.getElementById('open-tournaments-list');
     if (!container) {
       console.warn("No container for open tournaments found");

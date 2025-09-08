@@ -43,11 +43,11 @@ class TeamDataService {
     }
 
     if (membersToFetch.length === 0) {
-      console.log("Using cached team data");
+      // console.log("Using cached team data");
       return results;
     }
 
-    console.log(`Fetching data for ${membersToFetch.length} team members`);
+    // console.log(`Fetching data for ${membersToFetch.length} team members`);
 
     for (const member of membersToFetch) {
       try {
@@ -110,7 +110,7 @@ class TeamDataService {
   async prefetchTeamData(): Promise<void> {
     try {
       await this.getTeamMembers();
-      console.log('Team data prefetched successfully');
+      // console.log('Team data prefetched successfully');
     } catch (error) {
       console.error('Failed to prefetch team data:', error);
     }

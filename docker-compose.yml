@@ -9,7 +9,7 @@ volumes:
   vault_data:
   avatars_data:
   frontend_dist:
-  env_generated:
+  vault_token:
 
 services:
   nginx:
@@ -22,6 +22,11 @@ services:
     volumes:
       - ./nginx/certs:/etc/nginx/certs:ro
       - frontend_dist:/usr/share/nginx/html:ro
+      - ./nginx/confs/modsecurity.conf:/etc/nginx/modsecurity/modsecurity.conf:ro
+      - ./nginx/confs/main.conf:/etc/nginx/modsecurity/main.conf:ro
+      - ./nginx/confs/logs:/var/log/nginx
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - api-gateway
       - frontend
@@ -33,8 +38,14 @@ services:
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - API_URL=${API_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - SOCIAL_SERVICE_URL=${SOCIAL_SERVICE_URL}
+      - PONG_SERVICE_URL=${PONG_SERVICE_URL}
+      - API_PORT=${API_PORT}
+      - HOST=${HOST}
     ports:
       - 3000:3000
     depends_on:
@@ -49,23 +60,50 @@ services:
       - /app/node_modules
       - avatars_data:/app/public/avatars
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   auth-service:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
-    env_file:
-      - .env
-      # - .env.generated
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - VAULT_ADDR=${VAULT_ADDR}
+      - VAULT_SKIP_VERIFY=${VAULT_SKIP_VERIFY}
+      - AUTH_PORT=${AUTH_PORT}
     volumes:
       - database_data:/app/data
       - ./services/auth-service:/app
       - avatars_data:/app/public/avatars
       - /app/node_modules
       - ./nginx/certs:/app/certs:ro
-      - ./.env.generated:/app/.env.generated:ro
+      - vault_token:/secrets:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - vault
+    networks:
+      - ft_transcendence
+    restart: unless-stopped
+
+  social-service:
+    build:
+      context: ./services/social-service
+      dockerfile: Dockerfile
+    environment:
+      - SOCIAL_PORT=${SOCIAL_PORT}
+    volumes:
+      - database_data:/app/data
+      - ./services/social-service:/app
+      - /app/node_modules
+      - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      - vault
+      - auth-service
     networks:
       - ft_transcendence
     restart: unless-stopped
@@ -74,13 +112,15 @@ services:
     build:
       context: ./services/pong-service
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    environment:
+      - PONG_PORT=${PONG_PORT}
     volumes:
       - database_data:/app/data
       - ./services/pong-service:/app
       - /app/node_modules
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - vault
       - auth-service
@@ -93,8 +133,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: ${NODE_ENV}
-    env_file:
-      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV}
     ports:
       - 5173:5173
     volumes:
@@ -102,6 +142,8 @@ services:
       - /app/node_modules
       - frontend_dist:/app/dist
       - ./nginx/certs:/app/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - ft_transcendence
     restart: unless-stopped
@@ -113,16 +155,10 @@ services:
     volumes:
       - database_data:/app/data
       - ./database/init:/docker-entrypoint-initdb.d
-      - ./database/scripts:/app/scripts
-    env_file: .env
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - ft_transcendence
-    healthcheck:
-      test: ["CMD", "/app/scripts/health-check.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     restart: unless-stopped
 
   # i think we'll just leave vault in dev mode since it doesn't make sense to automate the manual sceret insertoin process in prod mode with shamir keys and such
@@ -134,14 +170,17 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - IPC_LOCK
-    env_file: .env
-    ports:
-      - "8200:8200"
+    env_file: 
+      - .env
+    # ports:
+    #   - "8200:8200"
     volumes:
       - vault_data:/vault/data
       - ./vault/config/policies:/vault/config/policies:ro
       - ./vault/scripts:/vault/scripts:ro
-      - ./.env.generated:/app/.env.generated:rw
+      - vault_token:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "--insecure", "https://localhost:8200/v1/sys/health"]
       interval: 10s

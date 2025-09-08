@@ -1,7 +1,9 @@
+require("dotenv").config({ path: "/secrets/.env.generated" });
+
 const vault = require("node-vault")({
   apiVersion: "v1",
   endpoint: process.env.VAULT_ADDR,
-  token: process.env.VAULT_TOKEN,
+  token: process.env.APP_VAULT_TOKEN,
   requestOptions: {
     rejectUnauthorized: false,
   },

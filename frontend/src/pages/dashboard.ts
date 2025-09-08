@@ -56,7 +56,7 @@ export async function dashboardPage(): Promise<string> {
             </div>
 
             <!-- Avatar Dropdown Menu -->
-            <div id="avatar-dropdown" class="hidden absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-700 rounded-md shadow-lg py-1 z-50">
+            <div id="dashboard-avatar-dropdown" class="hidden absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-700 rounded-md shadow-lg py-1 z-50">
               <input 
                 type="file" 
                 id="avatar-file-input" 
@@ -381,7 +381,7 @@ function renderSettingsContent(user: any): string {
 
 export function attachDashboardListeners() {
   const avatarTrigger = document.getElementById('avatar-trigger');
-  const avatarDropdown = document.getElementById('avatar-dropdown');
+  const avatarDropdown = document.getElementById('dashboard-avatar-dropdown');
   const avatarFileInput = document.getElementById('avatar-file-input') as HTMLInputElement;
   const removeAvatarBtn = document.getElementById('remove-avatar-btn');
   const winLossChartBtn = document.getElementById('win-loss-chart-btn');
@@ -416,8 +416,8 @@ export function attachDashboardListeners() {
         alert('Only PNG and JPEG images are allowed');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size must be less than 5MB');
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image size must be less than 2MB');
         return;
       }
 
@@ -450,10 +450,9 @@ export function attachDashboardListeners() {
         const defaultAvatarResponse = await fetch('/avatars/default.png');
         const blob = await defaultAvatarResponse.blob();
         const file = new File([blob], 'default.png', { type: 'image/png' });
-
         await uploadAvatar(token, file);
         alert('Avatar removed successfully!');
-        (window as any).navigate('/Dashboard');
+        (window as any).navigate('/dashboard');
       } catch (error) {
         alert(error instanceof Error ? error.message : 'Failed to remove avatar');
       } finally {

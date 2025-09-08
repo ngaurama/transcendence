@@ -315,7 +315,7 @@ async function cancelDeletionRequest() {
     const data = await response.json();
     if (data.success) {
       alert('Deletion request cancelled successfully!');
-      window.location.reload();
+      (window as any).navigate("/");
     }
   } catch (error) {
     alert('Failed to cancel deletion request');
@@ -494,20 +494,29 @@ async function handleDeleteAccount() {
     const response = await fetch('/api/auth/gdpr/account', {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
+        'Authorization': `Bearer ${token}`
+      }
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new Error(`Invalid JSON response: ${text}`);
+    }
 
     if (data.success) {
       alert('Account deletion requested. You will be logged out. You have 30 days to cancel this request.');
       localStorage.clear();
       (window as any).navigate('/');
     } else {
-      throw new Error(data.error);
+      throw new Error(data.error || 'Deletion failed');
     }
   } catch (error) {
     alert(`Deletion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

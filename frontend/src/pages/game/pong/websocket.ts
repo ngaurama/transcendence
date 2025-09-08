@@ -58,7 +58,7 @@ function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void):
     case 'game_started':
       rollNeonColor();
       updateScene({ countdown: null });
-      console.log('Game started');
+      // console.log('Game started');
       break;
 
     case 'game_ended':

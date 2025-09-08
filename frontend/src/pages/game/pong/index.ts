@@ -7,7 +7,6 @@ export async function pongGamePage(): Promise<string> {
   const urlParams = new URLSearchParams(window.location.search);
   const gameId = urlParams.get('game_id');
   const tournamentId = urlParams.get('tournament_id');
-  console.log("WINDOW AS ANY: ", (window as any).gameOptions);
   
   return `
     <div class="max-w-4xl mx-auto px-2">
@@ -54,8 +53,8 @@ export function attachPongGameListeners(): () => void {
     setupPlayAgainHandler();
   }
 
-  console.log('Starting game with ID:', gameId);
-  console.log('User token available:', !!token);
+  // console.log('Starting game with ID:', gameId);
+  // console.log('User token available:', !!token);
 
   if (!gameId) {
     console.error('No game ID found in URL');
@@ -63,7 +62,7 @@ export function attachPongGameListeners(): () => void {
   }
 
   const onGameEnd = (winner: string) => {
-    console.log('Game ended, winner:', winner);
+    // console.log('Game ended, winner:', winner);
     const gameEndEl = document.getElementById('game-end');
     const winnerTextEl = document.getElementById('winner-text');
     

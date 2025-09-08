@@ -25,7 +25,7 @@ export function setupRematchHandler() {
       if (options.gameMode === 'local') {
         const newGameId = await requestMatch(options);
 
-        console.log("Local rematch created, navigating to:", newGameId);
+        // console.log("Local rematch created, navigating to:", newGameId);
         
         (window as any).navigate(`/game/pong?game_id=${newGameId}`);
       } else {

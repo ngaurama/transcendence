@@ -1,18 +1,19 @@
-DOCKER_COMPOSE = docker-compose -f docker-compose.dev.yml
-SCRIPT_PROD = ./add_host.sh
-SCRIPT_DEV = ./remove_host.sh
+DOCKER_COMPOSE = docker-compose
+SCRIPT_ADD_LAN = ./add_host.sh
+SCRIPT_ADD_LOCAL = ./remove_host.sh
+
+all: up
 
 up-dev:
-	@touch .env.generated
 	@echo "Updating HOST in .env..."
-	@$(SCRIPT_DEV)
+	@$(SCRIPT_ADD_LOCAL)
 	@echo "Starting containers..."
 	@$(DOCKER_COMPOSE) up -d
 
-up-prod:
-	@touch .env.generated
+up:
 	@echo "Updating HOST in .env..."
-	@$(SCRIPT_PROD)
+	@$(SCRIPT_ADD_LOCAL)
+# 	@$(SCRIPT_ADD_LAN)
 	@echo "Starting containers..."
 	@$(DOCKER_COMPOSE) up -d
 
@@ -28,9 +29,4 @@ logs:
 	@echo "Showing logs..."
 	@$(DOCKER_COMPOSE) logs -f
 
-addhost:
-	@echo "Updating .env with current IP..."
-	@chmod +x ./add_host.sh
-	@./add_host.sh
-
-.PHONY: help up down restart reset logs ps rebuild addhost
+.PHONY: all up down reset logs

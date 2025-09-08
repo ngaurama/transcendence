@@ -22,7 +22,11 @@ fi
 echo "Detected IP: $IP on interface $INTERFACE"
 
 if grep -q "^HOST=" .env 2>/dev/null; then
-    sed -i.bak "s|^HOST=.*|HOST=$IP|" .env
+    if [[ "$OS" == "Darwin" ]]; then
+        sed -i '' "s|^HOST=.*|HOST=$IP|" .env
+    else
+        sed -i "s|^HOST=.*|HOST=$IP|" .env
+    fi
 else
     echo "HOST=$IP" >> .env
 fi
