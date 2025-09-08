@@ -6,7 +6,7 @@ export async function resetPasswordPage(): Promise<string> {
   
   if (!token) {
     return `
-      <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+      <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-2xl mb-4 text-red-400">Invalid Reset Link</h2>
         <p class="mb-4">The password reset link is invalid or missing.</p>
         <button onclick="navigate('/forgot-password')" class="glass-button w-full bg-blue-500 p-2 rounded mb-2">
@@ -29,7 +29,7 @@ export async function resetPasswordPage(): Promise<string> {
     const data = await res.json();
     if (!res.ok || !data.valid) {
       return `
-        <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+        <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
           <h2 class="text-2xl mb-4 text-red-400">Invalid or Expired Reset Token</h2>
           <p class="mb-4">The password reset link is invalid or has expired. Please request a new one.</p>
           <button onclick="navigate('/forgot-password')" class="glass-button w-full bg-blue-500 p-2 rounded mb-2">
@@ -42,7 +42,7 @@ export async function resetPasswordPage(): Promise<string> {
       `;
     }
     return `
-      <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+      <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-2xl mb-4">Reset Password</h2>
         <div id="reset-error" class="hidden mb-4 p-3 bg-red-600 text-white rounded"></div>
         <div id="reset-success" class="hidden mb-4 p-3 bg-green-600 text-white rounded">
@@ -68,7 +68,7 @@ export async function resetPasswordPage(): Promise<string> {
     `;
   } catch (error) {
     return `
-      <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+      <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
         <h2 class="text-2xl mb-4 text-red-400">Reset Token Validation Error</h2>
         <p class="mb-4">Failed to validate reset token. Please try again later.</p>
         <button onclick="navigate('/forgot-password')" class="glass-button w-full bg-blue-500 p-2 rounded mb-2">

@@ -3,6 +3,7 @@ import { initRouter, render } from './router';
 import { checkAuthStatus } from './services';
 import { initUserWebSocket } from './services/UserWebSocket';
 import { ParticleSystem } from './utils/particles';
+import { teamDataService } from './services/teamDataService';
 
 let particleSystem: ParticleSystem | null = null;
 
@@ -103,6 +104,7 @@ async function main() {
   }
 
   particleSystem = new ParticleSystem();
+  teamDataService.prefetchTeamData().catch(console.error);
   if (user) {
     initUserWebSocket();
   }
@@ -142,7 +144,3 @@ if (document.readyState === 'loading') {
   (window as any).navigate('/play');
 };
 
-// (window as any).navigate = (path: string) => {
-//   history.pushState({}, '', path);
-//   render();
-// };

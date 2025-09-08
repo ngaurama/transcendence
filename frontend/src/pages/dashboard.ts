@@ -512,23 +512,6 @@ export function attachDashboardListeners() {
     });
   }
 
-  // document.querySelectorAll('.recent-game-item').forEach(item => {
-  //   item.addEventListener('click', (e) => {
-  //     const gameId = item.getAttribute('data-game-id');
-  //     const detailsElement = document.getElementById(`game-details-${gameId}`);
-      
-  //     document.querySelectorAll('[id^="game-details-"]').forEach(detail => {
-  //       if (detail.id !== `game-details-${gameId}`) {
-  //         detail.classList.add('hidden');
-  //       }
-  //     });
-      
-  //     if (detailsElement) {
-  //       detailsElement.classList.toggle('hidden');
-  //     }
-  //   });
-  // });
-
   document.querySelectorAll('.recent-game-item').forEach(item => {
   item.addEventListener('click', (e) => {
     const gameId = item.getAttribute('data-game-id');

@@ -1,4 +1,5 @@
 import { fetchWithErrorHandling } from '../services';
+import { teamDataService } from '../services/teamDataService';
 
 interface TeamMember {
   name?: string;
@@ -24,14 +25,6 @@ interface ChecklistItem {
 
 export async function creditsPage(): Promise<string> {
   try {
-    const teamMembers: TeamMember[] = [
-      { intraLogin: "abboudje", github: "https://github.com/abboudje"},
-      { intraLogin: "ilymegy", github: "https://github.com/IlyanaMegy"},
-      { intraLogin: "macheuk-", github: "https://github.com/Emine-42"},
-      { intraLogin: "ngaurama", github: "https://github.com/ngaurama"},
-      { intraLogin: "oprosvir", github: "https://github.com/oprosvir"},
-    ];
-
     let checklistData: ChecklistItem[] = [];
     let majorTotal = { required: 0, completed: 0 };
     let minorTotal = { required: 0, completed: 0 };
@@ -65,55 +58,7 @@ export async function creditsPage(): Promise<string> {
       console.error('Error loading checklist data:', error);
     }
 
-    const membersWithDetails: TeamMember[] = [];
-
-    for (const member of teamMembers) {
-        try {
-            const response = await fetchWithErrorHandling(
-            `/api/auth/oauth/fortytwo/user/${member.intraLogin}`,
-            {
-                method: 'GET',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-            }
-            );
-            
-            if (response.ok) {
-                const userData = await response.json();
-                
-                const projects = userData.projects_users
-                    ?.filter((project: any) => project.status === 'finished')
-                    ?.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-                    ?.slice(0, 5) || [];
-                
-                membersWithDetails.push({
-                    ...member,
-                    name: userData.displayname || userData.usual_full_name,
-                    email: userData.email,
-                    location: userData.location || 'Unavailable',
-                    level: userData.cursus_users?.[1]?.level || 0,
-                    wallet: userData.wallet || 0,
-                    correctionPoints: userData.correction_point || 0,
-                    projects: projects,
-                    avatar: userData.image?.link || member.avatar,
-                    status: userData.status || 'Unknown',
-                    poolYear: userData.pool_year,
-                    poolMonth: userData.pool_month
-                });
-            } else {
-                membersWithDetails.push(member);
-            }
-            
-            if (teamMembers.indexOf(member) < teamMembers.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-            
-        } catch (error) {
-            console.error(`Failed to fetch data for ${member.intraLogin}:`, error);
-            membersWithDetails.push(member);
-        }
-    }
+    const membersWithDetails = await teamDataService.getTeamMembers();;
 
 
     return `
@@ -151,7 +96,7 @@ export async function creditsPage(): Promise<string> {
         <div class="mt-8 mb-12">          
           <div id="checklistContent" class="hidden glass-card p-6">
             <div class="overflow-x-auto">
-              <table class="w-full text-sm text-left text-gray-300">
+              <table class="w-full text-lg text-left text-gray-300">
                 <thead class="text-xs uppercase bg-gray-700 text-gray-400">
                   <tr>
                     <th class="px-4 py-3">Module</th>
@@ -257,7 +202,7 @@ export async function creditsPage(): Promise<string> {
                 </a>
                 ${member.github ? `
                 <a href="${member.github}" target="_blank"
-                    class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 transition-colors text-white text-sm font-medium">
+                    class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-900 transition-colors text-white text-sm font-medium">
                     GitHub Account
                 </a>
                 ` : ''}

@@ -1,4 +1,3 @@
-// pages/input.ts - Updated version
 import { sendPaddleMove } from './websocket';
 import { checkAuthStatus } from '../../../services';
 

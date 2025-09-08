@@ -1,4 +1,3 @@
-// pages/websocket.ts
 import { GameState } from './types';
 import { updateScene } from './renderer';
 import { rollNeonColor } from './utils';

@@ -2,7 +2,7 @@ import {verify2FACode } from '../../services';
 
 export function verify2FAPage(): string {
   return `
-    <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4">Verify 2FA Code</h2>
       <p class="mb-4 text-gray-300">Please enter the 6-digit code from your authenticator app.</p>
       <form id="verify-2fa-form" class="space-y-4">

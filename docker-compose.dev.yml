@@ -9,7 +9,6 @@ volumes:
   vault_data:
   avatars_data:
   frontend_dist:
-  env_generated:
 
 services:
   nginx:
@@ -69,7 +68,6 @@ services:
       - avatars_data:/app/public/avatars
       - /app/node_modules
       - ./nginx/certs:/app/certs:ro
-      - ./.env.generated:/app/.env.generated:ro
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     depends_on:
@@ -161,14 +159,14 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - IPC_LOCK
-    env_file: .env
+    env_file: 
+      - .env
     ports:
       - "8200:8200"
     volumes:
       - vault_data:/vault/data
       - ./vault/config/policies:/vault/config/policies:ro
       - ./vault/scripts:/vault/scripts:ro
-      - ./.env.generated:/app/.env.generated:rw
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:

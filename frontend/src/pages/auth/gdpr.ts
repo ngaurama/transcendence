@@ -1,6 +1,5 @@
 import { checkAuthStatus } from "../../services";
 
-// pages/gdpr.ts - New GDPR pages
 export async function gdprPage(): Promise<string> {
   const user = await checkAuthStatus();
   if (!user) {
@@ -410,7 +409,6 @@ async function handleDataExport() {
     const data = await response.json();
 
     if (data.success) {
-      // Create download link
       const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

@@ -15,17 +15,17 @@ export async function playSelectionPage(): Promise<string> {
   const openTournaments = await getOpenTournaments();
 
   return `
-    <div class="glass-card max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-2xl mx-auto bg-gray-800 p-6 rounded-xl">
       <h2 class="text-2xl mb-6 text-center">Choose Your Game</h2>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <button id="select-pong" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-600">
           <h3 class="text-xl">Pong</h3>
-          <p class="text-sm text-gray-300">Classic paddle game</p>
+          <p class="text-md text-gray-300">Classic paddle game</p>
         </button>
         <button id="select-none" class="glass-button disabled bg-green-500 p-4 rounded opacity-50 cursor-not-allowed">
           <h3 class="text-xl">Another Game</h3>
-          <p class="text-sm text-gray-300">Coming soon</p>
+          <p class="text-md text-gray-300">Coming soon</p>
         </button>
       </div>
       
@@ -33,19 +33,19 @@ export async function playSelectionPage(): Promise<string> {
         <h3 class="text-xl mb-4">Choose How to Play</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <button id="play-online" class="bg-purple-600 p-4 rounded-lg hover:bg-purple-700">
-            <h4 class="text-lg">Play Online</h4>
-            <p class="text-sm text-gray-300">Match with other players</p>
+          <button id="play-online" class="bg-purple-600 p-4 rounded-xl hover:bg-purple-700">
+            <h4 class="text-xl">Play Online</h4>
+            <p class="text-md text-gray-300">Match with other players</p>
           </button>
-          <button id="play-local" class="bg-orange-600 p-4 rounded-lg hover:bg-orange-700">
-            <h4 class="text-lg">Play Local</h4>
-            <p class="text-sm text-gray-300">Multiple players on same device</p>
+          <button id="play-local" class="bg-orange-600 p-4 rounded-xl hover:bg-orange-700">
+            <h4 class="text-xl">Play Local</h4>
+            <p class="text-md text-gray-300">Multiple players on same device</p>
           </button>
         </div>
 
         <!-- Game Settings (Common for both modes) -->
         <div id="game-options" class="mb-4 hidden">
-          <h4 class="text-lg mb-3">Game Settings</h4>
+          <h4 class="text-xl mb-3">Game Settings</h4>
           <label class="block mb-2">Points to Win:</label>
           <select id="points-to-win" class="glass-dropdown w-full p-2 bg-gray-700 rounded mb-3">
             <option value="5">5</option>
@@ -78,7 +78,7 @@ export async function playSelectionPage(): Promise<string> {
 
         <!-- Online Mode Options -->
         <div id="online-options" class="mb-4 hidden">
-          <h4 class="text-lg mb-3">Online Play Options</h4>
+          <h4 class="text-xl mb-3">Online Play Options</h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <button id="start-matchmaking" class="glass-button  bg-green-600 p-4 rounded hover:bg-green-700 relative group transition-all duration-300">
               <div id="matchmaking-content" class="text-center">
@@ -121,15 +121,15 @@ export async function playSelectionPage(): Promise<string> {
 
         <!-- Local Mode Options -->
         <div id="local-options" class="mb-4 hidden">
-          <h4 class="text-lg mb-3">Local Play Options</h4>
+          <h4 class="text-xl mb-3">Local Play Options</h4>
           <div class="grid grid-cols-1 gap-4 mb-4">
             <button id="start-local-game" class="glass-button bg-green-600 p-4 rounded hover:bg-green-700">
-              <h5 class="font-semibold">Start 2-Player Game</h5>
-              <p class="text-sm text-gray-300">Play against one opponent</p>
+              <h5 class="font-semibold text-xl">Start 2-Player Game</h5>
+              <p class="text-md text-gray-300">Play against one opponent</p>
             </button>
             <button id="local-create-tournament" class="glass-button bg-blue-600 p-4 rounded hover:bg-blue-700">
-              <h5 class="font-semibold">Create Tournament</h5>
-              <p class="text-sm text-gray-300">4+ players bracket</p>
+              <h5 class="font-semibold text-xl">Create Tournament</h5>
+              <p class="text-md text-gray-300">4+ players bracket</p>
             </button>
           </div>
           <button id="back-to-settings-local" class="glass-button w-full bg-gray-600 p-2 rounded hover:bg-gray-700">
@@ -139,7 +139,7 @@ export async function playSelectionPage(): Promise<string> {
 
         <!-- Local 2-Player Confirmation -->
         <div id="local-confirmation" class="mb-4 hidden">
-          <h4 class="text-lg mb-3">Start 2-Player Game</h4>
+          <h4 class="text-xl mb-3">Start 2-Player Game</h4>
           <div class="mb-4">
             <label for="opponent-alias" class="block mb-2">Opponent Alias:</label>
             <input
@@ -162,7 +162,7 @@ export async function playSelectionPage(): Promise<string> {
 
         <!-- Tournament Creation (Common for both modes) -->
         <div id="tournament-creation" class="mb-4 hidden">
-          <h4 class="text-lg mb-3">Create Tournament</h4>
+          <h4 class="text-xl mb-3">Create Tournament</h4>
           
           <label class="block mb-2">Tournament Name:</label>
           <input id="tournament-name" class="glass-input w-full p-2 bg-gray-700 rounded mb-3" placeholder="My Tournament">
@@ -191,7 +191,7 @@ export async function playSelectionPage(): Promise<string> {
 
         <!-- Join Tournament Section (Online only) -->
         <div id="join-tournament-section" class="mb-4 hidden">
-          <h4 class="text-lg mb-3">Join Tournament</h4>
+          <h4 class="text-xl mb-3">Join Tournament</h4>
           <div id="open-tournaments-list" class="mb-4">
             ${openTournaments.length > 0
               ? `<ul class="space-y-2">

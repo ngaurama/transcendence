@@ -2,7 +2,7 @@ import { changePassword } from '../../services';
 
 export function changePasswordPage(): string {
   return `
-    <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4">Change Password</h2>
       <form id="change-password-form" class="space-y-4">
         <input type="password" id="current-password" placeholder="Current Password" class="w-full p-2 bg-gray-700 rounded" required>

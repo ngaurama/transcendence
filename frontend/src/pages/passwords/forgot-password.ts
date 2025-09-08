@@ -2,7 +2,7 @@ import { forgotPassword } from '../../services';
 
 export function forgotPasswordPage(): string {
   return `
-    <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
+    <div class="glass-card max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
       <h2 class="text-2xl mb-4">Forgot Password</h2>
       <div id="forgot-error" class="hidden mb-4 p-3 bg-red-600 text-white rounded"></div>
       <div id="forgot-success" class="hidden mb-4 p-3 bg-green-600 text-white rounded">

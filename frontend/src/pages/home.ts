@@ -2,7 +2,8 @@ import { checkAuthStatus } from '../services';
 
 export async function homePage(): Promise<string> {
   const user = await checkAuthStatus();
-  if (!user) return '<h2>Welcome! Please login or register.</h2>';
+  if (!user) 
+    return '<h2 class="text-2xl glass-card">Welcome! Please login or register.</h2>' 
 
   return `
     <div class="text-center py-20">
