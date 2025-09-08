@@ -17,15 +17,15 @@ class EmailConfig {
     try {
       await this.transporter.verify();
       console.log("SMTP Verified - Ready to send emails");
-      if (process.env.NODE_ENV === 'production')
-      {
-        this.sendEmail("ngauram222@gmail.com", "LAN IP URL", 
-          `<h2>Add this to your credentials</h2>
-          <p>Google: ${process.env.GOOGLE_REDIRECT_URI}</p>
-          <p>GitHub: ${process.env.GITHUB_REDIRECT_URI}</p>
-          <p>Fortytwo: ${process.env.FORTYTWO_REDIRECT_URI}</p>`
-        );
-      }
+      // if (process.env.NODE_ENV === 'production')
+      // {
+      //   this.sendEmail("ngauram222@gmail.com", "LAN IP URL", 
+      //     `<h2>Add this to your credentials</h2>
+      //     <p>Google: ${process.env.GOOGLE_REDIRECT_URI}</p>
+      //     <p>GitHub: ${process.env.GITHUB_REDIRECT_URI}</p>
+      //     <p>Fortytwo: ${process.env.FORTYTWO_REDIRECT_URI}</p>`
+      //   );
+      // }
     } catch (error) {
       console.error("SMTP Verification Failed:", error);
       throw error;
