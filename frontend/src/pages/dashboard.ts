@@ -240,7 +240,7 @@ export async function renderStatsContent(fullStats: any, isOwnProfile: boolean, 
                             <div><strong>Powerups:</strong> ${JSON.parse(game.game_settings).powerups_enabled ? 'Yes' : 'No'}</div>
                             <div><strong>Variant:</strong> ${JSON.parse(game.game_settings).board_variant}</div>
                             <div><strong>Points to win:</strong> ${JSON.parse(game.game_settings).points_to_win}</div>
-                            <div><strong>Type:</strong> ${game.game_type === 'local' ? 'Local' : 'Online'}</div>
+                            ${game.end_reason === 'normal' ? `` : `<div><strong>End Reason:</strong> ${game.end_reason}</div>`}
                           </div>
                         </div>
                       </div>

@@ -2,17 +2,20 @@ import { createWebSocketHandler } from './websocket';
 import { InputHandler } from './input';
 import { initCanvas, updateScene, cleanupRenderer, gameState } from './renderer';
 import { setupRematchHandler, setupPlayAgainHandler, setupTournamentHandlers } from './gameHandlers';
+import { getGameInfo } from '../../../services';
 
 export async function pongGamePage(): Promise<string> {
   const urlParams = new URLSearchParams(window.location.search);
   const gameId = urlParams.get('game_id');
   const tournamentId = urlParams.get('tournament_id');
-  
+
+  const gameInfo = await getGameInfo(gameId || '');
+  (window as any).gameOptions = gameInfo.settings;
   return `
     <div class="max-w-4xl mx-auto px-2">
       <h2 class="text-2xl mb-4 text-center">${tournamentId ? `Tournament #${tournamentId} Match` : `Pong Game #${gameId}`}</h2>
       <div id="player-info" class="text-center mb-2">
-        <p>${(window as any).gameOptions.gameMode === 'local' ? 
+        <p>${gameInfo.settings.gameMode === 'local' ? 
           "Player 1: Use W/S keys | Player 2: Use Arrow Up/Down keys" 
           : "Use Arrow Up/Down keys"}</p>
       </div>
@@ -75,14 +78,22 @@ export function attachPongGameListeners(): () => void {
     }
   };
 
-  console.log('Attempting WebSocket connection...');
-  const ws = createWebSocketHandler(gameId, token, onGameEnd);
 
-  const inputHandler = new InputHandler(ws, (window as any).gameOptions?.gameMode === 'local');
+  let ws: ReturnType<typeof createWebSocketHandler>;
+  let inputHandler: InputHandler;
 
-  return () => {
+  const cleanup = () => {
+    console.log('Cleaning up Pong game...');
     inputHandler.cleanup();
-    ws.close();
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
     cleanupRenderer();
+    sessionStorage.removeItem('pong_connected');
   };
+
+  console.log('Attempting WebSocket connection...');
+  ws = createWebSocketHandler(gameId, token, (window as any).gameOptions, onGameEnd, cleanup);
+
+  inputHandler = new InputHandler(ws, (window as any).gameOptions?.gameMode === 'local');
+
+  return cleanup;
 }

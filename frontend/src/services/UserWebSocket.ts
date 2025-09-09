@@ -75,8 +75,22 @@ export function closeUserWebSocket(): void {
   }
 }
 
+export function setupUserWebSocketCleanup(): () => void {
+  const originalBeforeUnload = window.onbeforeunload;
+  
+  window.onbeforeunload = () => {
+    console.log('Page is being refreshed or closed, closing User WebSocket');
+    closeUserWebSocket();
+  };
+  
+  return () => {
+    window.onbeforeunload = originalBeforeUnload;
+    closeUserWebSocket();
+  };
+}
+
 function handleUserWebSocketMessage(data: any): void {
-  // console.log("DATA WS", data);
+  console.log("DATA WS", data);
   switch (data.type) {
     case 'auth_success':
       console.log('User WebSocket authenticated');
@@ -163,12 +177,16 @@ function handleUserWebSocketMessage(data: any): void {
     case 'friend_playing':
       updateFriendStatus(data.user_id, 'playing', data.game_id);
       break;
+      
+    case 'game_abandoned_online':
+      alert('Game lost due to disconnection. Returning home.');
+      (window as any).navigate('/');
+      break;
 
     default:
       console.warn('Unknown user WebSocket message type:', data.type);
   }
 }
-
 
 function showFriendRequestNotification(fromUser: any, requestId: string): void {
   const notification = document.createElement('div');

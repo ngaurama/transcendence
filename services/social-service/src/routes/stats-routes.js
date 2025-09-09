@@ -73,6 +73,7 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
         gs.id, gs.created_at, gs.final_score_player1, gs.final_score_player2,
         gs.game_duration_ms, gs.game_settings, gs.winner_id,
         gs.player1_id, gs.player2_id,
+        gs.end_reason,
         u1.display_name AS player1_name, u1.avatar_url AS player1_avatar,
         u2.display_name AS player2_name, u2.avatar_url AS player2_avatar,
         CASE 
@@ -83,10 +84,6 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
           THEN 'win'
           ELSE 'loss'
         END AS result,
-        CASE 
-          WHEN u1.is_guest = 1 OR u2.is_guest = 1 THEN 'local'
-          ELSE 'online'
-        END AS game_type
       FROM game_sessions gs
       LEFT JOIN users u1 ON u1.id = gs.player1_id
       LEFT JOIN users u2 ON u2.id = gs.player2_id
@@ -102,6 +99,7 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
       game_duration_ms: g.game_duration_ms,
       game_settings: g.game_settings,
       winner_id: g.winner_id,
+      end_reason: g.end_reason,
       player1: {
         id: g.player1_id,
         score: g.final_score_player1,
@@ -115,7 +113,6 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
         avatar_url: g.player2_avatar
       },
       result: g.result,
-      game_type: g.game_type
     }));
 
     const tournamentStats = await socialService.db.all(`

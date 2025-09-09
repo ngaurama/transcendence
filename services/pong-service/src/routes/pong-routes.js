@@ -33,6 +33,7 @@ function setupRoutes(fastify, pongService) {
 
     try {
       const gameSettings = {
+        gameMode,
         powerups_enabled,
         points_to_win,
         board_variant
@@ -725,12 +726,18 @@ function setupRoutes(fastify, pongService) {
     const gameRoom = pongService.gameRooms.get(gameId);
     if (!gameRoom) {
       console.error('Game room not found for ID:', gameId);
-      console.log('Available game rooms:', Array.from(pongService.gameRooms.keys()));
+      // console.log('Available game rooms:', Array.from(pongService.gameRooms.keys()));
       connection.close(4004, 'Game not found');
       return;
     }
-    console.log('Found game room:', gameId);
-    console.log('Game room options:', gameRoom.options);
+    // console.log('Found game room:', gameId);
+    // console.log('Game room options:', gameRoom.options);
+
+     if (gameRoom.gameState.status === 'finished' || gameRoom.gameState.status === 'abandoned') {
+      console.log(`Game ${gameId} is already finished, rejecting connection`);
+      connection.close(4006, 'Game already finished');
+      return;
+    }
 
     if (gameRoom.options.gameMode === 'local') {
       console.log('Local game detected, bypassing auth');
@@ -744,7 +751,7 @@ function setupRoutes(fastify, pongService) {
         gameMode: 'local'
       }));
     } else {
-      console.log('Online game, requiring auth');
+      // console.log('Online game, requiring auth');
       connection.on('message', async (message) => {
         try {
           const data = JSON.parse(message.toString());
@@ -800,8 +807,13 @@ function setupRoutes(fastify, pongService) {
       
       try {
         const data = JSON.parse(message.toString());
+        if (data.type === 'refresh')
+        {
+            console.log('Received message from user', userId, ':', data);
+            gameRoom.handlePlayerDisconnection(userId, 'refresh');
+        }
         if (data.type === 'paddle_move') {
-          gameRoom.handlePlayerInput(userId, data);
+            gameRoom.handlePlayerInput(userId, data);
         }
       } catch (error) {
         console.error('Invalid WebSocket message:', error);

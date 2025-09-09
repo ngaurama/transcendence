@@ -2,23 +2,44 @@ import { GameState } from './types';
 import { updateScene } from './renderer';
 import { rollNeonColor } from './utils';
 
+
 export function createWebSocketHandler(
   gameId: string,
   token: string | null,
-  onGameEnd: (winner: string) => void
+  gameOptions: any,
+  onGameEnd: (winner: string) => void,
+  cleanup: () => void
 ): WebSocket {
 
   const ws = new WebSocket(`wss://${window.location.host}/api/pong/wss?game_id=${gameId}`);
 
   ws.onopen = () => {
     console.log('WebSocket connected successfully');
+
+    if (gameOptions.gameMode === 'local') {
+      if (sessionStorage.getItem('pong_connected')) {
+        ws.send(JSON.stringify({ type: 'refresh' }));
+      } else {
+        sessionStorage.setItem('pong_connected', 'true');
+      }
+    }
+
     ws.send(JSON.stringify({ type: 'auth', token }));
   };
+
+  if (gameOptions.gameMode !== 'local') {
+    const handleBeforeUnload = () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'refresh' }));
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  }
 
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      handleWebSocketMessage(data, onGameEnd);
+      handleWebSocketMessage(data, onGameEnd, cleanup);
     } catch (error) {
       console.error('Error parsing WebSocket message:', error);
     }
@@ -30,13 +51,21 @@ export function createWebSocketHandler(
 
   ws.onclose = (event) => {
     console.log('WebSocket closed:', event.code, event.reason);
-    (window as any).navigate('/');
+    if (event.code === 4006) {
+      alert('This game has already finished and game room is closed. Returning to home.');
+      cleanup();
+      (window as any).navigate('/');
+    }
   };
 
   return ws;
 }
 
-function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void): void {
+function handleWebSocketMessage(
+  data: any,
+  onGameEnd: (winner: string) => void,
+  cleanup: () => void
+): void {
   switch (data.type) {
     case 'auth_success':
       break;
@@ -62,8 +91,29 @@ function handleWebSocketMessage(data: any, onGameEnd: (winner: string) => void):
       break;
 
     case 'game_ended':
-      onGameEnd(data.winner);
+      console.log("GAME ENDED DATA:", data);
+      if (data.reason === 'opponent_disconnected') {
+        alert('Opponent disconnected. You win by default!');
+        onGameEnd(data.winner);
+        cleanup();
+        (window as any).navigate('/');
+      } else {
+        onGameEnd(data.winner);
+        // cleanup();
+      }
       break;
+
+    case 'game_abandoned_local':
+      alert('Game abandoned due to disconnection. Returning to home.');
+      cleanup();
+      (window as any).navigate('/');
+      break;
+
+    // case 'game_abandoned_online':
+    //   alert('Game lost due to disconnection1. Returning to home.');
+    //   cleanup();
+    //   (window as any).navigate('/');
+    //   break;
 
     case 'tournament_match_start':
       (window as any).navigate(`/game/pong?game_id=${data.game_id}&tournament_id=${data.tournament_id}`);

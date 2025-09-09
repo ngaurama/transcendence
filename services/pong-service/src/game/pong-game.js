@@ -103,7 +103,7 @@ class PongGame {
     this.connections.delete(userId);
     this.db.run('UPDATE user_presence SET status = "online", current_game_id = NULL WHERE user_id = ?', [userId]);
     if (this.gameState.status === 'active' && !this.options.gameMode === 'local') {
-      this.handlePlayerDisconnection(userId);
+      this.handlePlayerDisconnection(userId, 'normal');
     }
   }
 
@@ -325,28 +325,56 @@ class PongGame {
     };
   }
 
-  async endGame(winnerKey) {
+  // async endGame(winnerKey) {
+  //   this.gameState.status = 'finished';
+  //   this.endTime = Date.now();
+
+
+  //   if (this.gameLoop) {
+  //     clearInterval(this.gameLoop);
+  //     this.gameLoop = null;
+  //   }
+
+  //   this.broadcast({
+  //     type: 'game_ended',
+  //     winner: winnerKey,
+  //     final_score: this.gameState.score,
+  //     is_tournament: !!this.options.tournament_id,
+  //     tournament_id: this.options.tournament_id
+  //   });
+
+  //   await this.saveGameResults(winnerKey);
+
+  //   if (this.options.tournament_id) {
+  //     await this.handleTournamentCompletion(winnerKey);
+  //   }
+  // }
+
+  async endGame(winnerKey, reason = 'normal') {
     this.gameState.status = 'finished';
     this.endTime = Date.now();
 
+    if (reason !== 'abandoned') {
+      if (this.gameLoop) {
+        clearInterval(this.gameLoop);
+        this.gameLoop = null;
+      }
 
-    if (this.gameLoop) {
-      clearInterval(this.gameLoop);
-      this.gameLoop = null;
-    }
+      this.broadcast({
+        type: 'game_ended',
+        winner: winnerKey,
+        loser: winnerKey === 'player1' ? 'player2' : 'player1',
+        final_score: this.gameState.score,
+        is_tournament: !!this.options.tournament_id,
+        tournament_id: this.options.tournament_id,
+        reason: reason
+      });
 
-    this.broadcast({
-      type: 'game_ended',
-      winner: winnerKey,
-      final_score: this.gameState.score,
-      is_tournament: !!this.options.tournament_id,
-      tournament_id: this.options.tournament_id
-    });
+      await this.saveGameResults(winnerKey, reason);
 
-    await this.saveGameResults(winnerKey);
-
-    if (this.options.tournament_id) {
-      await this.handleTournamentCompletion(winnerKey);
+      if (this.options.tournament_id) {
+        await this.handleTournamentCompletion(winnerKey);
+      }
     }
   }
 
@@ -409,9 +437,8 @@ class PongGame {
   }
 
 
-  async saveGameResults(winnerKey) {
+  async saveGameResults(winnerKey, reason = 'normal') {
     try {
-      // First, get all participants from the database
       const participants = await this.db.all(`
         SELECT gp.user_id, gp.player_number 
         FROM game_participants gp
@@ -421,7 +448,6 @@ class PongGame {
       console.log("Participants from DB:", participants);
       console.log("Winner key:", winnerKey);
 
-      // Find the winner ID based on player number
       let winnerId = null;
       const winnerPlayerNumber = winnerKey === 'player1' ? 1 : 2;
       
@@ -432,15 +458,13 @@ class PongGame {
 
       console.log("Winner ID determined:", winnerId);
 
-      // Get player IDs for game_sessions table
       const player1Participant = participants.find(p => p.player_number === 1);
       const player2Participant = participants.find(p => p.player_number === 2);
       const player1_id = player1Participant ? player1Participant.user_id : null;
       const player2_id = player2Participant ? player2Participant.user_id : null;
 
       console.log("Player IDs:", { player1_id, player2_id });
-
-      // Update game_sessions with all required fields
+      reason === 'abandoned' ? 'abandoned' : 'completed';
       await this.db.run(`
         UPDATE game_sessions 
         SET status = 'completed', 
@@ -451,7 +475,8 @@ class PongGame {
             final_score_player1 = ?,
             final_score_player2 = ?,
             game_duration_ms = ?,
-            game_settings = ?
+            game_settings = ?,
+            end_reason = ?
         WHERE id = ?
       `, [
         winnerId,
@@ -461,10 +486,10 @@ class PongGame {
         this.gameState.score.player2,
         this.endTime - this.startTime,
         JSON.stringify(this.options),
+        reason,
         this.gameId
       ]);
 
-      // Update user stats for all participants
       for (const participant of participants) {
         if (participant.user_id) {
           const isWin = participant.user_id === winnerId;
@@ -500,16 +525,76 @@ class PongGame {
     });
   }
 
-  handlePlayerDisconnection(userId) {
-    const otherPlayers = [...this.players.keys()].filter(id => id !== userId);
-    if (otherPlayers.length > 0) {
-      const winnerKey = this.players.get(otherPlayers[0]).playerNumber === 1 ? 'player1' : 'player2';
-      this.endGame(winnerKey);
+  handlePlayerDisconnection(userId, reason = 'normal') {  
+    if (reason === 'refresh') {
+      if (this.options.gameMode === 'local') {
+        this.gameState.status = 'abandoned';
+        if (this.gameLoop) {
+          clearInterval(this.gameLoop);
+          this.gameLoop = null;
+        }
+        this.broadcast({
+          type: 'game_abandoned_local',
+          reason: 'Refresh in local mode'
+        });
+        this.endGame(null, 'abandoned');
+      } else {
+        const remainingPlayers = [...this.players.keys()].filter(id => id !== userId);
+        
+        if (remainingPlayers.length > 0) {
+          const winnerId = remainingPlayers[0];
+          const winnerPlayer = this.players.get(winnerId);
+          const winnerKey = `player${winnerPlayer.playerNumber}`;
+                  
+          this.sendToPlayer(winnerId, {
+            type: 'game_ended',
+            winner: winnerKey,
+            reason: 'opponent_disconnected'
+          });
+
+          setTimeout(() => {
+            this.pongService.sendToUser(userId, {
+              type: 'game_abandoned_online',
+              reason: 'You disconnected from the game',
+              result: 'loss'
+            });
+          }, 1000);
+
+          this.endGame(winnerKey, 'disconnection');
+          
+          setTimeout(() => {
+            this.pongService.gameRooms.delete(this.gameId);
+            console.log(`Game room ${this.gameId} cleaned up`);
+          }, 5000);
+          
+        } else {
+          this.gameState.status = 'abandoned';
+          if (this.gameLoop) {
+            clearInterval(this.gameLoop);
+            this.gameLoop = null;
+          }
+          this.broadcast({
+            type: 'game_abandoned',
+            reason: 'All players disconnected'
+          });
+          
+          setTimeout(() => {
+            this.pongService.gameRooms.delete(this.gameId);
+            console.log(`Game room ${this.gameId} cleaned up`);
+          }, 5000);
+        }
+      }
     } else {
-      this.gameState.status = 'abandoned';
-      if (this.gameLoop) {
-        clearInterval(this.gameLoop);
-        this.gameLoop = null;
+      const otherPlayers = [...this.players.keys()].filter(id => id !== userId);
+      if (otherPlayers.length > 0) {
+        const winnerKey = this.players.get(otherPlayers[0]).playerNumber === 1 ? 'player1' : 'player2';
+        this.endGame(winnerKey, 'normal');
+      } else {
+        this.gameState.status = 'abandoned';
+        if (this.gameLoop) {
+          clearInterval(this.gameLoop);
+          this.gameLoop = null;
+        }
       }
     }
   }

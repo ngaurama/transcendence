@@ -100,7 +100,7 @@ class PongService {
     await this.db.run('UPDATE user_presence SET status = ?, last_seen_at = CURRENT_TIMESTAMP WHERE user_id = ?', ['offline', userId]);
   }
 
-  sendToUser(userId, message) {    
+  sendToUser(userId, message) {
     const connection = this.userConnections.get(userId);
     if (connection && connection.readyState === 1) {
       connection.send(JSON.stringify(message));
