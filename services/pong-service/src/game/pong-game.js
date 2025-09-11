@@ -153,6 +153,7 @@ class PongGame {
   }
 
   async start() {
+    console.log("CAME HERE TO CHECK GAMELOOP");
     this.gameState.status = 'countdown';
     for (let i = 3; i > 0; i--) {
       this.broadcast({
@@ -297,12 +298,25 @@ class PongGame {
     this.powerUpSystem.clearAllPowerUpsAndBalls();
     this.resetPaddles();
 
+    // if (this.gameState.score[scorerKey] >= this.options.points_to_win) {
+    //   this.endGame(scorerKey);
+    //   return;
+    // }
+
     if (this.gameState.score[scorerKey] >= this.options.points_to_win) {
-      this.endGame(scorerKey);
+      if (this.gameState.status !== 'abandoned' && this.gameState.status !== 'finished') {
+        this.endGame(scorerKey);
+      }
       return;
     }
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  if (this.gameState.status === 'abandoned' || this.gameState.status === 'finished') {
+      return;
+  }
+
+  // await new Promise(resolve => setTimeout(resolve, 1500));
 
     this.resetBall(loserKey);
     this.resetPaddles();
@@ -329,15 +343,24 @@ class PongGame {
   }
 
   async endGame(winnerKey, reason = 'normal') {
-    this.gameState.status = 'finished';
-    this.endTime = Date.now();
+      if (this.gameEnded) {
+        console.log("Game already ended, ignoring duplicate endGame call");
+        return;
+      }
 
-    if (reason !== 'abandoned') {
+      this.gameEnded = true;
+      this.gameState.status = 'finished';
+      this.endTime = Date.now();
+
+      
       if (this.gameLoop) {
         clearInterval(this.gameLoop);
         this.gameLoop = null;
+        console.log("Game loop cleared successfully");
       }
 
+      if(reason === 'abandoned') 
+        winnerKey = 'none';
       this.broadcast({
         type: 'game_ended',
         winner: winnerKey,
@@ -348,12 +371,12 @@ class PongGame {
         reason: reason
       });
 
-      await this.saveGameResults(winnerKey, reason);
+      if (reason !== 'abandoned')
+        await this.saveGameResults(winnerKey, reason);
 
       if (this.options.tournament_id) {
         await this.handleTournamentCompletion(winnerKey);
       }
-    }
   }
 
   async handleTournamentCompletion(winnerKey) {
@@ -442,7 +465,7 @@ class PongGame {
       const player2_id = player2Participant ? player2Participant.user_id : null;
 
       console.log("Player IDs:", { player1_id, player2_id });
-      reason === 'abandoned' ? 'abandoned' : 'completed';
+      const endReason = reason === 'abandoned' ? 'abandoned' : 'completed';
       await this.db.run(`
         UPDATE game_sessions 
         SET status = 'completed', 
@@ -466,7 +489,7 @@ class PongGame {
         this.gameState.score.player2,
         this.endTime - this.startTime,
         JSON.stringify(this.options),
-        reason,
+        endReason,
         this.gameId
       ]);
 
