@@ -124,10 +124,10 @@ module.exports = function setupGoogleOauthRoute(fastify, { dbService, emailServi
             const saltRounds = parseInt(secrets.auth.bcrypt.rounds, 10);
             await dbService.db.run(
                 `
-        INSERT INTO user_sessions (
-          user_id, refresh_token, expires_at, ip_address, user_agent, created_at, last_used_at
-        ) VALUES (?, ?, datetime('now', '+7 days'), ?, ?, datetime('now'), datetime('now'))
-      `,
+                    INSERT INTO user_sessions (
+                    user_id, refresh_token, expires_at, ip_address, user_agent, created_at, last_used_at
+                    ) VALUES (?, ?, datetime('now', '+7 days'), ?, ?, datetime('now'), datetime('now'))
+                `,
                 [
                     user.id,
                     await bcrypt.hash(refresh_token, saltRounds),

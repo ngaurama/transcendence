@@ -105,7 +105,7 @@ export async function dashboardPage(): Promise<string> {
           </div>
         </div>
 
-        <p class="text-sm text-gray-500">Joined ${new Date(user.created_at).toLocaleDateString()}</p>
+        <p class="text-sm text-gray-500">Joined ${new Date(user.created_at + "Z").toLocaleDateString()}</p>
       </div>
 
       <!-- Tabs Navigation -->
@@ -665,7 +665,7 @@ async function loadPendingRequests() {
               <div>
                 <div class="font-semibold">${request.display_name}</div>
                 <div class="text-sm text-gray-400">@${request.username}</div>
-                <div class="text-xs text-gray-500">${new Date(request.created_at).toLocaleDateString()}</div>
+                <div class="text-xs text-gray-500">${new Date(request.created_at + "Z").toLocaleDateString()}</div>
               </div>
             </div>
             <div class="flex gap-2">

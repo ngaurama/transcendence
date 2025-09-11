@@ -41,7 +41,7 @@ export async function profilePage(): Promise<string> {
              class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-gray-600">
         <h2 class="text-2xl font-bold">${userStats.targetUser.display_name}</h2>
         <p class="text-gray-400">@${userStats.targetUser.username}</p>
-        <p class="text-sm text-gray-500">Joined ${new Date(userStats.targetUser.created_at).toLocaleDateString()}</p>
+        <p class="text-sm text-gray-500">Joined ${new Date(userStats.targetUser.created_at + "Z").toLocaleDateString()}</p>
         
         ${!isOwnProfile ? `
           <div class="mt-4">

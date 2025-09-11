@@ -290,7 +290,7 @@ async function loadDeletionStatus() {
       
       if (statusEl && dateEl && cancelBtn) {
         statusEl.classList.remove('hidden');
-        dateEl.textContent = `Scheduled for deletion on: ${new Date(data.deletion_date).toLocaleDateString()}`;
+        dateEl.textContent = `Scheduled for deletion on: ${new Date(data.deletion_date + "Z").toLocaleDateString()}`;
         
         cancelBtn.addEventListener('click', async () => {
           if (confirm('Cancel account deletion request?')) {
@@ -358,8 +358,8 @@ async function loadUserData() {
         <div><strong>Verified:</strong> ${data.data.is_verified ? 'Yes' : 'No'}</div>
         <div><strong>OAuth Provider:</strong> ${data.data.oauth_provider || 'Local'}</div>
         <div><strong>2FA Enabled:</strong> ${data.data.totp_enabled ? 'Yes' : 'No'}</div>
-        <div><strong>Created At:</strong> ${new Date(data.data.created_at).toLocaleString()}</div>
-        <div><strong>Last Login:</strong> ${new Date(data.data.last_login_at).toLocaleString()}</div>
+        <div><strong>Created At:</strong> ${new Date(data.data.created_at + "Z").toLocaleString()}</div>
+        <div><strong>Last Login:</strong> ${new Date(data.data.last_login_at + "Z").toLocaleString()}</div>
       `;
       const jsonDiv = document.createElement('pre');
       jsonDiv.className = 'bg-gray-900 p-4 rounded overflow-auto text-sm hidden';

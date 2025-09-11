@@ -221,7 +221,7 @@ export async function creditsPage(): Promise<string> {
                             <span class="${p.final_mark >= 100 ? 'text-green-400' : p.final_mark >= 75 ? 'text-yellow-400' : 'text-red-400'}">
                               ${p.final_mark !== null ? p.final_mark : 'N/A'}%
                             </span>
-                            <span class="text-gray-500">${new Date(p.updated_at).toLocaleDateString()}</span>
+                            <span class="text-gray-500">${new Date(p.updated_at + "Z").toLocaleDateString()}</span>
                           </div>
                         </div>
                       `).join('')}

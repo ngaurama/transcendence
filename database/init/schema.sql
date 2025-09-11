@@ -39,7 +39,7 @@ CREATE TABLE users (
     -- Timestamps
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    last_login_at DATETIME,
+    last_login_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     -- Constraints
     CHECK (

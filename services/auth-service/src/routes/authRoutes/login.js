@@ -81,9 +81,7 @@ module.exports = function setupLoginRoute(fastify, { dbService, emailService, se
       );
 
       await dbService.db.run(
-        `
-        UPDATE users SET last_login_at = datetime('now') WHERE id = ?
-      `,
+        `UPDATE users SET last_login_at = datetime('now') WHERE id = ?`,
         [user.id]
       );
 
