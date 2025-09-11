@@ -503,7 +503,7 @@ function setupRoutes(fastify, pongService) {
         return reply.code(400).send({ error: 'Tournament creator cannot leave the tournament' });
       }
       
-      if (tournament.status !== 'registration') {
+      if (tournament.status !== 'registration' && tournament.status !== 'completed') {
         return reply.code(400).send({ error: 'Cannot leave tournament after it has started' });
       }
 

@@ -160,11 +160,11 @@ function handleUserWebSocketMessage(data: any): void {
         (window as any).navigate(`/tournament/${data.tournament_id}`);
       }
       break;
-    
+
     case 'friend_request_received':
       showFriendRequestNotification(data.from_user, data.request_id);
       break;
-      
+
     case 'friend_request_accepted':
       showFriendRequestAccepted(data.friend);
       refreshFriendsList();

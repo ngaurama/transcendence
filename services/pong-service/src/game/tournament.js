@@ -162,7 +162,6 @@ class Tournament {
       WHERE id = ?
     `, [winnerId, this.tournamentId]);
 
-    // Update stats for tournament
     const participants = await this.db.all(`
       SELECT user_id FROM tournament_participants 
       WHERE tournament_id = ?
