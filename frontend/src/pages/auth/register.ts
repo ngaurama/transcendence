@@ -32,7 +32,7 @@ export function registerPage(): string {
 
         <button type="submit" class="glass-button w-full bg-green-700 p-2 rounded">Register</button>
       </form>
-      <div class="mt-4">
+      ${window.location.hostname === 'localhost' ? `
         <p class="text-center mb-2">Or login with:</p>
         <div class="flex justify-evenly">
           <div class="flex justify-center gap-6">
@@ -50,12 +50,14 @@ export function registerPage(): string {
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.087-.744.083-.729.083-.729 1.205.085 1.838 1.237 1.838 1.237 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.333-5.466-5.931 0-1.31.467-2.381 1.235-3.221-.123-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23a11.5 11.5 0 0 1 3.003-.404c1.018.004 2.042.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.241 2.873.118 3.176.77.84 1.232 1.911 1.232 3.221 0 4.609-2.803 5.628-5.475 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .319.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
               </svg>
             </button>
+
             <button id="fortytwo-oauth" class="bg-white w-16 h-16 rounded-full flex items-center justify-center hover:bg-gray-200">
               <img src="/fortytwo.png" alt="42 Logo" class="w-10 h-10 object-contain">
             </button>
           </div>
         </div>
       </div>
+      ` : ''}
       <div class="mt-4 text-center">
         <span class="text-gray-400">Already have an account? </span>
         <a href="#" onclick="navigate('/login')" class="text-blue-400 hover:underline">Sign in</a>

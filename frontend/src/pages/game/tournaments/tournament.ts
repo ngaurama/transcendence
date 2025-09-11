@@ -160,10 +160,37 @@ if (deleteTournamentBtn) {
   });
 }
 
+  // const leaveTournamentBtn = document.getElementById('leave-tournament');
+  // if (leaveTournamentBtn) {
+  //   leaveTournamentBtn.addEventListener('click', () => {
+  //     (window as any).navigate('/');
+  //   });
+  // }
+
   const leaveTournamentBtn = document.getElementById('leave-tournament');
   if (leaveTournamentBtn) {
-    leaveTournamentBtn.addEventListener('click', () => {
-      (window as any).navigate('/');
+    leaveTournamentBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch(`/api/pong/tournament/${tournamentId}/leave`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          alert(error.error || 'Failed to leave tournament');
+          return;
+        }
+
+        (window as any).navigate('/');
+      } catch (error) {
+        console.error('Error leaving tournament:', error);
+        alert('Failed to leave tournament');
+      }
     });
   }
 

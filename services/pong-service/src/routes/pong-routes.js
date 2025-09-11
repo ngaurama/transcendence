@@ -494,14 +494,36 @@ function setupRoutes(fastify, pongService) {
     
     try {
       const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
-      if (!tournament || tournament.status !== 'registration') {
-        return reply.code(400).send({ error: 'Cannot leave this tournament' });
+      
+      if (!tournament) {
+        return reply.code(404).send({ error: 'Tournament not found' });
+      }
+      
+      if (tournament.creator_id === user.id) {
+        return reply.code(400).send({ error: 'Tournament creator cannot leave the tournament' });
+      }
+      
+      if (tournament.status !== 'registration') {
+        return reply.code(400).send({ error: 'Cannot leave tournament after it has started' });
       }
 
       await pongService.db.run(`
         DELETE FROM tournament_participants 
         WHERE tournament_id = ? AND user_id = ?
       `, [tournamentId, user.id]);
+
+      const participants = await pongService.db.all(`
+        SELECT u.id, u.display_name, u.is_guest 
+        FROM tournament_participants tp
+        JOIN users u ON u.id = tp.user_id
+        WHERE tp.tournament_id = ?
+      `, [tournamentId]);
+
+      pongService.broadcastToAllUsers({
+        type: 'tournament_joined',
+        tournament_id: tournamentId,
+        participants: participants
+      });
 
       return { success: true };
     } catch (error) {
