@@ -28,6 +28,7 @@ export function loginPage(): string {
         <a href="#" onclick="navigate('/forgot-password')" class="text-blue-400 hover:underline">Forgot Password?</a>
       </div>
       <div class="mt-4">
+      ${window.location.hostname === 'localhost' ? `
         <p class="text-center mb-2">Or login with:</p>
         <div class="flex justify-evenly">
           <div class="flex justify-center gap-6">
@@ -52,6 +53,7 @@ export function loginPage(): string {
           </div>
         </div>
       </div>
+      ` : ''}
       <div class="mt-4 text-center">
         <button id="guest-login" class="text-blue-400 hover:underline">Play as Guest</button>
       </div>

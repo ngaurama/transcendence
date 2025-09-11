@@ -1,0 +1,34 @@
+#!/bin/bash
+OS=$(uname)
+IP=""
+INTERFACE=""
+
+if [[ "$OS" == "Darwin" ]]; then
+    INTERFACE=$(route get default 2>/dev/null | awk '/interface:/ {print $2}')
+    IP=$(ifconfig "$INTERFACE" | awk '/inet / {print $2}' | head -n1)
+elif [[ "$OS" == "Linux" ]]; then
+    INTERFACE=$(ip route | awk '/default/ {print $5}' | head -n1)
+    IP=$(ip -4 addr show "$INTERFACE" | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
+else
+    echo "Unsupported OS: $OS"
+    exit 1
+fi
+
+if [ -z "$IP" ]; then
+    echo "Could not detect IP address. Check your network connection."
+    exit 1
+fi
+
+echo "Detected IP: $IP on interface $INTERFACE"
+
+if grep -q "^LAN_IP=" .env 2>/dev/null; then
+    if [[ "$OS" == "Darwin" ]]; then
+        sed -i '' "s|^LAN_IP=.*|LAN_IP=$IP|" .env
+    else
+        sed -i "s|^LAN_IP=.*|LAN_IP=$IP|" .env
+    fi
+else
+    echo "LAN_IP=$IP" >> .env
+fi
+
+echo "Updated .env with LAN_IP=$IP"

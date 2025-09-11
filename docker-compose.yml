@@ -46,6 +46,7 @@ services:
       - PONG_SERVICE_URL=${PONG_SERVICE_URL}
       - API_PORT=${API_PORT}
       - HOST=${HOST}
+      - LAN_IP=${LAN_IP}
     ports:
       - 3000:3000
     depends_on:
