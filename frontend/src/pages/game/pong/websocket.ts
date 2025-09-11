@@ -149,7 +149,7 @@ export function handleWebSocketMessage(
       break;
 
     case 'game_ended':
-      // console.log("GAME ENDED DATA:", data);
+      console.log("GAME ENDED DATA:", data);
       if (data.reason === 'opponent_disconnected' && data.gameType === '2player') {
         alert('Opponent disconnected. You win by default! Returning home.');
         onGameEnd(data.winner);
@@ -160,9 +160,9 @@ export function handleWebSocketMessage(
         onGameEnd(data.winner);
         cleanup();
         (window as any).navigate(`/tournament/${data.tournament_id}`);
-      } else {
+      } else if (data.reason === 'normal') {
         onGameEnd(data.winner);
-        // cleanup();
+        cleanup();
       }
       break;
 

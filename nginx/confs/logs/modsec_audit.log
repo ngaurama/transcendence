@@ -1,0 +1,180 @@
+---0T3QWCMg---A--
+[11/Sep/2025:16:53:16 +0200] 175760239640.545837 172.18.0.1 51972 172.18.0.9 443
+---0T3QWCMg---B--
+GET /api/auth/oauth/fortytwo/user/macheuk- HTTP/1.1
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+Sec-GPC: 1
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Sec-Fetch-Site: same-origin
+Content-Type: application/json
+Referer: https://10.16.11.12:8443/login
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.5
+Accept: */*
+DNT: 1
+Sec-Fetch-Dest: empty
+Host: 10.16.11.12:8443
+Priority: u=4
+
+---0T3QWCMg---D--
+
+---0T3QWCMg---E--
+{"error":"Rate limit exceeded"}
+
+---0T3QWCMg---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Thu, 11 Sep 2025 14:53:16 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.intra.42.fr;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---0T3QWCMg---H--
+
+---0T3QWCMg---I--
+
+---0T3QWCMg---J--
+
+---0T3QWCMg---Z--
+
+---p6XNPhBD---A--
+[11/Sep/2025:16:53:16 +0200] 175760239653.476452 172.18.0.1 51972 172.18.0.9 443
+---p6XNPhBD---B--
+GET /api/auth/oauth/fortytwo/user/ngaurama HTTP/1.1
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+Sec-GPC: 1
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Sec-Fetch-Site: same-origin
+Content-Type: application/json
+Referer: https://10.16.11.12:8443/login
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.5
+Accept: */*
+DNT: 1
+Sec-Fetch-Dest: empty
+Host: 10.16.11.12:8443
+Priority: u=4
+
+---p6XNPhBD---D--
+
+---p6XNPhBD---E--
+{"error":"Rate limit exceeded"}
+
+---p6XNPhBD---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Thu, 11 Sep 2025 14:53:16 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.intra.42.fr;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---p6XNPhBD---H--
+
+---p6XNPhBD---I--
+
+---p6XNPhBD---J--
+
+---p6XNPhBD---Z--
+
+---OWVDcZsY---A--
+[11/Sep/2025:16:53:16 +0200] 175760239677.093805 172.18.0.1 51972 172.18.0.9 443
+---OWVDcZsY---B--
+GET /api/auth/oauth/fortytwo/user/oprosvir HTTP/1.1
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+Sec-GPC: 1
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0
+Sec-Fetch-Site: same-origin
+Content-Type: application/json
+Referer: https://10.16.11.12:8443/login
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.5
+Accept: */*
+DNT: 1
+Sec-Fetch-Dest: empty
+Host: 10.16.11.12:8443
+Priority: u=4
+
+---OWVDcZsY---D--
+
+---OWVDcZsY---E--
+{"error":"Rate limit exceeded"}
+
+---OWVDcZsY---F--
+HTTP/1.1 429
+X-XSS-Protection: 0
+X-XSS-Protection: 1; mode=block
+Cross-Origin-Opener-Policy: same-origin
+X-Permitted-Cross-Domain-Policies: none
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Download-Options: noopen
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+access-control-allow-credentials: true
+Server: nginx
+Date: Thu, 11 Sep 2025 14:53:16 GMT
+Connection: keep-alive
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+X-DNS-Prefetch-Control: off
+vary: Origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: default-src 'self';style-src 'self' 'unsafe-inline';script-src 'self';img-src 'self' data: https: undefined;connect-src 'self' ws: wss: https://localhost:3000;font-src 'self' https: data:;object-src 'none';media-src 'self';frame-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'self';script-src-attr 'none';upgrade-insecure-requests
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.intra.42.fr;
+Origin-Agent-Cluster: ?1
+Referrer-Policy: no-referrer
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+---OWVDcZsY---H--
+
+---OWVDcZsY---I--
+
+---OWVDcZsY---J--
+
+---OWVDcZsY---Z--
+

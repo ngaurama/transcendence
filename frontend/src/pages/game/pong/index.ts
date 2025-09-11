@@ -32,8 +32,7 @@ export async function pongGamePage(): Promise<string> {
         ${tournamentId 
           ? `<button id="view-bracket" class="glass-button bg-blue-500 text-white p-2 rounded mr-2">View Bracket</button>
              <button id="leave-tournament" class="glass-button bg-red-500 text-white p-2 rounded">Leave Tournament</button>`
-          : `<button id="rematch" class="glass-button bg-blue-500 text-white p-2 rounded mr-2">Rematch</button>
-             <button id="play-again" class="glass-button bg-green-500 text-white p-2 rounded">New Game</button>`
+          : `<button id="play-again" class="glass-button bg-green-500 text-white p-2 rounded">New Game</button>`
         }
       </div>
     </div>
