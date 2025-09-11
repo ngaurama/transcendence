@@ -149,7 +149,7 @@ export function attachTournamentListeners(tournamentId: string) {
 const deleteTournamentBtn = document.getElementById('delete-tournament');
 if (deleteTournamentBtn) {
   deleteTournamentBtn.addEventListener('click', async () => {
-    if (confirm('Are you sure you want to delete this tournament? All participants will be removed.')) {
+    if (confirm('Are you sure you want to delete this tournament?')) {
       try {
         await deleteTournament(tournamentId);
         (window as any).navigate('/play');

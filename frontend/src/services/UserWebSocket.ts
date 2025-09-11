@@ -91,7 +91,7 @@ export function setupUserWebSocketCleanup(): () => void {
 
 function handleUserWebSocketMessage(data: any): void {
   let alert_sent = false;
-  console.log("DATA WS", data);
+  // console.log("DATA WS", data);
   switch (data.type) {
     case 'auth_success':
       console.log('User WebSocket authenticated');

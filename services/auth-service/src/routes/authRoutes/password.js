@@ -57,7 +57,7 @@ module.exports = function setupPasswordRoute(fastify, { dbService, emailService,
           [user.id, reset_token]
         );
 
-        const reset_url = `${process.env.FRONTEND_URL}/reset-password?token=${reset_token}`;
+        const reset_url = `${process.env.FRONTEND_URL_LAN}/reset-password?token=${reset_token}`;
         await emailService.sendEmail(
           email,
           "Password Reset Request",

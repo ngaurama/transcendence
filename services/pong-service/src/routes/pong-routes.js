@@ -532,6 +532,30 @@ function setupRoutes(fastify, pongService) {
     }
   });
 
+  // fastify.delete('/tournament/:tournamentId', async (request, reply) => {
+  //   const token = request.headers.authorization?.replace('Bearer ', '');
+  //   const user = await validateToken(token);
+  //   if (!user) {
+  //     return reply.code(401).send({ error: 'Authentication required' });
+  //   }
+
+  //   const tournamentId = parseInt(request.params.tournamentId);
+  //   const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
+  //   if (!tournament || tournament.creator_id !== user.id || tournament.status !== 'registration' ) {
+  //     if (tournament.status !== 'registration')
+  //         return reply.code(400).send({ error: 'Cannot delete a tournament that has started' });
+  //     else
+  //       return reply.code(403).send({ error: 'Not authorized to delete this tournament' });
+  //   }
+
+  //   await pongService.db.run('DELETE FROM tournament_participants WHERE tournament_id = ?', [tournamentId]);
+  //   await pongService.db.run('DELETE FROM tournaments WHERE id = ?', [tournamentId]);
+
+  //   pongService.tournaments.delete(tournamentId);
+
+  //   return { success: true };
+  // });
+
   fastify.delete('/tournament/:tournamentId', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');
     const user = await validateToken(token);
@@ -540,14 +564,29 @@ function setupRoutes(fastify, pongService) {
     }
 
     const tournamentId = parseInt(request.params.tournamentId);
-    const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
-    if (!tournament || tournament.creator_id !== user.id || tournament.status !== 'registration' ) {
-      if (tournament.status !== 'registration')
-          return reply.code(400).send({ error: 'Cannot delete a tournament that has started' });
+    const tournament = await pongService.db.get(
+      'SELECT * FROM tournaments WHERE id = ?',
+      [tournamentId]
+    );
+    if (!tournament || tournament.creator_id !== user.id || tournament.status !== 'registration') {
+      if (tournament?.status !== 'registration')
+        return reply.code(400).send({ error: 'Cannot delete a tournament that has started' });
       else
         return reply.code(403).send({ error: 'Not authorized to delete this tournament' });
     }
 
+    const participants = await pongService.db.all(
+      'SELECT * FROM tournament_participants WHERE tournament_id = ? AND user_id != ?',
+      [tournamentId, tournament.creator_id]
+    );
+
+    if (participants.length > 0) {
+      return reply
+        .code(400)
+        .send({ error: 'Cannot delete tournament: participants have already joined' });
+    }
+
+    // Safe to delete
     await pongService.db.run('DELETE FROM tournament_participants WHERE tournament_id = ?', [tournamentId]);
     await pongService.db.run('DELETE FROM tournaments WHERE id = ?', [tournamentId]);
 
@@ -555,6 +594,7 @@ function setupRoutes(fastify, pongService) {
 
     return { success: true };
   });
+
 
   fastify.get('/tournament/:tournamentId/participants', async (request, reply) => {
     const token = request.headers.authorization?.replace('Bearer ', '');

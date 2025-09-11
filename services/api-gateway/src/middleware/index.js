@@ -29,7 +29,6 @@ async function setupCORS(fastify) {
 
       try {
         const hostname = new URL(origin).hostname;
-        console.log("HOSTNAME:", hostname);
         if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.transcendence.local') || hostname.endsWith('.nip.io') || hostname === process.env.LAN_IP || hostname === process.env.HOST) {
           callback(null, true);
           return;

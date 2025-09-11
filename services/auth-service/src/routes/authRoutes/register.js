@@ -73,7 +73,7 @@ module.exports = function setupRegisterRoute(fastify, { dbService, emailService,
         [user_id, verification_token]
       );
 
-      const verification_url = `${process.env.FRONTEND_URL}/verify-email?token=${verification_token}`;
+      const verification_url = `${process.env.FRONTEND_URL_LAN}/verify-email?token=${verification_token}`;
       await emailService.sendEmail(
         email,
         "Verify Your Email Address",

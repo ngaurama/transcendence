@@ -105,7 +105,7 @@ module.exports = function setupGoogleOauthRoute(fastify, { dbService, emailServi
 
             if (user.oauth_provider && user.oauth_provider !== 'google') {
                 return reply.redirect(
-                    `${process.env.FRONTEND_URL}/auth/callback?error=account_mismatch&provider=${user.oauth_provider}`
+                    `${process.env.FRONTEND_URL_LOCAL}/auth/callback?error=account_mismatch&provider=${user.oauth_provider}`
                 );
             }
 
@@ -144,11 +144,11 @@ module.exports = function setupGoogleOauthRoute(fastify, { dbService, emailServi
             );
 
             reply.redirect(
-                `${process.env.FRONTEND_URL}/auth/callback?access_token=${access_token}&refresh_token=${refresh_token}`
+                `${process.env.FRONTEND_URL_LOCAL}/auth/callback?access_token=${access_token}&refresh_token=${refresh_token}`
             );
         } catch (error) {
             console.error("Google OAuth error:", error);
-            return reply.redirect(`${process.env.FRONTEND_URL}/auth/callback?error=oauth_failed`);
+            return reply.redirect(`${process.env.FRONTEND_URL_LOCAL}/auth/callback?error=oauth_failed`);
         }
     });
 };

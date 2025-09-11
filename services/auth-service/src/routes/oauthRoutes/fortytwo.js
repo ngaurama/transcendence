@@ -109,7 +109,7 @@ module.exports = function setup42OauthRoute(fastify, { dbService, emailService, 
 
             if (user.oauth_provider && user.oauth_provider !== 'fortytwo') {
                 return reply.redirect(
-                    `${process.env.FRONTEND_URL}/auth/callback?error=account_mismatch&provider=${user.oauth_provider}`
+                    `${process.env.FRONTEND_URL_LOCAL}/auth/callback?error=account_mismatch&provider=${user.oauth_provider}`
                 );
             }
 
@@ -146,11 +146,11 @@ module.exports = function setup42OauthRoute(fastify, { dbService, emailService, 
             );
 
             reply.redirect(
-                `${process.env.FRONTEND_URL}/auth/callback?access_token=${access_token}&refresh_token=${refresh_token}`
+                `${process.env.FRONTEND_URL_LOCAL}/auth/callback?access_token=${access_token}&refresh_token=${refresh_token}`
             );
         } catch (error) {
             console.error("42 OAuth error:", error.response?.data || error.message);
-            return reply.redirect(`${process.env.FRONTEND_URL}/auth/callback?error=oauth_failed`);
+            return reply.redirect(`${process.env.FRONTEND_URL_LOCAL}/auth/callback?error=oauth_failed`);
         }
     });
 

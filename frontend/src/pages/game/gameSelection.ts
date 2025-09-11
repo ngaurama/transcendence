@@ -720,7 +720,7 @@ export async function attachPlaySelectionListeners() {
       e.stopPropagation();
       const tournamentId = btn.getAttribute('data-id');
       if (tournamentId) {
-        if (!confirm('Are you sure you want to delete this tournament? All participants will be removed.')) {
+        if (!confirm('Are you sure you want to delete this tournament?')) {
           return;
         }
         

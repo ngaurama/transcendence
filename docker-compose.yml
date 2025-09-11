@@ -70,7 +70,8 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=${NODE_ENV}
-      - FRONTEND_URL=${FRONTEND_URL}
+      - FRONTEND_URL_LOCAL=${FRONTEND_URL_LOCAL}
+      - FRONTEND_URL_LAN=${FRONTEND_URL_LAN}
       - VAULT_ADDR=${VAULT_ADDR}
       - VAULT_SKIP_VERIFY=${VAULT_SKIP_VERIFY}
       - AUTH_PORT=${AUTH_PORT}
