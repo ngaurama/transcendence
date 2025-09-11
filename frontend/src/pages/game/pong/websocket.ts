@@ -69,6 +69,11 @@ export function createWebSocketHandler(
       cleanup();
       (window as any).navigate('/');
     }
+    if (event.code === 4003) {
+      alert('You left and cam back, this causes a disconnection. Returning to home.');
+      cleanup();
+      (window as any).navigate('/');
+    }
   };
 
   return ws;
@@ -144,7 +149,7 @@ export function handleWebSocketMessage(
       break;
 
     case 'game_ended':
-      console.log("GAME ENDED DATA:", data);
+      // console.log("GAME ENDED DATA:", data);
       if (data.reason === 'opponent_disconnected' && data.gameType === '2player') {
         alert('Opponent disconnected. You win by default! Returning home.');
         onGameEnd(data.winner);
@@ -157,7 +162,7 @@ export function handleWebSocketMessage(
         (window as any).navigate(`/tournament/${data.tournament_id}`);
       } else {
         onGameEnd(data.winner);
-        cleanup();
+        // cleanup();
       }
       break;
 

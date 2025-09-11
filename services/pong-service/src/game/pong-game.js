@@ -566,7 +566,6 @@ class PongGame {
           const winnerPlayer = this.players.get(winnerId);
           const winnerKey = `player${winnerPlayer.playerNumber}`;
 
-          // console.log("OPTIONSSSS: ", this.options);
           this.sendToPlayer(winnerId, {
             type: 'game_ended',
             winner: winnerKey,
