@@ -92,7 +92,6 @@ export function attachPongGameListeners(): () => void {
 
   console.log('Attempting WebSocket connection...');
   ws = createWebSocketHandler(gameId, token, (window as any).gameOptions, onGameEnd, cleanup);
-
   inputHandler = new InputHandler(ws, (window as any).gameOptions?.gameMode === 'local');
 
   return cleanup;

@@ -156,6 +156,7 @@ CREATE TABLE game_sessions (
     player1_id INTEGER,
     player2_id INTEGER,
     end_reason TEXT DEFAULT 'normal', -- for abandoned or completed
+    game_mode VARCHAR(20) DEFAULT 'online', -- 'online', 'local'
     
     -- Game state
     status VARCHAR(20) DEFAULT 'waiting', -- 'waiting', 'in_progress', 'completed', 'abandoned'

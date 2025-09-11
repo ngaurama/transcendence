@@ -90,6 +90,7 @@ export function setupUserWebSocketCleanup(): () => void {
 }
 
 function handleUserWebSocketMessage(data: any): void {
+  let alert_sent = false;
   console.log("DATA WS", data);
   switch (data.type) {
     case 'auth_success':
@@ -127,6 +128,10 @@ function handleUserWebSocketMessage(data: any): void {
       }
       break;
 
+    case 'tournament_match_ready':
+      (window as any).navigate(`/tournament/${data.tournament_id}`);
+      break;
+
     case 'tournament_match_start':
       (window as any).navigate(`/game/pong?game_id=${data.game_id}&tournament_id=${data.tournament_id}`);
       break;
@@ -151,11 +156,10 @@ function handleUserWebSocketMessage(data: any): void {
       break;
 
     case 'tournament_started':
-      // if ((window as any).currentTournamentId === data.tournament_id) {
+      if ((window as any).currentTournamentId === data.tournament_id) {
         (window as any).navigate(`/tournament/${data.tournament_id}`);
-      // }
+      }
       break;
-
     
     case 'friend_request_received':
       showFriendRequestNotification(data.from_user, data.request_id);
@@ -180,7 +184,25 @@ function handleUserWebSocketMessage(data: any): void {
       
     case 'game_abandoned_online':
       alert('Game lost due to disconnection. Returning home.');
+      alert_sent = true;
       (window as any).navigate('/');
+      alert_sent = false;
+      break;
+
+    case 'tournament_abandoned_local':
+      // if ((window as any).currentTournamentId == data.tournament_id) {
+        alert('Tournament abandoned due to disconnection. Returning home.');
+        // (window as any).cleanup();
+        (window as any).navigate('/');
+      // }
+      break;
+
+    case 'tournament_match_abandoned_online':
+      alert('You were disconnected from the tournament match. This counts as a loss. Returning to bracket');
+      // (window as any).cleanup();
+      if (data.tournament_id) {
+        (window as any).navigate(`/tournament/${data.tournament_id}`);
+      }
       break;
 
     default:

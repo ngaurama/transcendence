@@ -102,7 +102,10 @@ class PongGame {
   removeConnection(userId) {
     this.connections.delete(userId);
     this.db.run('UPDATE user_presence SET status = "online", current_game_id = NULL WHERE user_id = ?', [userId]);
-    if (this.gameState.status === 'active' && !this.options.gameMode === 'local') {
+    if (this.options.tournament_id && this.gameState.status === 'active') {
+      console.log('Tournament game WebSocket closed, handling as refresh');
+      this.handlePlayerDisconnection(userId, 'refresh');
+    } else if (this.gameState.status === 'active' && this.options.gameMode !== 'local') {
       this.handlePlayerDisconnection(userId, 'normal');
     }
   }
@@ -325,31 +328,6 @@ class PongGame {
     };
   }
 
-  // async endGame(winnerKey) {
-  //   this.gameState.status = 'finished';
-  //   this.endTime = Date.now();
-
-
-  //   if (this.gameLoop) {
-  //     clearInterval(this.gameLoop);
-  //     this.gameLoop = null;
-  //   }
-
-  //   this.broadcast({
-  //     type: 'game_ended',
-  //     winner: winnerKey,
-  //     final_score: this.gameState.score,
-  //     is_tournament: !!this.options.tournament_id,
-  //     tournament_id: this.options.tournament_id
-  //   });
-
-  //   await this.saveGameResults(winnerKey);
-
-  //   if (this.options.tournament_id) {
-  //     await this.handleTournamentCompletion(winnerKey);
-  //   }
-  // }
-
   async endGame(winnerKey, reason = 'normal') {
     this.gameState.status = 'finished';
     this.endTime = Date.now();
@@ -471,6 +449,7 @@ class PongGame {
             winner_id = ?,
             player1_id = ?,
             player2_id = ?,
+            game_mode = ?,
             ended_at = datetime('now'),
             final_score_player1 = ?,
             final_score_player2 = ?,
@@ -482,6 +461,7 @@ class PongGame {
         winnerId,
         player1_id,
         player2_id,
+        this.options.gameMode,
         this.gameState.score.player1,
         this.gameState.score.player2,
         this.endTime - this.startTime,
@@ -528,27 +508,48 @@ class PongGame {
   handlePlayerDisconnection(userId, reason = 'normal') {  
     if (reason === 'refresh') {
       if (this.options.gameMode === 'local') {
-        this.gameState.status = 'abandoned';
-        if (this.gameLoop) {
-          clearInterval(this.gameLoop);
-          this.gameLoop = null;
+        if (this.options.gameType === '2player') {
+          this.gameState.status = 'abandoned';
+          if (this.gameLoop) {
+            clearInterval(this.gameLoop);
+            this.gameLoop = null;
+          }
+          this.broadcast({
+            type: 'game_abandoned_local',
+            reason: 'Refresh in local mode'
+          });
+          this.endGame(null, 'abandoned');
+        } else if (this.options.gameType === 'tournament') {
+          console.log("AHHHHH REACHED HERE, ", this.options);
+          this.gameState.status = 'abandoned';
+          if (this.gameLoop) {
+            clearInterval(this.gameLoop);
+            this.gameLoop = null;
+          }
+          setTimeout(() => {
+            this.broadcast({
+              type: 'tournament_abandoned_local',
+              tournament_id: this.options.tournament_id,
+              reason: 'You refreshed during a local tournament game',
+            });
+          }, 1000);
+          this.endGame(null, 'abandoned');
         }
-        this.broadcast({
-          type: 'game_abandoned_local',
-          reason: 'Refresh in local mode'
-        });
-        this.endGame(null, 'abandoned');
       } else {
         const remainingPlayers = [...this.players.keys()].filter(id => id !== userId);
-        
+
         if (remainingPlayers.length > 0) {
           const winnerId = remainingPlayers[0];
           const winnerPlayer = this.players.get(winnerId);
           const winnerKey = `player${winnerPlayer.playerNumber}`;
-                  
+
+          // console.log("OPTIONSSSS: ", this.options);
           this.sendToPlayer(winnerId, {
             type: 'game_ended',
             winner: winnerKey,
+            gameMode: this.options.gameMode,
+            gameType: this.options.gameType,
+            tournament_id: this.options.tournament_id,
             reason: 'opponent_disconnected'
           });
 
@@ -556,6 +557,9 @@ class PongGame {
             this.pongService.sendToUser(userId, {
               type: 'game_abandoned_online',
               reason: 'You disconnected from the game',
+              gameMode: this.options.gameMode,
+              gameType: this.options.gameType,
+              tournament_id: this.options.tournament_id,
               result: 'loss'
             });
           }, 1000);

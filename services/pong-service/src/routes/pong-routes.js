@@ -45,9 +45,9 @@ function setupRoutes(fastify, pongService) {
       }
 
       const gameResult = await pongService.db.run(`
-        INSERT INTO game_sessions (status, game_settings, created_at) 
-        VALUES ('waiting', ?, CURRENT_TIMESTAMP)
-      `, [JSON.stringify(gameSettings)]);
+        INSERT INTO game_sessions (status, game_mode, game_settings, created_at) 
+        VALUES ('waiting', ?, ?, CURRENT_TIMESTAMP)
+      `, [gameMode, JSON.stringify(gameSettings)]);
 
       const gameId = gameResult.lastID;
 
@@ -129,6 +129,7 @@ function setupRoutes(fastify, pongService) {
           gs.status,
           gs.created_at,
           gs.ended_at,
+          gs.game_mode,
           gs.final_score_player1,
           gs.final_score_player2,
           gs.game_duration_ms,
@@ -151,7 +152,7 @@ function setupRoutes(fastify, pongService) {
         return reply.code(404).send({ error: 'Game not found' });
       }
 
-      if (game.player1_id !== user.id && game.player2_id !== user.id) {
+      if (game.game_mode === 'online' && game.player1_id !== user.id && game.player2_id !== user.id) {
         return reply.code(403).send({ error: 'Not authorized to view this game' });
       }
 
@@ -519,7 +520,10 @@ function setupRoutes(fastify, pongService) {
     const tournamentId = parseInt(request.params.tournamentId);
     const tournament = await pongService.db.get('SELECT * FROM tournaments WHERE id = ?', [tournamentId]);
     if (!tournament || tournament.creator_id !== user.id || tournament.status !== 'registration' ) {
-      return reply.code(403).send({ error: 'Not authorized to delete this tournament' });
+      if (tournament.status !== 'registration')
+          return reply.code(400).send({ error: 'Cannot delete a tournament that has started' });
+      else
+        return reply.code(403).send({ error: 'Not authorized to delete this tournament' });
     }
 
     await pongService.db.run('DELETE FROM tournament_participants WHERE tournament_id = ?', [tournamentId]);

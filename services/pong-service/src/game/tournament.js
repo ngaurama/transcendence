@@ -72,9 +72,9 @@ class Tournament {
           if (this.options.tournament_settings.gameMode === 'online') {
             const gameSettings = this.options.tournament_settings;
             const gameResult = await this.db.run(`
-              INSERT INTO game_sessions (tournament_id, status, game_settings, created_at) 
-              VALUES (?, 'waiting', ?, CURRENT_TIMESTAMP)
-            `, [this.tournamentId, JSON.stringify(gameSettings)]);
+              INSERT INTO game_sessions (tournament_id, status, game_mode, game_settings, created_at) 
+              VALUES (?, 'waiting', ?, ?, CURRENT_TIMESTAMP)
+            `, [this.tournamentId, this.options.tournament_settings.gameMode, JSON.stringify(gameSettings)]);
 
             const gameId = gameResult.lastID;
 
@@ -97,7 +97,7 @@ class Tournament {
               gameMode: 'online', 
               tournament_id: this.tournamentId,
               player1_name: player1Name,
-              player2_name: player2Name
+              player2_name: player2Name,
             });
 
             this.pongService.sendToUser(player1, {
@@ -235,9 +235,9 @@ class Tournament {
     const gameSettings = this.options.tournament_settings;
 
     const gameResult = await this.db.run(`
-      INSERT INTO game_sessions (tournament_id, status, game_settings, created_at) 
-      VALUES (?, 'waiting', ?, CURRENT_TIMESTAMP)
-    `, [this.tournamentId, JSON.stringify(gameSettings)]);
+      INSERT INTO game_sessions (tournament_id, status, game_mode, game_settings, created_at) 
+      VALUES (?, 'waiting', ?, ?, CURRENT_TIMESTAMP)
+    `, [this.tournamentId, gameSettings.gameMode, JSON.stringify(gameSettings)]);
 
     const gameId = gameResult.lastID;
 

@@ -73,6 +73,7 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
         gs.id, gs.created_at, gs.final_score_player1, gs.final_score_player2,
         gs.game_duration_ms, gs.game_settings, gs.winner_id,
         gs.player1_id, gs.player2_id,
+        gs.game_mode,
         gs.end_reason,
         u1.display_name AS player1_name, u1.avatar_url AS player1_avatar,
         u2.display_name AS player2_name, u2.avatar_url AS player2_avatar,
@@ -83,7 +84,7 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
                   OR (? = gs.player2_id AND gs.final_score_player2 > gs.final_score_player1))
           THEN 'win'
           ELSE 'loss'
-        END AS result,
+        END AS result
       FROM game_sessions gs
       LEFT JOIN users u1 ON u1.id = gs.player1_id
       LEFT JOIN users u2 ON u2.id = gs.player2_id
@@ -100,6 +101,7 @@ module.exports = function setupStatsRoutes(fastify, socialService) {
       game_settings: g.game_settings,
       winner_id: g.winner_id,
       end_reason: g.end_reason,
+      game_mode: g.game_mode,
       player1: {
         id: g.player1_id,
         score: g.final_score_player1,

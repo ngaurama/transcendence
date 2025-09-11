@@ -108,6 +108,7 @@ class PongService {
   }
 
   broadcastToAllUsers(message) {
+    // console.log("AHHH", message);
     for (const [userId, connection] of this.userConnections) {
       if (connection.readyState === 1) {
         connection.send(JSON.stringify(message));
@@ -308,9 +309,9 @@ class PongService {
           const settings = JSON.parse(key);
 
           const gameResult = await this.db.run(`
-            INSERT INTO game_sessions (status, game_settings, created_at) 
-            VALUES ('waiting', ?, CURRENT_TIMESTAMP)
-          `, [JSON.stringify(settings)]);
+            INSERT INTO game_sessions (status, game_mode, game_settings, created_at) 
+            VALUES ('waiting', ?, ?, CURRENT_TIMESTAMP)
+          `, ['online', JSON.stringify(settings)]);
 
           const gameId = gameResult.lastID;
 
