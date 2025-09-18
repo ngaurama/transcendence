@@ -61,7 +61,7 @@ transcendence/
 │   └── social-service/         # Chat and social features
 ├── nginx/                      # Reverse proxy with SSL
 │   ├── certs/                  # SSL certificates
-│   └── confs/                  # Nginx configuration
+│   └── confs/                  # Nginx and modsec configuration
 ├── database/                   # SQLite database setup
 └── vault/                      # Secrets management
     ├── config/                 # Vault policies
@@ -86,7 +86,7 @@ transcendence/
   cp .env.example .env
   # Edit .env with your configuration (see Configuration section below)
   ```
-+ Start the application
++ Start the application (check the makefile for more details)
   ```bash
   make up
   ```
