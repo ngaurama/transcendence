@@ -74,7 +74,8 @@ curl -s --insecure -H "X-Vault-Token: $VAULT_TOKEN" \
      }' \
      $VAULT_ADDR/v1/secret/data/database/config
 
-if [ ! -z "$GOOGLE_CLIENT_ID" ] && [ ! -z "$GOOGLE_CLIENT_SECRET" ]; then
+# GOOGLE
+if [ ! -z "$GOOGLE_CLIENT_ID" ] && [ "$GOOGLE_CLIENT_ID" != "your_google_client_id_here" ] && [ ! -z "$GOOGLE_CLIENT_SECRET" ] && [ "$GOOGLE_CLIENT_SECRET" != "your_google_client_secret_here" ]; then
   echo "storing Google OAuth secrets..."
   curl -s --insecure -H "X-Vault-Token: $VAULT_TOKEN" \
        -X POST \
@@ -86,9 +87,12 @@ if [ ! -z "$GOOGLE_CLIENT_ID" ] && [ ! -z "$GOOGLE_CLIENT_SECRET" ]; then
          }
        }' \
        $VAULT_ADDR/v1/secret/data/external/google
+else
+  echo "Google OAuth not configured - skipping"
 fi
 
-if [ ! -z "$GITHUB_CLIENT_ID" ] && [ ! -z "$GITHUB_CLIENT_SECRET" ]; then
+# GITHUB
+if [ ! -z "$GITHUB_CLIENT_ID" ] && [ "$GITHUB_CLIENT_ID" != "your_github_client_id_here" ] && [ ! -z "$GITHUB_CLIENT_SECRET" ] && [ "$GITHUB_CLIENT_SECRET" != "your_github_client_secret_here" ]; then
   echo "storing Github OAuth secrets..."
   curl -s --insecure -H "X-Vault-Token: $VAULT_TOKEN" \
        -X POST \
@@ -100,9 +104,12 @@ if [ ! -z "$GITHUB_CLIENT_ID" ] && [ ! -z "$GITHUB_CLIENT_SECRET" ]; then
          }
        }' \
        $VAULT_ADDR/v1/secret/data/external/github
+else
+  echo "Github OAuth not configured - skipping"
 fi
 
-if [ ! -z "$FORTYTWO_CLIENT_ID" ] && [ ! -z "$FORTYTWO_CLIENT_SECRET" ]; then
+# 42 OAUTH
+if [ ! -z "$FORTYTWO_CLIENT_ID" ] && [ "$FORTYTWO_CLIENT_ID" != "your_42_client_id_here" ] && [ ! -z "$FORTYTWO_CLIENT_SECRET" ] && [ "$FORTYTWO_CLIENT_SECRET" != "your_42_client_secret_here" ]; then
   echo "storing 42 OAuth secrets..."
   curl -s --insecure -H "X-Vault-Token: $VAULT_TOKEN" \
        -X POST \
@@ -114,9 +121,12 @@ if [ ! -z "$FORTYTWO_CLIENT_ID" ] && [ ! -z "$FORTYTWO_CLIENT_SECRET" ]; then
          }
        }' \
        $VAULT_ADDR/v1/secret/data/external/fortytwo
+else
+  echo "42 OAuth not configured - skipping"
 fi
 
-if [ ! -z "$SMTP_EMAIL" ] && [ ! -z "$SMTP_PASSWORD" ]; then
+# SMTP
+if [ ! -z "$SMTP_EMAIL" ] && [ "$SMTP_EMAIL" != "your_smtp_email_here" ] && [ ! -z "$SMTP_PASSWORD" ] && [ "$SMTP_PASSWORD" != "your_smtp_password_here" ]; then
   echo "storing SMTP secrets..."
   curl -s --insecure -H "X-Vault-Token: $VAULT_TOKEN" \
        -X POST \
@@ -130,6 +140,8 @@ if [ ! -z "$SMTP_EMAIL" ] && [ ! -z "$SMTP_PASSWORD" ]; then
                      }
                    }')" \
        $VAULT_ADDR/v1/secret/data/external/smtp
+else
+  echo "SMTP not configured - skipping"
 fi
 
 echo "storing 2FA configuration..."

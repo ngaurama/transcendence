@@ -35,7 +35,7 @@ export async function register(
   password: string,
   displayName: string,
   acceptGdpr: boolean
-): Promise<User> {
+): Promise<User & { verification_token?: string; smtp_fallback?: boolean }> {  // ✅ Add return type
   try {
     const res = await fetchWithErrorHandling(`/api/auth/register`, {
       method: 'POST',
@@ -57,7 +57,12 @@ export async function register(
 
     localStorage.setItem('access_token', data.access_token);
     localStorage.setItem('refresh_token', data.refresh_token);
-    return data.user;
+    
+    return {
+      ...data.user,
+      verification_token: data.verification_token,
+      smtp_fallback: data.smtp_fallback
+    };
   } catch (error) {
     throw error;
   }

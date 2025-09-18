@@ -19,7 +19,7 @@ interface TeamMember {
 class TeamDataService {
   private cache: Map<string, { data: TeamMember; timestamp: number }> = new Map();
   private readonly CACHE_DURATION = 10 * 60 * 1000; // 1 hour
-  private teamMembers: TeamMember[] = [
+  public teamMembers: TeamMember[] = [
     { intraLogin: "abboudje", github: "https://github.com/abboudje" },
     { intraLogin: "ilymegy", github: "https://github.com/IlyanaMegy" },
     { intraLogin: "macheuk-", github: "https://github.com/Emine-42" },
@@ -92,6 +92,16 @@ class TeamDataService {
           const index = results.findIndex(m => m.intraLogin === member.intraLogin);
           if (index !== -1) {
             results[index] = detailedMember;
+          }
+        } else if (response.status === 501) {
+          console.warn(`42 API not configured for ${member.intraLogin}`);
+          const index = results.findIndex(m => m.intraLogin === member.intraLogin);
+          if (index !== -1) {
+            results[index] = {
+              ...member,
+              name: member.intraLogin,
+              avatar: '/avatars/default.png'
+            };
           }
         }
         

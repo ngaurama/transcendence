@@ -45,6 +45,20 @@ export async function fetchWithErrorHandling(input: RequestInfo, init?: RequestI
   return response;
 }
 
+export async function getOAuthConfig(): Promise<{
+  google: boolean;
+  github: boolean;
+  fortytwo: boolean;
+}> {
+  try {
+    const res = await fetchWithErrorHandling(`/api/auth/oauth-config`);
+    return await res.json();
+  } catch (error) {
+    console.error('Failed to fetch OAuth config:', error);
+    return { google: false, github: false, fortytwo: false };
+  }
+}
+
 export * from "./AuthService"
 export * from "./PasswordService"
 export * from "./TwoFAService"

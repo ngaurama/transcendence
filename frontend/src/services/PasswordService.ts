@@ -23,7 +23,12 @@ export async function changePassword(token: string, currentPassword: string, new
   }
 }
 
-export async function forgotPassword(email: string): Promise<void> {
+export async function forgotPassword(email: string): Promise<{ 
+  success: boolean; 
+  message: string;
+  reset_token?: string;
+  smtp_fallback?: boolean;
+}> {
   try {
     const res = await fetchWithErrorHandling(`/api/auth/forgot-password`, {
       method: 'POST',

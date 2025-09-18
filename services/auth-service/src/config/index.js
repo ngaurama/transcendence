@@ -44,8 +44,18 @@ class AuthService {
   }
 
   async setupEmailService() {
-    this.transporter = new EmailConfig(this.secrets.external.smtp);
-    await this.transporter.verify();
+    try {
+      if (this.secrets.external.smtp && this.secrets.external.smtp.host) {
+        this.transporter = new EmailConfig(this.secrets.external.smtp);
+        await this.transporter.verify();
+      } else {
+        throw new Error("SMTP not configured");
+      }
+    } catch (error) {
+      console.warn("SMTP configuration failed, using fallback:", error.message);
+      const { EmailFallback } = require("./emailFallback");
+      this.transporter = new EmailFallback();
+    }
   }
 
   async setupRoutes() {

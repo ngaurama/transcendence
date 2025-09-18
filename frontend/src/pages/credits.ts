@@ -58,8 +58,18 @@ export async function creditsPage(): Promise<string> {
       console.error('Error loading checklist data:', error);
     }
 
-    const membersWithDetails = await teamDataService.getTeamMembers();;
+    let membersWithDetails: TeamMember[] = [];
 
+    try {
+      membersWithDetails = await teamDataService.getTeamMembers();
+    } catch (error) {
+      console.error('Error loading team data:', error);
+      membersWithDetails = teamDataService.teamMembers.map(member => ({
+        ...member,
+        name: member.intraLogin,
+        avatar: '/avatars/default.png'
+      }));
+    }
 
     return `
       <div class="glass-card max-w-6xl mx-auto">

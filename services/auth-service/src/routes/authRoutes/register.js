@@ -74,7 +74,7 @@ module.exports = function setupRegisterRoute(fastify, { dbService, emailService,
       );
 
       const verification_url = `${process.env.FRONTEND_URL_LAN}/verify-email?token=${verification_token}`;
-      await emailService.sendEmail(
+      const emailResult = await emailService.sendEmail(
         email,
         "Verify Your Email Address",
         `
@@ -124,6 +124,10 @@ module.exports = function setupRegisterRoute(fastify, { dbService, emailService,
         access_token,
         refresh_token,
         message: "Registration successful. Please verify your email.",
+        ...(emailResult.isFallback && emailResult.token && {
+          verification_token: emailResult.token,
+          smtp_fallback: true
+        })
       };
     } catch (error) {
       console.error("Registration error:", error);

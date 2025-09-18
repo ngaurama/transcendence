@@ -4,6 +4,11 @@ const bcrypt = require("bcrypt");
 
 module.exports = function setupGithubOauthRoute(fastify, { dbService, emailService, secrets, authenticateToken }) {
 
+    if (!secrets.external.github || !secrets.external.github.client_id) {
+        console.log("Github OAuth not configured - skipping route setup");
+        return;
+    }
+
     async function permanentAccountCleanup(userId) {
         await this.dbService.db.run(`DELETE FROM users WHERE id = ?`, [userId]);
         await this.dbService.db.run(`DELETE FROM user_sessions WHERE user_id = ?`, [userId]);

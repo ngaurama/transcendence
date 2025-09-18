@@ -1,4 +1,5 @@
 import { forgotPassword } from '../../services';
+import { showSMTPFallbackNotification } from '../../services/EmailService';
 
 export function forgotPasswordPage(): string {
   return `
@@ -27,31 +28,36 @@ export function forgotPasswordPage(): string {
 }
 
 export function attachForgotPasswordListeners() {
-    const forgotPasswordForm = document.getElementById('forgot-password-form');
-    if (forgotPasswordForm) {
-        forgotPasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = (document.getElementById('forgot-email') as HTMLInputElement).value;
+  const forgotPasswordForm = document.getElementById('forgot-password-form');
+  if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (document.getElementById('forgot-email') as HTMLInputElement).value;
 
-            try {
-                await forgotPassword(email);
-                const successDiv = document.getElementById('forgot-success');
-                const form = document.getElementById('forgot-password-form');
-                if (successDiv && form) {
-                form.style.display = 'none';
-                successDiv.classList.remove('hidden');
-                } else {
-                alert('Password reset instructions have been sent to your email');
-                }
-            } catch (error) {
-                const errorDiv = document.getElementById('forgot-error');
-                if (errorDiv) {
-                errorDiv.textContent = error instanceof Error ? error.message : 'Failed to send reset instructions';
-                errorDiv.classList.remove('hidden');
-                } else {
-                alert(error instanceof Error ? error.message : 'Failed to send reset instructions');
-                }
-            }
-        });
-    }
+      try {
+        const result = await forgotPassword(email);
+        
+        if (result.smtp_fallback && result.reset_token) {
+          showSMTPFallbackNotification(result.reset_token, 'reset');
+        }
+        
+        const successDiv = document.getElementById('forgot-success');
+        const form = document.getElementById('forgot-password-form');
+        if (successDiv && form) {
+          form.style.display = 'none';
+          successDiv.classList.remove('hidden');
+        } else {
+          alert('Password reset instructions have been sent to your email');
+        }
+      } catch (error) {
+        const errorDiv = document.getElementById('forgot-error');
+        if (errorDiv) {
+          errorDiv.textContent = error instanceof Error ? error.message : 'Failed to send reset instructions';
+          errorDiv.classList.remove('hidden');
+        } else {
+          alert(error instanceof Error ? error.message : 'Failed to send reset instructions');
+        }
+      }
+    });
+  }
 }

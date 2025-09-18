@@ -23,6 +23,13 @@ function setupRoutes(fastify, { dbService, emailService, secrets }) {
     }
   });
 
+  fastify.get("/smtp-status", async (request, reply) => {
+    return {
+      configured: !emailService.isFallback,
+      isFallback: !!emailService.isFallback
+    };
+  });
+
   setupAuthRoutes(fastify, { dbService, emailService, secrets, authenticateToken });
   setupUserRoutes(fastify, { dbService, emailService, secrets, authenticateToken });
   setupOAuthRoutes(fastify, { dbService, emailService, secrets });

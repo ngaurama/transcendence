@@ -1,5 +1,7 @@
 // types.ts
 export interface User {
+  smtp_fallback: any;
+  verification_token: any;
   is_guest: any;
   created_at: string | number | Date;
   id: number;

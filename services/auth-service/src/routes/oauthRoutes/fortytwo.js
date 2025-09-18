@@ -8,6 +8,30 @@ const userCache = new NodeCache({ stdTTL: 600 });
 
 module.exports = function setup42OauthRoute(fastify, { dbService, emailService, secrets, authenticateToken }) {
 
+    if (!secrets.external.fortytwo || !secrets.external.fortytwo.client_id) {
+        console.log("42 OAuth not configured - setting up fallback routes");
+        
+        fastify.get("/oauth/fortytwo/user/:login", async (request, reply) => {
+        return reply.code(501).send({ 
+            error: "42 API integration not configured",
+            message: "This feature requires 42 OAuth credentials to be set up in the environment variables"
+        });
+        });
+        
+        fastify.get("/oauth/fortytwo", async (request, reply) => {
+        return reply.code(501).send({ 
+            error: "42 OAuth not configured",
+            message: "This feature requires 42 OAuth credentials to be set up"
+        });
+        });
+        
+        fastify.get("/oauth/fortytwo/callback", async (request, reply) => {
+        return reply.redirect(`${process.env.FRONTEND_URL_LOCAL}/auth/callback?error=oauth_not_configured&provider=42`);
+        });
+        
+        return;
+    }
+
     async function permanentAccountCleanup(userId) {
         await dbService.db.run(`DELETE FROM users WHERE id = ?`, [userId]);
         await dbService.db.run(`DELETE FROM user_sessions WHERE user_id = ?`, [userId]);
