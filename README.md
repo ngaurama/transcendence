@@ -92,7 +92,7 @@ transcendence/
   ```
 
 ### Access the application
-+ Frontend: https://localhost:8443
++ Frontend: https://localhost:8443 or at https://LAN_IP:8443
 ---
 ### Configuration
 + You can change the current Self-signed certificates with your own located at `nginx/certs`
@@ -107,6 +107,8 @@ transcendence/
   SMTP_PASSWORD=your-app-password
   ```
   #### OAuth Providers
+  Currently the code is only configured such that the host device with localhost url can use oauth. <br>
+  You can change that in the frontend, but you would have to add the lan_ip redirect uri to the oauth services
   + Google OAuth:
     + Create project at Google Cloud Console
     + Enable Google API
